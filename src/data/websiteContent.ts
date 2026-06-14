@@ -242,36 +242,88 @@ export const ABOUT_CONTENT = {
     // Student Executive Committee 
     students: [
       {
-        name: "A. Harshavardhan", // <-- Replace with Student Chair
-        role: "Student Chapter Chair",
-        department: "ECE, Final Year",
-        email: "harshavardhan.a@student.bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/",
-        image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80"
+        name: "Charansaitej Voorugunda",
+        role: "Chair",
+        department: "ECE, 3rd year",
+        email: "24211A04R1@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/charansaitej-voorugonda"
       },
       {
-        name: "V. Sai Sreeja", // <-- Replace with Student Co-Chair
-        role: "Student Vice-Chair",
-        department: "ECE, Final Year",
-        email: "sai.sreeja@student.bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/",
-        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80"
+        name: "Sai Aashrita Vasagiri",
+        role: "Co-Chair",
+        department: "ECE, 3rd year",
+        email: "24211A04Q3@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/vasagiri-sai-aashrita-b41bb6327?utm_source=share_via&utm_content=profile&utm_medium=member_android"
       },
       {
-        name: "K. Rohit Kumar", // <-- Replace with Student Treasurer
-        role: "Treasurer & Event Head",
-        department: "ECE, Third Year",
-        email: "rohit.r@student.bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"
+        name: "Vaishnavi Cherukuri",
+        role: "Secretary",
+        department: "ECE, 3rd year",
+        email: "24211A0452@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/vaishnavi-cherukuri-b6aa5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
       },
       {
-        name: "M. Sneha", // <-- Replace with Logistics Lead
-        role: "Public Relations & Media Coordinator",
-        department: "ECE, Third Year",
-        email: "sneha.m@student.bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/",
-        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+        name: "SREEJAN GOUD ROUTHU",
+        role: "Treasurer",
+        department: "ECE, 3rd year",
+        email: "24211A04M8@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/sreejan-goud-routhu-15ba4033b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
+        name: "P V Lalith Surya",
+        role: "Technical Lead",
+        department: "ECE, 3rd year",
+        email: "24211A04G9@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/pv-lalith-surya-577ab733b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
+        name: "BANDI REDDAPPA VENKATESH",
+        role: "Web Master & Tech Admin",
+        department: "ECE, 3rd year",
+        email: "24211A0423@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/bandireddappa-venkatesh-889a3533b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
+        name: "HASINI PRIYA AVULA",
+        role: "Event Coordinator",
+        department: "ECE, 3rd year",
+        email: "24211A0418@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/avula-hasini-priya-7aa98433b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
+        name: "Patlolla Rushitha",
+        role: "Logistics Lead",
+        department: "ECE, 3rd year",
+        email: "24211A04H9@bvritr.ac.in",
+        linkedin: "https://www.linkedin.com/in/rushitha-p-6a8a5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
+        name: "AISHWARYA BATINI",
+        role: "Public & Industry Relation Lead",
+        department: "ECE, 3rd year",
+        email: "24211A0429@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/aishwarya-batini-ab40a5340?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
+        name: "YOGESH BALINENI",
+        role: "Design & Social Media Lead",
+        department: "ECE, 3rd year",
+        email: "24211A0421@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/yogesh-chandra-5b5682331?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+      },
+      {
+        name: "Niharika Rathod",
+        role: "Membership Development & OutReach head",
+        department: "ECE, 3rd year",
+        email: "24211A04K3@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/niharika-rathod-14a681223?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
+        name: "Choul Srinath",
+        role: "Web Master & Tech Admin",
+        department: "CSE, 3rd year",
+        email: "24211a05b5@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/srinathchoul/"
       }
     ]
   },

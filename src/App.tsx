@@ -46,11 +46,14 @@ import {
   Search,
   Filter,
   Database,
-  ShieldAlert
+  ShieldAlert,
+  Home,
+  Settings
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import bvritLogoImg from "../assets/bvrit-logo.jpg";
 import ieeeEpsLogoImg from "../assets/ieee-eps-logo.png";
+import combinedLogoImg from "../assets/ieee-eps-combined-logo.png";
 import mentorSanjayImg from "../assets/mentor-sanjay-dubey.png";
 import mentorSanjeevaImg from "../assets/mentor-sanjeeva-reddy.png";
 import mentorNareshImg from "../assets/mentor-naresh-kumar.png";
@@ -310,6 +313,11 @@ export default function App() {
   const [activeEvent, setActiveEvent] = useState<any | null>(null);
   // Registration and Admin Split Button Dropdown Toggle
   const [isRegisterDropdownOpen, setIsRegisterDropdownOpen] = useState(false);
+  const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsNewPassword, setSettingsNewPassword] = useState("");
+  const [settingsOldPassword, setSettingsOldPassword] = useState("");
   
   // Local Student Inquiry Submission State
   const [formData, setFormData] = useState({
@@ -343,7 +351,13 @@ export default function App() {
   // Announcements, Ticker and Admin Tabs state
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [tickerText, setTickerText] = useState("");
-  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker">("enquiries");
+  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker" | "carousel">("enquiries");
+  
+  // Carousel Slideshow state
+  const [carouselImages, setCarouselImages] = useState<any[]>([]);
+  const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
+  const [newCarouselUrl, setNewCarouselUrl] = useState("");
+  const [newCarouselCaption, setNewCarouselCaption] = useState("");
   const [announcementFormData, setAnnouncementFormData] = useState({
     title: "",
     type: "Practical Workshop",
@@ -487,7 +501,47 @@ export default function App() {
       setTickerText(defaultTicker);
       localStorage.setItem("ieee_ticker_text", defaultTicker);
     }
+
+    // Load carousel slideshow images
+    const savedCarousel = localStorage.getItem("ieee_carousel_images");
+    if (savedCarousel) {
+      try {
+        setCarouselImages(JSON.parse(savedCarousel));
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      const defaultCarousel = [
+        {
+          id: "slide-1",
+          url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80",
+          caption: "IEEE EPS BVRIT Chapter Inaugural Roundtable & Orientation"
+        },
+        {
+          id: "slide-2",
+          url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
+          caption: "Dynamic Hands-on Electronics Packaging & Modeling Session"
+        },
+        {
+          id: "slide-3",
+          url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+          caption: "Seminar and Roadmap Briefing: Scaling More-Than-Moore Era"
+        }
+      ];
+      setCarouselImages(defaultCarousel);
+      localStorage.setItem("ieee_carousel_images", JSON.stringify(defaultCarousel));
+    }
   }, []);
+
+  // Autoplay Carousel timer
+  useEffect(() => {
+    if (currentPage === "home" && carouselImages.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentCarouselIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
+      }, 4000); // Transition every 4 seconds
+      return () => clearInterval(interval);
+    }
+  }, [currentPage, carouselImages]);
 
   // Smooth navigation helper
   const navigateTo = (page: "home" | "about" | "admin" | "student") => {
@@ -911,103 +965,281 @@ export default function App() {
       {/* ========================================================================= */}
       {/* 1. APPMOBILE HEADER / FLOATING NAVIGATION BAR                             */}
       {/* ========================================================================= */}
-      <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? "bg-white/95 shadow-lg py-2.5 backdrop-blur-md border-b border-sky-200" 
-            : "bg-sky-50/95 shadow-md py-3.5 backdrop-blur-md border-b border-sky-100"
-        }`}
-      >
-        <div className="max-w-full mx-auto px-4 sm:px-10">
-          <div className="flex items-center justify-between">
-            {/* Header Brand Information */}
-            <div 
-              className="flex items-center gap-4 cursor-pointer select-none group" 
-              onClick={() => navigateTo("home")}
-            >
-              {/* 1. IEEE Electronics Packaging Society (EPS) Logo */}
-              <div className="relative shrink-0 flex items-center h-[46px]">
-                <img 
-                  src={ieeeEpsLogoImg} 
-                  alt="IEEE Electronics Packaging Society Logo" 
-                  className="h-[46px] w-auto object-contain hover:scale-105 transition-transform duration-300" 
-                />
-              </div>
-
-              {/* Vertical divider line */}
-              <div className="h-7 w-[1px] bg-slate-200"></div>
-
-              {/* 2. BVRIT Narsapur College Logo */}
-              <div className="relative shrink-0 flex items-center h-[44px]">
-                <img 
-                  src={bvritLogoImg} 
-                  alt="BVRIT Narsapur Logo" 
-                  className="h-[40px] w-auto object-contain hover:scale-105 transition-transform duration-300" 
-                />
-              </div>
-            </div>
-
-            {/* Desktop Navigation Link Toggles */}
-            <nav className="hidden md:flex items-center gap-8">
-              <button 
-                onClick={() => navigateTo("home")}
-                className={`py-2 text-sm font-semibold tracking-wide transition-colors relative ${
-                  currentPage === "home" 
-                    ? "text-[#00629B] font-extrabold" 
-                    : "text-slate-600 hover:text-[#00629B] font-semibold"
-                }`}
-              >
-                Home
-                {currentPage === "home" && (
-                  <motion.div 
-                    layoutId="activeNavIndicator" 
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00629B] rounded-full" 
-                  />
-                )}
-              </button>
-              
-              <button 
-                onClick={() => navigateTo("about")}
-                className={`py-2 text-sm font-semibold tracking-wide transition-colors relative ${
-                  currentPage === "about" 
-                    ? "text-[#00629B] font-extrabold" 
-                    : "text-slate-600 hover:text-[#00629B] font-semibold"
-                }`}
-              >
-                About us
-                {currentPage === "about" && (
-                  <motion.div 
-                    layoutId="activeNavIndicator" 
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00629B] rounded-full" 
-                  />
-                )}
-              </button>
-
-              <a 
-                href="#announcements" 
-                onClick={(e) => {
-                  e.preventDefault();
+      {/* Unstop-Style Left Navigation Sidebar Rail */}
+      <aside className="fixed left-0 top-[68px] sm:top-[84px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none">
+        {/* 4 Navigation Sections */}
+        <div className="flex-grow w-full flex flex-col gap-5 items-center px-1">
+          {[
+            {
+              id: "home",
+              name: "Home",
+              icon: <Home className="w-5 h-5 sm:w-6 sm:h-6" />,
+              action: () => navigateTo("home"),
+              subsections: [
+                { name: "Main Dashboard", action: () => { navigateTo("home"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+                { name: "Semiconductor SiP Layout", action: () => { navigateTo("home"); setTimeout(() => document.getElementById("hero-interactive")?.scrollIntoView({ behavior: "smooth" }), 200); } },
+                { name: "Live Ticker Banner", action: () => { navigateTo("home"); setTimeout(() => document.getElementById("hero-heading")?.scrollIntoView({ behavior: "smooth" }), 200); } }
+              ]
+            },
+            {
+              id: "about",
+              name: "About Us",
+              icon: <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />,
+              action: () => navigateTo("about"),
+              subsections: [
+                { name: "Vision 2026-2030", action: () => { navigateTo("about"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+                { name: "Advisory Coordinators", action: () => { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 200); } },
+                { name: "Core Executive Committee", action: () => { navigateTo("about"); setTimeout(() => {
+                  const el = document.getElementById("advisory-section");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }, 200); } }
+              ]
+            },
+            {
+              id: "announcements",
+              name: "Updates",
+              icon: <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />,
+              action: () => {
+                if (currentPage !== "home") {
+                  navigateTo("home");
+                  setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 300);
+                } else {
+                  document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
+                }
+              },
+              subsections: [
+                { name: "Events Calendar", action: () => {
                   if (currentPage !== "home") {
                     navigateTo("home");
-                    setTimeout(() => {
-                      document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-                    }, 300);
+                    setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 300);
                   } else {
                     document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
                   }
+                }},
+                { name: "Enrollment Desk", action: () => {
+                  if (currentPage !== "home") {
+                    navigateTo("home");
+                    setTimeout(() => document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }), 300);
+                  } else {
+                    document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
+                  }
                 }}
-                className="py-2 text-sm font-semibold tracking-wide text-slate-600 hover:text-[#00629B] transition-colors relative font-semibold"
-              >
-                Announcements
-              </a>
+              ]
+            },
+            {
+              id: "vlsi",
+              name: "VLSI Design",
+              icon: <Cpu className="w-5 h-5 sm:w-6 sm:h-6" />,
+              action: () => {
+                alert("IEEE EPS BVRIT Student Chapter specializes in advanced semiconductor packaging, system-in-package co-design, and high-speed VLSI physical architecture.");
+              },
+              subsections: [
+                { name: "Semiconductor Packaging", action: () => alert("Semiconductor Packaging involves assembly processes, thermal co-design, and electrical modeling.") },
+                { name: "Thermal Co-design", action: () => alert("Thermal Co-design focuses on heat dissipation architectures in high performance compute nodes.") }
+              ]
+            }
+          ].map((sec) => {
+            const isActive = currentPage === sec.id;
+            return (
+              <div key={sec.id} className="relative group w-full flex flex-col items-center">
+                <button
+                  onClick={sec.action}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
+                    isActive 
+                      ? "bg-[#00629B] text-white shadow-lg shadow-[#00629B]/25" 
+                      : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  }`}
+                >
+                  {sec.icon}
+                  <span className="text-[9px] sm:text-[10px] font-bold tracking-tight mt-1 leading-none">{sec.name}</span>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-[#38BDF8] rounded-r-md"></span>
+                  )}
+                </button>
 
-              <button 
-                className="py-2 text-sm font-semibold tracking-wide text-slate-600 hover:text-[#00629B] transition-colors relative font-semibold cursor-pointer"
-                onClick={() => {}}
-              >
-                VLSI design
-              </button>
+                {/* Hover Subsections Popover */}
+                <div className="absolute left-full top-0 ml-2 w-48 bg-white border border-slate-200 text-slate-800 rounded-xl shadow-2xl py-2 hidden group-hover:block z-[70] animate-fade-in">
+                  <div className="px-3 py-1 border-b border-slate-100 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                    Explore {sec.name}
+                  </div>
+                  <div className="py-1">
+                    {sec.subsections.map((sub) => (
+                      <button
+                        key={sub.name}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sub.action();
+                        }}
+                        className="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 text-slate-700 hover:text-[#00629B] transition-colors"
+                      >
+                        {sub.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
+        {/* Settings button */}
+        <div className="mt-auto pb-4">
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            title="Account Settings"
+          >
+            <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] font-bold tracking-tight mt-1 leading-none">Settings</span>
+          </button>
+        </div>
+      </aside>
+
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled 
+            ? "bg-white/95 shadow-md py-2 backdrop-blur-md border-b border-sky-200" 
+            : "bg-sky-50/95 shadow-sm py-3 backdrop-blur-md border-b border-sky-100"
+        }`}
+      >
+        <div className="max-w-full mx-auto px-4 sm:px-10">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left Brand Area: Logo only */}
+            <div className="flex items-center gap-2.5 shrink-0">
+              {/* Header Brand Information */}
+              <div 
+                className="flex items-center cursor-pointer select-none group" 
+                onClick={() => navigateTo("home")}
+              >
+                <div className="relative shrink-0 flex items-center h-[60px] sm:h-[72px]">
+                  <img 
+                    src={combinedLogoImg} 
+                    alt="IEEE EPS BVRIT Student Chapter combined logo" 
+                    className="h-[60px] sm:h-[72px] w-auto object-contain hover:scale-102 transition-transform duration-300" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Center-left: Search Opportunities Bar */}
+            <div className="hidden md:flex flex-grow max-w-sm relative">
+              <div className="relative w-full">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search Opportunities"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchPopupOpen(true)}
+                  className="w-full pl-10 pr-4 py-1.5 bg-slate-100 hover:bg-slate-200/70 focus:bg-white border border-slate-200 focus:border-[#00629B] rounded-full text-xs font-semibold text-slate-700 placeholder-slate-400 focus:outline-none transition-all"
+                />
+              </div>
+
+              {/* Popover / Overlay Card */}
+              <AnimatePresence>
+                {isSearchPopupOpen && (
+                  <>
+                    {/* Invisible overlay to close when clicking outside */}
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsSearchPopupOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 12 }}
+                      className="absolute left-0 top-full mt-2 w-[420px] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-50 space-y-4 text-left"
+                    >
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                          <Search className="w-4 h-4 text-[#00629B]" />
+                          <span>Search Opportunities</span>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            setSearchQuery("");
+                            setIsSearchPopupOpen(false);
+                          }}
+                          className="text-[11px] text-slate-400 hover:text-slate-600 font-bold"
+                        >
+                          Clear
+                        </button>
+                      </div>
+
+                      {/* Explore Grid */}
+                      <div className="space-y-2.5">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Explore Opportunities</span>
+                        <div className="grid grid-cols-3 gap-3">
+                          {[
+                            { name: "Competitions", icon: "Trophy", color: "bg-blue-50 text-blue-600 hover:bg-blue-100" },
+                            { name: "Quizzes", icon: "HelpCircle", color: "bg-indigo-50 text-indigo-600 hover:bg-indigo-100" },
+                            { name: "Hackathons", icon: "Code", color: "bg-purple-50 text-purple-600 hover:bg-purple-100" },
+                            { name: "Cultural Events", icon: "Music", color: "bg-pink-50 text-pink-600 hover:bg-pink-100" },
+                            { name: "Conferences", icon: "Users", color: "bg-orange-50 text-orange-600 hover:bg-orange-100" },
+                            { name: "Workshops", icon: "Wrench", color: "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" },
+                            { name: "College Festivals", icon: "Building", color: "bg-teal-50 text-teal-600 hover:bg-teal-100" },
+                            { name: "Mentors", icon: "GraduationCap", color: "bg-sky-50 text-sky-600 hover:bg-sky-100" },
+                            { name: "Articles", icon: "BookOpen", color: "bg-violet-50 text-violet-600 hover:bg-violet-100" }
+                          ].map((cat) => {
+                            const renderCatIcon = (name: string) => {
+                              switch (name) {
+                                case "Trophy": return <Award className="w-5 h-5" />;
+                                case "HelpCircle": return <BookOpen className="w-5 h-5" />;
+                                case "Code": return <Cpu className="w-5 h-5" />;
+                                case "Music": return <Globe className="w-5 h-5" />;
+                                case "Users": return <Compass className="w-5 h-5" />;
+                                case "Wrench": return <Wrench className="w-5 h-5" />;
+                                case "Building": return <Activity className="w-5 h-5" />;
+                                case "GraduationCap": return <GraduationCap className="w-5 h-5" />;
+                                case "BookOpen": return <BookOpen className="w-5 h-5" />;
+                                default: return <BookOpen className="w-5 h-5" />;
+                              }
+                            };
+
+                            return (
+                              <button
+                                key={cat.name}
+                                type="button"
+                                onClick={() => {
+                                  setIsSearchPopupOpen(false);
+                                  if (cat.name === "Mentors") {
+                                    navigateTo("about");
+                                    setTimeout(() => {
+                                      document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" });
+                                    }, 400);
+                                  } else if (cat.name === "Articles") {
+                                    navigateTo("home");
+                                    setTimeout(() => {
+                                      document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
+                                    }, 400);
+                                  } else {
+                                    navigateTo("student");
+                                    setSearchQuery(cat.name);
+                                  }
+                                }}
+                                className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group"
+                              >
+                                <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors shadow-xs ${cat.color}`}>
+                                  {renderCatIcon(cat.icon)}
+                                </div>
+                                <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#00629B] text-center leading-tight">
+                                  {cat.name}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Right Brand Area: Only Register/Enquire */}
+            <div className="flex items-center shrink-0">
               {/* Split Button with Dropdown for Register/Enquire and Admin Portal */}
               <div className="relative inline-flex items-center">
                 <div className="inline-flex items-stretch rounded-xl overflow-hidden bg-[#00629B] hover:bg-[#004B75] transition shadow-md shadow-[#00629B]/10">
@@ -1093,109 +1325,15 @@ export default function App() {
                   )}
                 </AnimatePresence>
               </div>
-            </nav>
-
-            {/* Mobile Hamburger Menu Toggle Button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-slate-700 hover:text-[#00629B] p-2 focus:outline-none"
-                aria-label="Toggle navigation menu"
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
             </div>
           </div>
         </div>
-
-        {/* Responsive Drawer Menu for Mobile screens */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden bg-white border-t border-slate-100 mt-2 px-4 shadow-inner overflow-hidden"
-            >
-              <div className="py-3 flex flex-col gap-2">
-                <button
-                  onClick={() => navigateTo("home")}
-                  className={`flex items-center justify-between p-3 rounded-lg text-left font-medium text-sm ${
-                    currentPage === "home" ? "bg-sky-50 text-[#00629B]" : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <span>Home</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => navigateTo("about")}
-                  className={`flex items-center justify-between p-3 rounded-lg text-left font-medium text-sm ${
-                    currentPage === "about" ? "bg-sky-50 text-[#00629B]" : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <span>About BVRIT Chapter</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <a
-                  href="#announcements"
-                  onClick={(e) => {
-                    setMobileMenuOpen(false);
-                    if (currentPage !== "home") {
-                      e.preventDefault();
-                      navigateTo("home");
-                      setTimeout(() => {
-                        document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-                      }, 400);
-                    } else {
-                      e.preventDefault();
-                      document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                  className="flex items-center justify-between p-3 rounded-lg text-left font-medium text-sm text-slate-700 hover:bg-slate-50"
-                >
-                  <span>Announcements</span>
-                  <ChevronRight className="w-4 h-4" />
-                </a>
-
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-lg text-left font-medium text-sm text-slate-700 hover:bg-slate-50 cursor-pointer"
-                >
-                  <span>VLSI design</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => navigateTo("student")}
-                  className="flex items-center justify-center gap-2 p-3 mt-2 font-bold text-sm bg-indigo-700 text-white rounded-lg text-center cursor-pointer"
-                >
-                  <Globe className="w-4 h-4" />
-                  <span>Student Event Portal</span>
-                </button>
-                <a
-                  href="#inquiry-section"
-                  onClick={(e) => {
-                    setMobileMenuOpen(false);
-                    if (currentPage !== "home") {
-                      e.preventDefault();
-                      navigateTo("home");
-                      setTimeout(() => {
-                        document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                      }, 400);
-                    }
-                  }}
-                  className="flex items-center justify-center gap-2 p-3 mt-1.5 font-semibold text-sm bg-[#00629B] text-white rounded-lg text-center"
-                >
-                  <span>Register & Enquire Now</span>
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
 
-      {/* Spacing Offset for Fixed Navbar */}
-      <div className="pt-[76px]"></div>
+      {/* Main Content Area shifted to the right to accommodate the Unstop Left Rail Sidebar */}
+      <div className="pl-16 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
+        {/* Spacing Offset for Fixed Navbar */}
+        <div className="pt-[68px] sm:pt-[84px]"></div>
 
       {/* ========================================================================= */}
       {/* 2. DYNAMIC MAIN BODY ROUTER - HOME PAGE                                   */}
@@ -1207,6 +1345,89 @@ export default function App() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
         >
+          {/* DYNAMIC SCROLLING NEWS TICKER BANNER */}
+          <section className="bg-gradient-to-r from-[#00629B] to-[#004B75] text-white py-3 relative overflow-hidden shadow-inner border-b border-sky-300/30 flex items-center">
+            <div className="bg-[#003B5C] px-6 py-1.5 z-20 font-black tracking-wider uppercase text-[10px] sm:text-xs skew-x-12 -ml-2 shadow-lg flex items-center gap-2 shrink-0 border-r border-sky-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+              <span className="-skew-x-12">Live Updates</span>
+            </div>
+            <div className="w-full overflow-hidden select-none z-10 flex items-center">
+              <marquee 
+                scrollamount="4" 
+                behavior="scroll" 
+                direction="left" 
+                className="font-semibold text-xs sm:text-sm tracking-wide py-1 text-sky-100"
+                onMouseOver={(e) => e.currentTarget.stop()}
+                onMouseOut={(e) => e.currentTarget.start()}
+              >
+                {tickerText}
+              </marquee>
+            </div>
+          </section>
+
+          {/* PICTURE PROFILE SECTION (DYNAMIC CAROUSEL SLIDESHOW) */}
+          {carouselImages.length > 0 && (
+            <section className="relative overflow-hidden bg-slate-950 h-[350px] sm:h-[450px] border-b border-slate-800">
+              {/* Picture/Slides container */}
+              <div className="relative w-full h-full">
+                {carouselImages.map((slide, idx) => (
+                  <div
+                    key={slide.id || idx}
+                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                      idx === currentCarouselIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+                    }`}
+                  >
+                    <img
+                      src={slide.url}
+                      alt={slide.caption}
+                      className="w-full h-full object-cover object-center"
+                    />
+                    {/* Shadow overlay at bottom of photo for text legibility */}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-24 pb-8 px-6 sm:px-12 text-left z-20">
+                      <p className="text-white text-base sm:text-2xl font-bold tracking-tight drop-shadow-md font-display leading-tight max-w-3xl">
+                        {slide.caption}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Slider Left Arrow */}
+              <button
+                onClick={() => setCurrentCarouselIndex((prev) => (prev - 1 + carouselImages.length) % carouselImages.length)}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/45 hover:bg-[#00629B]/80 text-white rounded-full transition-colors cursor-pointer border border-white/10 backdrop-blur-xs shadow-md"
+                aria-label="Previous Slide"
+              >
+                <ChevronRight className="w-5 h-5 rotate-180" />
+              </button>
+
+              {/* Slider Right Arrow */}
+              <button
+                onClick={() => setCurrentCarouselIndex((prev) => (prev + 1) % carouselImages.length)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/45 hover:bg-[#00629B]/80 text-white rounded-full transition-colors cursor-pointer border border-white/10 backdrop-blur-xs shadow-md"
+                aria-label="Next Slide"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+
+              {/* Dot Indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+                {carouselImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentCarouselIndex(idx)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      idx === currentCarouselIndex 
+                        ? "bg-[#00629B] w-6" 
+                        : "bg-white/50 hover:bg-white"
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* HOME HERO SECTION */}
           <section className="relative overflow-hidden bg-white border-b border-slate-100">
             {/* Visual Vector Grid Backdrop */}
@@ -1354,25 +1575,7 @@ export default function App() {
             </div>
           </section>
 
-          {/* DYNAMIC SCROLLING NEWS TICKER BANNER */}
-          <section className="bg-gradient-to-r from-[#00629B] to-[#004B75] text-white py-3 relative overflow-hidden shadow-inner border-y border-sky-300/30 flex items-center">
-            <div className="bg-[#003B5C] px-6 py-1.5 z-20 font-black tracking-wider uppercase text-[10px] sm:text-xs skew-x-12 -ml-2 shadow-lg flex items-center gap-2 shrink-0 border-r border-sky-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-              <span className="-skew-x-12">Live Updates</span>
-            </div>
-            <div className="w-full overflow-hidden select-none z-10 flex items-center">
-              <marquee 
-                scrollamount="4" 
-                behavior="scroll" 
-                direction="left" 
-                className="font-semibold text-xs sm:text-sm tracking-wide py-1 text-sky-100"
-                onMouseOver={(e) => e.currentTarget.stop()}
-                onMouseOut={(e) => e.currentTarget.start()}
-              >
-                {tickerText}
-              </marquee>
-            </div>
-          </section>
+          {/* Removed old news ticker banner section from here */}
 
           {/* WHAT IS ELECTRONICS PACKAGING INFOCARDS */}
           <section className="py-20 bg-slate-50 border-b border-slate-100">
@@ -1891,33 +2094,36 @@ export default function App() {
                     role: "Professor & Principal",
                     email: "sanjay.dubey@bvrit.ac.in",
                     image: mentorSanjayImg,
-                    qualifications: "B.E. (ECE), M.Tech. (WMC, JNTUH), Ph.D. (JNTUH on FPGA based Robotics)"
+                    qualifications: "B.E. (ECE), M.Tech. (WMC, JNTUH), Ph.D. (JNTUH on FPGA based Robotics)",
+                    linkedin: "https://www.linkedin.com/in/sanjay-dubey?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   },
                   {
                     name: "Dr. B.R. Sanjeeva Reddy",
                     role: "Professor & HoD ECE",
                     email: "hod.ece@bvrit.ac.in",
                     image: mentorSanjeevaImg,
-                    qualifications: "B.E. (ECE), M.Tech. (Microwave Engg, COEP), Ph.D. (NIT Warangal on RF & Microwaves)"
+                    qualifications: "B.E. (ECE), M.Tech. (Microwave Engg, COEP), Ph.D. (NIT Warangal on RF & Microwaves)",
+                    linkedin: "https://www.linkedin.com/in/sanjeev-reddy-b-r-46a75439?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   },
                   {
                     name: "Dr. B. Naresh Kumar",
                     role: "Assistant Professor, ECE Dept.",
                     email: "nareshkumar.b@bvrit.ac.in",
                     image: mentorNareshImg,
-                    qualifications: "B.Tech. (ECE), M.Tech. (ECE, JNTUH), Ph.D. (Lovely Professional University, 2024)"
+                    qualifications: "B.Tech. (ECE), M.Tech. (ECE, JNTUH), Ph.D. (Lovely Professional University, 2024)",
+                    linkedin: "https://www.linkedin.com/in/dr-b-naresh-kumar-9979aa337?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   }
                 ].map((member, fIdx) => (
-                  <div key={fIdx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-md transition">
-                    <div className="w-full h-52 sm:h-56 rounded-xl bg-slate-50 overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center">
+                  <div key={fIdx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-md transition text-center items-center">
+                    <div className="w-36 h-44 rounded-xl bg-slate-50 overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center shrink-0">
                       <img 
                         src={member.image} 
                         alt={member.name} 
-                        className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" 
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
                       />
                     </div>
 
-                    <div className="space-y-3 flex-grow flex flex-col justify-between">
+                    <div className="space-y-3 flex-grow flex flex-col justify-between w-full">
                       <div className="space-y-2">
                         <div>
                           <strong className="block text-slate-800 text-base font-display leading-tight">{member.name}</strong>
@@ -1928,11 +2134,15 @@ export default function App() {
                         </div>
                       </div>
                       
-                      <div className="pt-2.5 border-t border-slate-100 flex items-center gap-4 text-xs mt-auto">
-                        <a href={`mailto:${member.email}`} className="text-slate-500 hover:text-[#00629B] flex items-center gap-1 font-semibold">
-                          <Mail className="w-3.5 h-3.5" />
-                          <span>{member.email}</span>
+                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-center gap-4 text-xs mt-auto">
+                        <a href={`mailto:${member.email}`} className="text-slate-500 hover:text-[#00629B] p-1 rounded hover:bg-slate-50 transition" title={member.email}>
+                          <Mail className="w-4 h-4" />
                         </a>
+                        {member.linkedin && (
+                          <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-[#0A66C2] p-1 rounded hover:bg-slate-50 transition" title="LinkedIn Profile">
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1956,33 +2166,36 @@ export default function App() {
                     role: "Assistant Professor, ECE Dept.",
                     email: "Gnaneshwara.chary@bvrit.ac.in",
                     image: facultyGnaneshwaraImg,
-                    qualifications: "B.Tech (ECE – Jatipita College of Engg, 2006), M.Tech (VLSI – VNR VJIET, 2010), Ph.D (K L University, Vijayawada)"
+                    qualifications: "B.Tech (ECE – Jatipita College of Engg, 2006), M.Tech (VLSI – VNR VJIET, 2010), Ph.D (K L University, Vijayawada)",
+                    linkedin: "https://www.linkedin.com/in/dr-gnaneshwara-chary-udari-05577176?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   },
                   {
                     name: "Mr. T P Kausalya Nandan",
                     role: "Assistant Professor, ECE Dept.",
                     email: "kausalya.nandan@bvrit.ac.in",
                     image: facultyKausalyaImg,
-                    qualifications: "B.Tech (ECE – Biju Patnaik Univ of Tech, 2006), M.Tech (Digital Image Processing – JNTUK, 2011), Ph.D (Pursuing in Digital Image Processing – GITAM University)"
+                    qualifications: "B.Tech (ECE – Biju Patnaik Univ of Tech, 2006), M.Tech (Digital Image Processing – JNTUK, 2011), Ph.D (Pursuing in Digital Image Processing – GITAM University)",
+                    linkedin: "https://www.linkedin.com/in/kausalya-nandan-33119590?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   },
                   {
                     name: "Mrs. Mareddy Anusha",
                     role: "Assistant Professor, ECE Dept.",
                     email: "anusha.m@bvrit.ac.in",
                     image: facultyAnushaImg,
-                    qualifications: "B.Tech (ECE – ML Engg College, JNTUK, 2009), M.Tech (VLSI & ES – DRKCET, JNTUH, 2013), Ph.D (Pursuing – SRM University)"
+                    qualifications: "B.Tech (ECE – ML Engg College, JNTUK, 2009), M.Tech (VLSI & ES – DRKCET, JNTUH, 2013), Ph.D (Pursuing – SRM University)",
+                    linkedin: "https://www.linkedin.com/in/anusha-mareddy-65329842?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   }
                 ].map((member, fIdx) => (
-                  <div key={fIdx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-md transition">
-                    <div className="w-full h-52 sm:h-56 rounded-xl bg-slate-50 overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center">
+                  <div key={fIdx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-md transition text-center items-center">
+                    <div className="w-36 h-44 rounded-xl bg-slate-50 overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center shrink-0">
                       <img 
                         src={member.image} 
                         alt={member.name} 
-                        className="w-full h-full object-contain hover:scale-105 transition-transform duration-300" 
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
                       />
                     </div>
 
-                    <div className="space-y-3 flex-grow flex flex-col justify-between">
+                    <div className="space-y-3 flex-grow flex flex-col justify-between w-full">
                       <div className="space-y-2">
                         <div>
                           <strong className="block text-slate-800 text-sm font-display leading-tight">{member.name}</strong>
@@ -1993,11 +2206,15 @@ export default function App() {
                         </div>
                       </div>
                       
-                      <div className="pt-2.5 border-t border-slate-100 flex items-center gap-4 text-xs mt-auto">
-                        <a href={`mailto:${member.email}`} className="text-slate-500 hover:text-[#00629B] flex items-center gap-1 font-semibold">
-                          <Mail className="w-3.5 h-3.5" />
-                          <span>{member.email}</span>
+                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-center gap-4 text-xs mt-auto">
+                        <a href={`mailto:${member.email}`} className="text-slate-500 hover:text-[#00629B] p-1 rounded hover:bg-slate-50 transition" title={member.email}>
+                          <Mail className="w-4 h-4" />
                         </a>
+                        {member.linkedin && (
+                          <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-[#0A66C2] p-1 rounded hover:bg-slate-50 transition" title="LinkedIn Profile">
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2016,36 +2233,31 @@ export default function App() {
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {ABOUT_CONTENT.committee.students.map((student, sIdx) => (
-                  <div key={sIdx} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-[#00629B]/30 hover:shadow-md transition flex flex-col justify-between">
-                    <div className="space-y-4">
-                      {/* Student photo placeholder */}
-                      <div className="w-16 h-16 rounded-full bg-slate-100 overflow-hidden border border-slate-200 mx-auto">
-                        {/* 
-                          MANUAL STUDENT PHOTO ACCENT:
-                          Replace this URL inside 'src/data/websiteContent.ts' under ABOUT_CONTENT.committee.students.
-                        */}
-                        <img 
-                          src={student.image} 
-                          alt={student.name} 
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover" 
-                        />
+                  <div key={sIdx} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-[#00629B]/30 hover:shadow-md transition flex flex-col justify-between text-center items-center">
+                    <div className="space-y-3 w-full">
+                      {/* Blank profile avatar (WhatsApp/Instagram style) */}
+                      <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center border border-slate-300 mx-auto text-slate-400 overflow-hidden shrink-0 shadow-inner">
+                        <svg className="w-10 h-10 mt-2" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
                       </div>
 
                       <div className="text-center">
-                        <strong className="block text-slate-800 text-sm font-display">{student.name}</strong>
-                        <span className="text-[11px] font-bold text-[#00629B] block">{student.role}</span>
-                        <span className="text-[10px] text-slate-400 font-mono block mt-0.5">{student.department}</span>
+                        <strong className="block text-slate-800 text-sm font-display leading-tight">{student.name}</strong>
+                        <span className="text-[11px] font-bold text-[#00629B] block mt-0.5">{student.role}</span>
+                        <span className="text-[10px] text-slate-500 font-mono block mt-0.5">{student.department}</span>
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-100 mt-4 flex items-center justify-around text-xs">
-                      <a href={`mailto:${student.email}`} className="text-slate-400 hover:text-[#00629B]" title="Email Office">
+                    <div className="pt-3 border-t border-slate-100 mt-4 flex items-center justify-center gap-4 text-xs w-full">
+                      <a href={`mailto:${student.email}`} className="text-slate-400 hover:text-[#00629B] p-1 rounded hover:bg-slate-50 transition" title={student.email}>
                         <Mail className="w-4 h-4" />
                       </a>
-                      <a href={student.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#00629B]" title="LinkedIn Profile">
-                        <Linkedin className="w-4 h-4" />
-                      </a>
+                      {student.linkedin && (
+                        <a href={student.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#0A66C2] p-1 rounded hover:bg-slate-50 transition" title="LinkedIn Profile">
+                          <Linkedin className="w-4 h-4" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -2240,6 +2452,16 @@ export default function App() {
                   }`}
                 >
                   News Ticker Updates
+                </button>
+                <button
+                  onClick={() => setAdminTab("carousel")}
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                    adminTab === "carousel"
+                      ? "border-[#00629B] text-[#00629B]"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Manage Carousel ({carouselImages.length})
                 </button>
               </div>
 
@@ -2701,6 +2923,129 @@ export default function App() {
                       Save & Publish Live
                     </button>
                   </form>
+                </div>
+              )}
+
+              {adminTab === "carousel" && (
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-6 max-w-4xl mx-auto animate-fade-in">
+                  <h3 className="text-lg font-bold text-[#00629B] font-display flex items-center gap-2">
+                    <Database className="w-5 h-5 text-[#00629B]" />
+                    <span>Manage Picture Carousel (Hero Slideshow)</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Add, edit, or remove the slideshow posters/pictures shown directly on the public homepage. Use high-quality wide image URLs (e.g. from your department server, imgur, unsplash, or college portal).
+                  </p>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!newCarouselUrl.trim()) return;
+                      const newSlide = {
+                        id: "slide-" + Date.now(),
+                        url: newCarouselUrl.trim(),
+                        caption: newCarouselCaption.trim() || "Event Poster / Banner"
+                      };
+                      const updatedSlides = [...carouselImages, newSlide];
+                      setCarouselImages(updatedSlides);
+                      localStorage.setItem("ieee_carousel_images", JSON.stringify(updatedSlides));
+                      setNewCarouselUrl("");
+                      setNewCarouselCaption("");
+                      alert("New picture added to the carousel successfully!");
+                    }}
+                    className="bg-slate-50 p-4 rounded-xl border border-slate-100 grid md:grid-cols-2 gap-4 items-end"
+                  >
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Upload Poster / Image *</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        required
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              if (typeof reader.result === "string") {
+                                setNewCarouselUrl(reader.result);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#00629B]/10 file:text-[#00629B] hover:file:bg-[#00629B]/20 cursor-pointer"
+                      />
+                      {newCarouselUrl && (
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-2">
+                          <span className="text-emerald-600 font-bold">✓ Image loaded</span>
+                          <img src={newCarouselUrl} alt="Preview" className="w-8 h-8 object-cover rounded border border-slate-200" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase">Caption / Title</label>
+                      <input
+                        type="text"
+                        value={newCarouselCaption}
+                        onChange={(e) => setNewCarouselCaption(e.target.value)}
+                        placeholder="Inauguration Ceremony poster"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#00629B] text-xs font-medium"
+                      />
+                    </div>
+                    <div className="md:col-span-2 flex justify-end">
+                      <button
+                        type="submit"
+                        className="px-6 py-2 bg-[#00629B] hover:bg-[#004B75] text-white font-bold text-xs rounded-lg shadow uppercase tracking-wider transition cursor-pointer"
+                      >
+                        Add Poster to Slideshow
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Current Carousel Slides List */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Active Slides ({carouselImages.length})</h4>
+                    {carouselImages.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">No images currently in the slideshow. Add one above.</p>
+                    ) : (
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {carouselImages.map((slide, idx) => (
+                          <div key={slide.id || idx} className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden flex flex-col justify-between">
+                            <div className="relative h-32 bg-slate-900 flex items-center justify-center">
+                              <img 
+                                src={slide.url} 
+                                alt={slide.caption} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=300&q=80";
+                                }}
+                              />
+                              <div className="absolute top-2 right-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (confirm("Are you sure you want to remove this slide?")) {
+                                      const updated = carouselImages.filter(item => item.id !== slide.id);
+                                      setCarouselImages(updated);
+                                      localStorage.setItem("ieee_carousel_images", JSON.stringify(updated));
+                                      setCurrentCarouselIndex(0);
+                                    }
+                                  }}
+                                  className="bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded-lg border border-red-200 transition"
+                                  title="Delete slide"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-white border-t border-slate-100">
+                              <p className="text-xs font-bold text-slate-800 line-clamp-1">{slide.caption}</p>
+                              <span className="text-[10px] text-slate-400 font-mono block truncate mt-1">{slide.url}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -3214,6 +3559,102 @@ export default function App() {
       </AnimatePresence>
 
       {/* ========================================================================= */}
+      {/* 5. USER SETTINGS MODAL POPUP                                             */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl max-w-md w-full p-6 overflow-hidden shadow-2xl border border-slate-200 space-y-4 text-left"
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-[#00629B]" />
+                  <span>Update Essentials / Security</span>
+                </h3>
+                <button 
+                  onClick={() => {
+                    setIsSettingsOpen(false);
+                    setSettingsOldPassword("");
+                    setSettingsNewPassword("");
+                  }}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Update passwords for student enrollment logins or local developer options. By default, values are stored securely in local app storage.
+              </p>
+
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!settingsNewPassword.trim()) return;
+
+                  const savedUsers = localStorage.getItem("student_auth_users");
+                  if (savedUsers) {
+                    try {
+                      const users = JSON.parse(savedUsers);
+                      if (users.length > 0) {
+                        users[0].password = settingsNewPassword.trim();
+                        localStorage.setItem("student_auth_users", JSON.stringify(users));
+                        alert("Enrollment credential password updated successfully!");
+                      } else {
+                        alert("No active user records found. Log in or sign up first.");
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  } else {
+                    alert("Settings updated successfully!");
+                  }
+
+                  setIsSettingsOpen(false);
+                  setSettingsOldPassword("");
+                  setSettingsNewPassword("");
+                }}
+                className="space-y-3"
+              >
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Current Password / ID</label>
+                  <input
+                    type="password"
+                    value={settingsOldPassword}
+                    onChange={(e) => setSettingsOldPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={settingsNewPassword}
+                    onChange={(e) => setSettingsNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  className="w-full py-2 bg-[#00629B] hover:bg-[#004B75] text-white text-xs font-bold rounded-lg shadow transition uppercase tracking-wider cursor-pointer"
+                >
+                  Save Settings
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ========================================================================= */}
       {/* 5. CONTACT & FOOTER SECTION                                              */}
       {/* ========================================================================= */}
       <footer className="bg-slate-900 text-slate-100 pt-16 pb-8 border-t border-slate-800">
@@ -3223,9 +3664,6 @@ export default function App() {
             {/* Column 1: Joint Affiliation and Core Details */}
             <div className="md:col-span-4 space-y-4">
               <div className="flex items-center gap-2">
-                <div className="bg-[#00629B] p-2 rounded text-white inline-flex">
-                  <Cpu className="w-5 h-5" />
-                </div>
                 <strong className="text-white text-base font-display">{CHAPTER_INFO.shortName}</strong>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
@@ -3292,16 +3730,9 @@ export default function App() {
               <p className="text-xs text-slate-400">
                 For invitations, joint student paper collaborations, or society enrollment help, contact our advisory coordinators:
               </p>
-              <div className="space-y-2 text-xs text-slate-400">
-                <a href={`mailto:${CHAPTER_INFO.email}`} className="flex items-center gap-2 hover:text-[#00629B] transition">
-                  <Mail className="w-4 h-4 text-[#00629B]" />
-                  <span>{CHAPTER_INFO.email}</span>
-                </a>
-                <div className="flex items-start gap-2">
-                  <Phone className="w-4 h-4 text-[#00629B] mt-0.5" />
-                  <span>{CHAPTER_INFO.contactPhone}</span>
-                </div>
-              </div>
+              <p className="text-xs text-amber-300 font-semibold italic">
+                Contact information will be updated soon.
+              </p>
 
               {/* Social Media Link Buttons Grid */}
               <div className="flex gap-3 pt-2">
@@ -3348,6 +3779,7 @@ export default function App() {
 
         </div>
       </footer>
+      </div>
 
     </div>
   );
