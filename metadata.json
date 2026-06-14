@@ -1,0 +1,8 @@
+{
+  "name": "Remix: IEEE EPS Student Chapter BVRIT",
+  "description": "Official website for the IEEE Electronics Packaging Society (EPS) Student Chapter at BVRIT Narsapur, featuring modern responsive Home and About pages.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
