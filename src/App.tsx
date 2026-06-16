@@ -1480,7 +1480,7 @@ export default function App() {
                     <img
                       src={slide.url}
                       alt={slide.caption}
-                      className="w-full h-full object-cover object-center"
+                      className="w-full h-full object-contain object-center"
                     />
                     {/* Shadow overlay at bottom of photo for text legibility */}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-24 pb-8 px-6 sm:px-12 text-left z-20">
@@ -3204,7 +3204,7 @@ export default function App() {
                               <img 
                                 src={slide.url} 
                                 alt={slide.caption} 
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain"
                                 onError={(e) => {
                                   e.currentTarget.src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=300&q=80";
                                 }}
