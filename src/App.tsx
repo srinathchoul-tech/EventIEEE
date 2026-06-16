@@ -62,7 +62,7 @@ import facultyKausalyaImg from "../assets/faculty-kausalya.png";
 import facultyVandanaImg from "../assets/faculty-vandana.png";
 import facultyAnushaImg from "../assets/faculty-anusha.png";
 import { db, auth, isFirebaseEnabled } from "./firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
 // Import all local dataset for ease of modification
@@ -298,6 +298,12 @@ function BvritLogoSvg({ className = "h-11 w-auto" }: { className?: string }) {
   );
 }
 
+const isAdminEmail = (email: string) => {
+  if (!email) return false;
+  const e = email.toLowerCase().trim();
+  return e === "24211a04r1@bvrit.ac.in" || e === "24211a05r1@bvrit.ac.in" || e === "24211a05b5@bvrit.ac.in" || e === "admin@ieee.org";
+};
+
 export default function App() {
   // Page routing state ('home' | 'about' | 'admin' | 'student')
   const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student">("home");
@@ -351,7 +357,7 @@ export default function App() {
   // Announcements, Ticker and Admin Tabs state
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [tickerText, setTickerText] = useState("");
-  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker" | "carousel">("enquiries");
+  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker" | "carousel" | "pending-requests">("enquiries");
   
   // Carousel Slideshow state
   const [carouselImages, setCarouselImages] = useState<any[]>([]);
@@ -370,7 +376,12 @@ export default function App() {
   });
 
   // Firebase Admin Console State
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
+    return localStorage.getItem("ieee_is_admin_logged_in") === "true";
+  });
+  const [loggedInAdminEmail, setLoggedInAdminEmail] = useState(() => {
+    return localStorage.getItem("ieee_logged_in_admin_email") || "";
+  });
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [authError, setAuthError] = useState("");
@@ -419,8 +430,14 @@ export default function App() {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
           setIsAdminLoggedIn(true);
+          setLoggedInAdminEmail(user.email || "");
+          localStorage.setItem("ieee_is_admin_logged_in", "true");
+          localStorage.setItem("ieee_logged_in_admin_email", user.email || "");
         } else {
           setIsAdminLoggedIn(false);
+          setLoggedInAdminEmail("");
+          localStorage.removeItem("ieee_is_admin_logged_in");
+          localStorage.removeItem("ieee_logged_in_admin_email");
         }
         fetchEnquiries();
       });
@@ -573,8 +590,6 @@ export default function App() {
       alert("Please fill in the required fields (Name, Email, Roll Number).");
       return;
     }
-    
-    // Create new enrollment record
     const timestampStr = new Date().toLocaleString("en-US", {
       year: "numeric",
       month: "short",
@@ -583,7 +598,7 @@ export default function App() {
       minute: "2-digit",
       second: "2-digit"
     });
-
+    const isChair = isAdminEmail(formData.email);
     const newRecord = {
       fullName: formData.fullName,
       email: formData.email,
@@ -594,7 +609,8 @@ export default function App() {
       branch: formData.branch,
       inquiryType: formData.inquiryType,
       message: formData.message,
-      timestamp: timestampStr
+      timestamp: timestampStr,
+      status: formData.password ? (isChair ? "approved" : "pending") : "approved"
     };
 
     if (isFirebaseEnabled && db) {
@@ -659,6 +675,64 @@ export default function App() {
     }
   };
 
+  // Approve request handler
+  const handleApproveRequest = async (id: string) => {
+    if (!window.confirm("Are you sure you want to approve this registration request?")) return;
+    
+    if (isFirebaseEnabled && db) {
+      try {
+        const docRef = doc(db, "enquiries", id);
+        await updateDoc(docRef, { status: "approved" });
+        setReceivedEnquiries(prev => prev.map(item => item.id === id ? { ...item, status: "approved" } : item));
+      } catch (err) {
+        console.error("Error updating Firestore status:", err);
+        alert("Failed to approve the online request.");
+      }
+    } else {
+      // Fallback local storage
+      const saved = localStorage.getItem("ieee_eps_enquiries");
+      if (saved) {
+        try {
+          const list = JSON.parse(saved);
+          const updated = list.map((item: any) => item.id === id ? { ...item, status: "approved" } : item);
+          setReceivedEnquiries(updated);
+          localStorage.setItem("ieee_eps_enquiries", JSON.stringify(updated));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  };
+
+  // Reject request handler
+  const handleRejectRequest = async (id: string) => {
+    if (!window.confirm("Are you sure you want to reject (delete) this registration request?")) return;
+    
+    if (isFirebaseEnabled && db) {
+      try {
+        const docRef = doc(db, "enquiries", id);
+        await deleteDoc(docRef);
+        setReceivedEnquiries(prev => prev.filter(item => item.id !== id));
+      } catch (err) {
+        console.error("Error deleting from Firestore:", err);
+        alert("Failed to reject the online request.");
+      }
+    } else {
+      // Fallback local storage
+      const saved = localStorage.getItem("ieee_eps_enquiries");
+      if (saved) {
+        try {
+          const list = JSON.parse(saved);
+          const updated = list.filter((item: any) => item.id !== id);
+          setReceivedEnquiries(updated);
+          localStorage.setItem("ieee_eps_enquiries", JSON.stringify(updated));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  };
+
   // Admin login handler
   const handleAdminLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -686,17 +760,34 @@ export default function App() {
       }
     } else {
       // Fallback offline authentication
+      const emailLower = adminEmail.toLowerCase();
       const matchesEnrolled = receivedEnquiries.find(
-        enq => enq.email?.toLowerCase() === adminEmail.toLowerCase() && enq.password === adminPassword
+        enq => enq.email?.toLowerCase() === emailLower && enq.password === adminPassword
       );
 
-      if ((adminEmail === "admin@ieee.org" && adminPassword === "admin123") || matchesEnrolled) {
+      if (matchesEnrolled) {
+        if (matchesEnrolled.status === "pending") {
+          setAuthError("Your registration request is pending approval from the Chair (24211a05r1@bvrit.ac.in).");
+          setIsAuthenticating(false);
+          return;
+        }
+        if (matchesEnrolled.status === "rejected") {
+          setAuthError("Your registration request has been rejected.");
+          setIsAuthenticating(false);
+          return;
+        }
+      }
+
+      if ((emailLower === "admin@ieee.org" && adminPassword === "admin123") || (matchesEnrolled && matchesEnrolled.status !== "pending")) {
         setIsAdminLoggedIn(true);
+        setLoggedInAdminEmail(emailLower);
+        localStorage.setItem("ieee_is_admin_logged_in", "true");
+        localStorage.setItem("ieee_logged_in_admin_email", emailLower);
         setAdminEmail("");
         setAdminPassword("");
         fetchEnquiries();
       } else {
-        setAuthError("Invalid credentials. Hint: Use 'admin@ieee.org' and 'admin123', or any registered student organizer account to login.");
+        setAuthError("Invalid credentials. Hint: Use 'admin@ieee.org' and 'admin123', or any approved student organizer account to login.");
       }
       setIsAuthenticating(false);
     }
@@ -708,11 +799,17 @@ export default function App() {
       try {
         await signOut(auth);
         setIsAdminLoggedIn(false);
+        setLoggedInAdminEmail("");
+        localStorage.removeItem("ieee_is_admin_logged_in");
+        localStorage.removeItem("ieee_logged_in_admin_email");
       } catch (err) {
         console.error("Sign out error:", err);
       }
     } else {
       setIsAdminLoggedIn(false);
+      setLoggedInAdminEmail("");
+      localStorage.removeItem("ieee_is_admin_logged_in");
+      localStorage.removeItem("ieee_logged_in_admin_email");
     }
   };
 
@@ -2463,6 +2560,18 @@ export default function App() {
                 >
                   Manage Carousel ({carouselImages.length})
                 </button>
+                {isAdminEmail(loggedInAdminEmail) && (
+                  <button
+                    onClick={() => setAdminTab("pending-requests")}
+                    className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                      adminTab === "pending-requests"
+                        ? "border-[#00629B] text-[#00629B]"
+                        : "border-transparent text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    Pending Organizer Requests ({receivedEnquiries.filter(e => e.status === "pending" && e.password).length})
+                  </button>
+                )}
               </div>
 
               {adminTab === "enquiries" && (
@@ -2683,6 +2792,84 @@ export default function App() {
                     </div>
                   )}
                 </>
+              )}
+
+              {adminTab === "pending-requests" && isAdminEmail(loggedInAdminEmail) && (
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fade-in">
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                    <h3 className="font-bold text-slate-800 font-display">Pending Organizer Console Requests</h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Approve or Reject registration requests for the Organizers Console. Only approved users can log in.
+                    </p>
+                  </div>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-slate-400 font-bold text-xs bg-slate-50 font-display">
+                          <th className="px-6 py-3 font-semibold uppercase tracking-wider">Timestamp</th>
+                          <th className="px-6 py-3 font-semibold uppercase tracking-wider">Full Name</th>
+                          <th className="px-6 py-3 font-semibold uppercase tracking-wider">Email</th>
+                          <th className="px-6 py-3 font-semibold uppercase tracking-wider">Roll Number</th>
+                          <th className="px-6 py-3 font-semibold uppercase tracking-wider">Year/Branch</th>
+                          <th className="px-6 py-3 font-semibold uppercase tracking-wider text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {receivedEnquiries.filter(e => e.status === "pending" && e.password).length > 0 ? (
+                          receivedEnquiries.filter(e => e.status === "pending" && e.password).map((req) => (
+                            <tr key={req.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
+                              <td className="px-6 py-4 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                                {req.timestamp}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-800">
+                                {req.fullName}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-slate-600 text-xs font-mono">
+                                {req.email}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap font-semibold font-mono text-slate-700">
+                                {req.rollNumber}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded mr-1">
+                                  {req.year}
+                                </span>
+                                <span className="bg-sky-50 text-[#00629B] border border-sky-100 text-[10px] font-bold px-2 py-0.5 rounded">
+                                  {req.branch}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={() => handleApproveRequest(req.id)}
+                                    className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm shadow-emerald-700/10 cursor-pointer transition"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleRejectRequest(req.id)}
+                                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold shadow-sm shadow-red-700/10 cursor-pointer transition"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                              <ShieldAlert className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                              <p className="font-semibold text-slate-500">No pending organizer requests</p>
+                              <p className="text-xs text-slate-400 mt-1">All registrations are up to date.</p>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
 
               {adminTab === "announcements" && (
