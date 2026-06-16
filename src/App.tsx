@@ -1221,7 +1221,7 @@ export default function App() {
             </div>
 
             {/* Center-left: Search Opportunities Bar */}
-            <div className="hidden md:flex flex-grow max-w-sm relative">
+            <div className="flex flex-grow max-w-[140px] sm:max-w-sm relative">
               <div className="relative w-full">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -1230,7 +1230,7 @@ export default function App() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchPopupOpen(true)}
-                  className="w-full pl-10 pr-4 py-1.5 bg-slate-100 hover:bg-slate-200/70 focus:bg-white border border-slate-200 focus:border-[#00629B] rounded-full text-xs font-semibold text-slate-700 placeholder-slate-400 focus:outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200/70 focus:bg-white border border-slate-200 focus:border-[#00629B] rounded-full text-[10px] sm:text-xs font-semibold text-slate-700 placeholder-slate-400 focus:outline-none transition-all"
                 />
               </div>
 
