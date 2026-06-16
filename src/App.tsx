@@ -308,8 +308,8 @@ const isAdminEmail = (email: string) => {
 };
 
 export default function App() {
-  // Page routing state ('home' | 'about' | 'admin' | 'student')
-  const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student">("home");
+  // Page routing state ('home' | 'about' | 'admin' | 'student' | 'settings')
+  const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student" | "settings">("home");
   
   // Image loading fallbacks to prevent broken image icons on CORS blocks
   const [ieeeLogoError, setIeeeLogoError] = useState(false);
@@ -327,6 +327,9 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsNewPassword, setSettingsNewPassword] = useState("");
   const [settingsOldPassword, setSettingsOldPassword] = useState("");
+  const [openSettingSection, setOpenSettingSection] = useState<string>("notifications");
+  const [showStudentAuthModal, setShowStudentAuthModal] = useState(false);
+  const [pendingEventToRegister, setPendingEventToRegister] = useState<string | null>(null);
   
   // Local Student Inquiry Submission State
   const [formData, setFormData] = useState({
@@ -564,7 +567,7 @@ export default function App() {
   }, [currentPage, carouselImages]);
 
   // Smooth navigation helper
-  const navigateTo = (page: "home" | "about" | "admin" | "student") => {
+  const navigateTo = (page: "home" | "about" | "admin" | "student" | "settings") => {
     setCurrentPage(page);
     setMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -855,6 +858,27 @@ export default function App() {
     setStudentAuthPassword("");
     setStudentAuthName("");
     setStudentAuthRoll("");
+    setShowStudentAuthModal(false);
+
+    // Auto-register pending event if any
+    if (pendingEventToRegister) {
+      const eventTitle = pendingEventToRegister;
+      setPendingEventToRegister(null);
+      
+      const newReg = {
+        id: "reg-" + Date.now(),
+        studentId: newStudent.id,
+        studentName: newStudent.name,
+        studentRoll: newStudent.rollNumber,
+        eventTitle: eventTitle,
+        timestamp: new Date().toLocaleString(),
+        status: "Confirmed"
+      };
+      const updatedRegs = [...studentRegistrations, newReg];
+      setStudentRegistrations(updatedRegs);
+      localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
+      alert(`Account created! Success: registered for "${eventTitle}".`);
+    }
   };
 
   // Student Login Handler
@@ -877,6 +901,35 @@ export default function App() {
       localStorage.setItem("ieee_student_current_user", JSON.stringify(user));
       setStudentAuthEmail("");
       setStudentAuthPassword("");
+      setShowStudentAuthModal(false);
+      
+      // Auto-register pending event if any
+      if (pendingEventToRegister) {
+        const eventTitle = pendingEventToRegister;
+        setPendingEventToRegister(null);
+        
+        // Execute registration logic
+        const alreadyRegistered = studentRegistrations.find(
+          r => r.studentId === user.id && r.eventTitle === eventTitle
+        );
+        if (!alreadyRegistered) {
+          const newReg = {
+            id: "reg-" + Date.now(),
+            studentId: user.id,
+            studentName: user.name,
+            studentRoll: user.rollNumber,
+            eventTitle: eventTitle,
+            timestamp: new Date().toLocaleString(),
+            status: "Confirmed"
+          };
+          const updatedRegs = [...studentRegistrations, newReg];
+          setStudentRegistrations(updatedRegs);
+          localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
+          alert(`Logged in! Success: registered for "${eventTitle}".`);
+        } else {
+          alert(`Logged in! Note: You were already registered for "${eventTitle}".`);
+        }
+      }
     } else {
       setStudentAuthError("Invalid student credentials. If you do not have an account, click 'Create Account' above.");
     }
@@ -891,8 +944,10 @@ export default function App() {
   // Student Event Registration Handler
   const handleStudentEventRegister = (eventTitle: string) => {
     if (!currentStudentUser) {
-      alert("Please log in to register for events.");
-      navigateTo("student");
+      setPendingEventToRegister(eventTitle);
+      setStudentAuthTab("login");
+      setStudentAuthError("");
+      setShowStudentAuthModal(true);
       return;
     }
 
@@ -1118,6 +1173,26 @@ export default function App() {
                     document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
                   }
                 }},
+                { name: "Competitions", action: () => {
+                  navigateTo("student");
+                  setSearchQuery("Competitions");
+                  setStudentDashboardTab("upcoming");
+                }},
+                { name: "Quizzes", action: () => {
+                  navigateTo("student");
+                  setSearchQuery("Quizzes");
+                  setStudentDashboardTab("upcoming");
+                }},
+                { name: "Hackathons", action: () => {
+                  navigateTo("student");
+                  setSearchQuery("Hackathons");
+                  setStudentDashboardTab("upcoming");
+                }},
+                { name: "Workshops", action: () => {
+                  navigateTo("student");
+                  setSearchQuery("Workshops");
+                  setStudentDashboardTab("upcoming");
+                }},
                 { name: "Enrollment Desk", action: () => {
                   if (currentPage !== "home") {
                     navigateTo("home");
@@ -1187,7 +1262,7 @@ export default function App() {
         {/* Settings button */}
         <div className="mt-auto pb-4">
           <button
-            onClick={() => setIsSettingsOpen(true)}
+            onClick={() => navigateTo("settings")}
             className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
             title="Account Settings"
           >
@@ -1213,11 +1288,11 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[60px] sm:h-[72px]">
+                <div className="relative shrink-0 flex items-center h-[64px] sm:h-[78px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="IEEE EPS BVRIT Student Chapter combined logo" 
-                    className="h-[60px] sm:h-[72px] w-auto object-contain hover:scale-102 transition-transform duration-300" 
+                    className="h-[64px] sm:h-[78px] w-auto object-contain hover:scale-102 transition-transform duration-300" 
                   />
                 </div>
               </div>
@@ -1317,6 +1392,7 @@ export default function App() {
                                   } else {
                                     navigateTo("student");
                                     setSearchQuery(cat.name);
+                                    setStudentDashboardTab("upcoming");
                                   }
                                 }}
                                 className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group"
@@ -3274,184 +3350,36 @@ export default function App() {
           transition={{ duration: 0.4 }}
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
         >
-          {!currentStudentUser ? (
-            /* 1. STUDENT AUTHENTICATION CARD */
-            <div className="max-w-md mx-auto my-12">
-              <div className="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden">
-                {/* Brand Banner */}
-                <div className="bg-gradient-to-r from-indigo-700 to-[#00629B] p-6 text-white text-center">
-                  <Globe className="w-10 h-10 mx-auto text-indigo-200 mb-2" />
-                  <h2 className="text-xl font-bold font-display">IEEE Student Portal</h2>
-                  <p className="text-xs text-indigo-100 mt-1">Sign in to register for events, view upcoming workshops, and claim prizes.</p>
+          {/* STUDENT DASHBOARD PANEL - If not logged in, we allow browsing upcoming events */}
+          <div className="space-y-8">
+            {/* Dynamic Welcome / Explore Header Banner */}
+            {!currentStudentUser ? (
+              <div className="bg-gradient-to-r from-slate-800 to-indigo-900 rounded-3xl p-6 sm:p-10 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 opacity-10">
+                  <Globe className="w-64 h-64" />
                 </div>
-
-                {/* Tab selectors */}
-                <div className="flex border-b border-slate-100 bg-slate-50">
-                  <button
-                    onClick={() => {
-                      setStudentAuthTab("login");
-                      setStudentAuthError("");
-                    }}
-                    className={`flex-1 py-3 text-center text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
-                      studentAuthTab === "login"
-                        ? "border-indigo-600 text-indigo-600 bg-white"
-                        : "border-transparent text-slate-500 hover:text-slate-700"
-                    }`}
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => {
-                      setStudentAuthTab("signup");
-                      setStudentAuthError("");
-                    }}
-                    className={`flex-1 py-3 text-center text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
-                      studentAuthTab === "signup"
-                        ? "border-indigo-600 text-indigo-600 bg-white"
-                        : "border-transparent text-slate-500 hover:text-slate-700"
-                    }`}
-                  >
-                    Create Account
-                  </button>
+                <div className="space-y-2 relative z-10 text-center sm:text-left">
+                  <span className="text-xs font-bold bg-white/25 px-3 py-1 rounded-full text-white uppercase tracking-wider font-display">Public Opportunities Hub</span>
+                  <h1 className="text-2xl sm:text-3xl font-black font-display tracking-tight mt-1">
+                    Explore IEEE Events & Workshops
+                  </h1>
+                  <p className="text-indigo-100 text-xs sm:text-sm">
+                    Browse all active contests, seminars, and hackathons. Sign in to register instantly and record credentials.
+                  </p>
                 </div>
-
-                {/* Authentication Forms */}
-                <div className="p-6 space-y-4">
-                  {studentAuthError && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-semibold leading-relaxed">
-                      {studentAuthError}
-                    </div>
-                  )}
-
-                  {studentAuthTab === "login" ? (
-                    /* SIGN IN FORM */
-                    <form onSubmit={handleStudentLogin} className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
-                        <input
-                          type="email"
-                          required
-                          value={studentAuthEmail}
-                          onChange={(e) => setStudentAuthEmail(e.target.value)}
-                          placeholder="xyz@bvrit.ac.in"
-                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Password *</label>
-                        <input
-                          type="password"
-                          required
-                          value={studentAuthPassword}
-                          onChange={(e) => setStudentAuthPassword(e.target.value)}
-                          placeholder="••••••••"
-                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full py-3 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow transition duration-200 uppercase tracking-widest cursor-pointer"
-                      >
-                        Sign In
-                      </button>
-                    </form>
-                  ) : (
-                    /* SIGN UP FORM */
-                    <form onSubmit={handleStudentSignUp} className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
-                        <input
-                          type="text"
-                          required
-                          value={studentAuthName}
-                          onChange={(e) => setStudentAuthName(e.target.value)}
-                          placeholder="Your official name"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
-                        <input
-                          type="email"
-                          required
-                          value={studentAuthEmail}
-                          onChange={(e) => setStudentAuthEmail(e.target.value)}
-                          placeholder="xyz@bvrit.ac.in"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Roll Number *</label>
-                          <input
-                            type="text"
-                            required
-                            value={studentAuthRoll}
-                            onChange={(e) => setStudentAuthRoll(e.target.value)}
-                            placeholder="e.g. 24211A04R1"
-                            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 text-transform-uppercase"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Department *</label>
-                          <select
-                            value={studentAuthBranch}
-                            onChange={(e) => setStudentAuthBranch(e.target.value)}
-                            className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                          >
-                            <option value="ECE">ECE</option>
-                            <option value="EEE">EEE</option>
-                            <option value="CSE">CSE</option>
-                            <option value="IT">IT</option>
-                            <option value="Other">Other</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Institution/College Name *</label>
-                        <input
-                          type="text"
-                          required
-                          value={studentAuthCollege}
-                          onChange={(e) => setStudentAuthCollege(e.target.value)}
-                          placeholder="e.g. BVRIT Narsapur"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Create Password *</label>
-                        <input
-                          type="password"
-                          required
-                          value={studentAuthPassword}
-                          onChange={(e) => setStudentAuthPassword(e.target.value)}
-                          placeholder="Minimum 6 characters"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full py-3 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow transition duration-200 uppercase tracking-widest cursor-pointer"
-                      >
-                        Register Account
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
-              <div className="text-center mt-6">
                 <button
-                  onClick={() => navigateTo("home")}
-                  className="text-xs text-slate-500 hover:text-indigo-600 font-semibold"
+                  onClick={() => {
+                    setStudentAuthTab("login");
+                    setStudentAuthError("");
+                    setShowStudentAuthModal(true);
+                  }}
+                  className="shrink-0 relative z-10 px-5 py-2.5 bg-white text-indigo-900 hover:bg-slate-100 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow cursor-pointer border-none"
                 >
-                  ← Back to Chapter Homepage
+                  <Lock className="w-4 h-4" />
+                  <span>Sign In / Register</span>
                 </button>
               </div>
-            </div>
-          ) : (
-            /* 2. LOGGED IN STUDENT DASHBOARD PANEL */
-            <div className="space-y-8">
-              {/* Dynamic Welcome Header Banner */}
+            ) : (
               <div className="bg-gradient-to-r from-indigo-700 to-sky-700 rounded-3xl p-6 sm:p-10 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
                 <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 opacity-10">
                   <Globe className="w-64 h-64" />
@@ -3473,9 +3401,11 @@ export default function App() {
                   <span>Logout</span>
                 </button>
               </div>
+            )}
 
-              {/* Tab Selector Buttons */}
-              <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-px">
+            {/* Tab Selector Buttons */}
+            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-px">
+              {currentStudentUser && (
                 <button
                   onClick={() => setStudentDashboardTab("registered")}
                   className={`py-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
@@ -3490,17 +3420,19 @@ export default function App() {
                     {studentRegistrations.filter(r => r.studentId === currentStudentUser.id).length}
                   </span>
                 </button>
-                <button
-                  onClick={() => setStudentDashboardTab("upcoming")}
-                  className={`py-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
-                    studentDashboardTab === "upcoming"
-                      ? "border-indigo-600 text-indigo-600"
-                      : "border-transparent text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>Upcoming Events & Register</span>
-                </button>
+              )}
+              <button
+                onClick={() => setStudentDashboardTab("upcoming")}
+                className={`py-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+                  studentDashboardTab === "upcoming" || (!currentStudentUser && studentDashboardTab === "registered")
+                    ? "border-indigo-600 text-indigo-600"
+                    : "border-transparent text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Upcoming Events & Register</span>
+              </button>
+              {currentStudentUser && (
                 <button
                   onClick={() => setStudentDashboardTab("results")}
                   className={`py-3 px-4 font-bold text-xs sm:text-sm border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
@@ -3512,164 +3444,388 @@ export default function App() {
                   <Award className="w-4 h-4" />
                   <span>Results & Prizes</span>
                 </button>
-              </div>
-
-              {/* Content Panel Area */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm min-h-[300px]">
-                {studentDashboardTab === "registered" ? (
-                  /* TAB 1: MY REGISTERED EVENTS */
-                  <div className="space-y-4">
-                    {studentRegistrations.filter(r => r.studentId === currentStudentUser.id).length === 0 ? (
-                      <div className="py-12 text-center space-y-3">
-                        <Database className="w-12 h-12 text-slate-300 mx-auto" />
-                        <h3 className="text-sm font-bold text-slate-700">No registered events found</h3>
-                        <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                          You haven't registered for any events yet. Open the "Upcoming Events" tab and register for workshops instantly!
-                        </p>
-                        <button
-                          onClick={() => setStudentDashboardTab("upcoming")}
-                          className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer"
-                        >
-                          <span>Explore Upcoming Events</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="grid sm:grid-cols-2 gap-6">
-                        {studentRegistrations.filter(r => r.studentId === currentStudentUser.id).map(reg => (
-                          <div key={reg.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4 hover:shadow transition">
-                            <div className="flex items-center justify-between">
-                              <span className="bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-emerald-100">
-                                {reg.status}
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-mono">{reg.timestamp}</span>
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">{reg.eventTitle}</h4>
-                              <p className="text-xs text-slate-500 mt-1.5">Official seat allocated. Dynamic attendance card issued.</p>
-                            </div>
-                            <div className="pt-3 border-t border-slate-200/50 flex justify-between items-center text-xs">
-                              <span className="text-indigo-600 font-bold">Dynamic Registration ID</span>
-                              <code className="bg-slate-200/60 px-2 py-0.5 rounded font-mono font-bold text-slate-700">{reg.id}</code>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : studentDashboardTab === "upcoming" ? (
-                  /* TAB 2: UPCOMING EVENTS & REGISTRATION */
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-900 font-display">Upcoming Chapter Workshops & Events</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">Register for any IEEE Electronics Packaging Society event with a single click!</p>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      {[
-                        {
-                          title: "Advanced Packaging BootCamp & Substrate Prototyping",
-                          desc: "3-Day intensive hands-on lab. Learn substrate stackups, silicon packaging models, and physical co-design.",
-                          date: "July 12-14, 2026",
-                          cost: "Free (Student Member Exclusive)"
-                        },
-                        {
-                          title: "Thermal integrity & Thermal Packaging Simulation Challenge",
-                          desc: "A collaborative thermal-flow coding challenge. Model structural packaging heat flows under standard workloads.",
-                          date: "August 04-05, 2026",
-                          cost: "Free for BVRIT Students"
-                        },
-                        {
-                          title: "National Conference on Semiconductor Packing Technologies",
-                          desc: "Preeminent expert panels, guest research briefings, and national coordinators roadmap discussions.",
-                          date: "September 20, 2026",
-                          cost: "Open to All Branches"
-                        }
-                      ].map((evt, idx) => {
-                        const isRegistered = studentRegistrations.find(
-                          r => r.studentId === currentStudentUser.id && r.eventTitle === evt.title
-                        );
-
-                        return (
-                          <div key={idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition">
-                            <div className="space-y-2.5">
-                              <div className="flex items-center justify-between">
-                                <span className="bg-indigo-50 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded font-mono uppercase">
-                                  {evt.date}
-                                </span>
-                                <span className="text-[10px] text-emerald-600 font-bold">{evt.cost}</span>
-                              </div>
-                              <h4 className="font-bold text-slate-900 text-sm font-display leading-tight">{evt.title}</h4>
-                              <p className="text-xs text-slate-500 leading-relaxed">{evt.desc}</p>
-                            </div>
-                            <div className="pt-4 border-t border-slate-100 mt-4">
-                              {isRegistered ? (
-                                <button
-                                  disabled
-                                  className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1"
-                                >
-                                  <CheckCircle className="w-3.5 h-3.5" />
-                                  <span>Already Registered</span>
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleStudentEventRegister(evt.title)}
-                                  className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition flex items-center justify-center gap-1"
-                                >
-                                  <span>Register Instantly</span>
-                                  <ArrowRight className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  /* TAB 3: ACADEMIC RESULTS & PRIZES */
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-900 font-display">My Achievements & Prizes Showcase</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">Track your certified awards and positions won in Chapter challenges.</p>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 hover:shadow transition">
-                        <Award className="w-10 h-10 text-amber-500 shrink-0 mt-0.5" />
-                        <div className="space-y-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">1st Prize Winner</span>
-                          <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">VLSI Layout Integrity Challenge</h4>
-                          <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
-                            Awarded 1st Place for laying out optimal signal integrity bypass paths. Presided by Principal of BVRIT and IEEE representatives.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 hover:shadow transition opacity-75">
-                        <CheckCircle className="w-10 h-10 text-indigo-500 shrink-0 mt-0.5" />
-                        <div className="space-y-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Certified Attendee</span>
-                          <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">Advanced Thermal Simulation challenge</h4>
-                          <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
-                            Successfully completed active research modules and simulated heat flow benchmarks. Chapter Co-Coordinator Mrs. K. Radhika.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="text-center">
-                <button
-                  onClick={() => navigateTo("home")}
-                  className="text-xs text-slate-500 hover:text-indigo-600 font-semibold"
-                >
-                  ← Back to Chapter Homepage
-                </button>
-              </div>
+              )}
             </div>
-          )}
+
+            {/* Content Panel Area */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm min-h-[300px]">
+              {(studentDashboardTab === "registered" && currentStudentUser) ? (
+                /* TAB 1: MY REGISTERED EVENTS */
+                <div className="space-y-4">
+                  {studentRegistrations.filter(r => r.studentId === currentStudentUser.id).length === 0 ? (
+                    <div className="py-12 text-center space-y-3">
+                      <Database className="w-12 h-12 text-slate-300 mx-auto" />
+                      <h3 className="text-sm font-bold text-slate-700">No registered events found</h3>
+                      <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                        You haven't registered for any events yet. Open the "Upcoming Events" tab and register for workshops instantly!
+                      </p>
+                      <button
+                        onClick={() => setStudentDashboardTab("upcoming")}
+                        className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer"
+                      >
+                        <span>Explore Upcoming Events</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      {studentRegistrations.filter(r => r.studentId === currentStudentUser.id).map(reg => (
+                        <div key={reg.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4 hover:shadow transition">
+                          <div className="flex items-center justify-between">
+                            <span className="bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-emerald-100">
+                              {reg.status}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">{reg.timestamp}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">{reg.eventTitle}</h4>
+                            <p className="text-xs text-slate-500 mt-1.5">Official seat allocated. Dynamic attendance card issued.</p>
+                          </div>
+                          <div className="pt-3 border-t border-slate-200/50 flex justify-between items-center text-xs">
+                            <span className="text-indigo-600 font-bold">Dynamic Registration ID</span>
+                            <code className="bg-slate-200/60 px-2 py-0.5 rounded font-mono font-bold text-slate-700">{reg.id}</code>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (studentDashboardTab === "upcoming" || !currentStudentUser) ? (
+                /* TAB 2: UPCOMING EVENTS & REGISTRATION */
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 font-display">Upcoming Chapter Workshops & Events</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Register for any IEEE Electronics Packaging Society event with a single click!</p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {[
+                      {
+                        title: "Advanced Packaging BootCamp & Substrate Prototyping",
+                        desc: "3-Day intensive hands-on lab. Learn substrate stackups, silicon packaging models, and physical co-design.",
+                        date: "July 12-14, 2026",
+                        cost: "Free (Student Member Exclusive)"
+                      },
+                      {
+                        title: "Thermal integrity & Thermal Packaging Simulation Challenge",
+                        desc: "A collaborative thermal-flow coding challenge. Model structural packaging heat flows under standard workloads.",
+                        date: "August 04-05, 2026",
+                        cost: "Free for BVRIT Students"
+                      },
+                      {
+                        title: "National Conference on Semiconductor Packing Technologies",
+                        desc: "Preeminent expert panels, guest research briefings, and national coordinators roadmap discussions.",
+                        date: "September 20, 2026",
+                        cost: "Open to All Branches"
+                      }
+                    ].map((evt, idx) => {
+                      const isRegistered = currentStudentUser && studentRegistrations.find(
+                        r => r.studentId === currentStudentUser.id && r.eventTitle === evt.title
+                      );
+
+                      return (
+                        <div key={idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition">
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between">
+                              <span className="bg-indigo-50 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded font-mono uppercase">
+                                {evt.date}
+                              </span>
+                              <span className="text-[10px] text-emerald-600 font-bold">{evt.cost}</span>
+                            </div>
+                            <h4 className="font-bold text-slate-900 text-sm font-display leading-tight">{evt.title}</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">{evt.desc}</p>
+                          </div>
+                          <div className="pt-4 border-t border-slate-100 mt-4">
+                            {isRegistered ? (
+                              <button
+                                disabled
+                                className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                <span>Already Registered</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleStudentEventRegister(evt.title)}
+                                className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition flex items-center justify-center gap-1"
+                              >
+                                <span>Register Instantly</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* TAB 3: ACADEMIC RESULTS & PRIZES */
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 font-display">My Achievements & Prizes Showcase</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Track your certified awards and positions won in Chapter challenges.</p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 hover:shadow transition">
+                      <Award className="w-10 h-10 text-amber-500 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">1st Prize Winner</span>
+                        <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">VLSI Layout Integrity Challenge</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                          Awarded 1st Place for laying out optimal signal integrity bypass paths. Presided by Principal of BVRIT and IEEE representatives.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 hover:shadow transition opacity-75">
+                      <CheckCircle className="w-10 h-10 text-indigo-500 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Certified Attendee</span>
+                        <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">Advanced Thermal Simulation challenge</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                          Successfully completed active research modules and simulated heat flow benchmarks. Chapter Co-Coordinator Mrs. K. Radhika.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="text-center">
+              <button
+                onClick={() => navigateTo("home")}
+                className="text-xs text-slate-500 hover:text-indigo-600 font-semibold"
+              >
+                ← Back to Chapter Homepage
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3.9. DYNAMIC MAIN BODY ROUTER - SETTINGS PAGE                             */}
+      {/* ========================================================================= */}
+      {currentPage === "settings" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8"
+        >
+          {/* Settings Header */}
+          <div className="border-b border-slate-200 pb-4">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">Settings</h2>
+            <p className="text-sm text-slate-500 mt-1">Manage notifications, security credentials, devices, and profile options.</p>
+          </div>
+
+          <div className="space-y-4">
+            {/* Accordion 1: Notifications */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+              <button 
+                onClick={() => setOpenSettingSection(openSettingSection === "notifications" ? "" : "notifications")}
+                className="w-full px-6 py-4 flex items-center justify-between font-bold text-slate-800 text-left cursor-pointer hover:bg-slate-50 transition"
+              >
+                <span>Notifications</span>
+                <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform ${openSettingSection === "notifications" ? "rotate-180" : ""}`} />
+              </button>
+              
+              {openSettingSection === "notifications" && (
+                <div className="px-6 pb-6 pt-2 border-t border-slate-100 space-y-6 text-sm text-slate-600">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <h5 className="font-bold text-slate-800">Newsletter Preference</h5>
+                      <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                        Our newsletter will gain you access to the latest updates regarding the hiring challenges of top recruiters (like Walmart, Flipkart, Uber, Amazon, etc.), jobs & internships, competitions, quizzes, and hackathons from elite colleges across the world.
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00629B]"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <h5 className="font-bold text-slate-800">Email Notification Preferences</h5>
+                      <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
+                        Automated reminders are sent in case of incomplete registration (incomplete extended form or incomplete payment), daily quiz and hackathon reminders, submission reminders, and reminder to submit a review.
+                      </p>
+                      <p className="text-[11px] text-slate-500 italic">You can turn off the automated email notifications for a particular opportunity from 'My Registrations/Application'.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00629B]"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <h5 className="font-bold text-slate-800">Receive relevant Jobs notifications</h5>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00629B]"></div>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Accordion 2: Password */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+              <button 
+                onClick={() => setOpenSettingSection(openSettingSection === "password" ? "" : "password")}
+                className="w-full px-6 py-4 flex items-center justify-between font-bold text-slate-800 text-left cursor-pointer hover:bg-slate-50 transition"
+              >
+                <span>Password</span>
+                <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform ${openSettingSection === "password" ? "rotate-180" : ""}`} />
+              </button>
+              
+              {openSettingSection === "password" && (
+                <div className="px-6 pb-6 pt-4 border-t border-slate-100 space-y-4 max-w-md">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!settingsNewPassword.trim()) return;
+
+                    const savedUsers = localStorage.getItem("student_auth_users");
+                    if (savedUsers) {
+                      try {
+                        const users = JSON.parse(savedUsers);
+                        if (users.length > 0) {
+                          users[0].password = settingsNewPassword.trim();
+                          localStorage.setItem("student_auth_users", JSON.stringify(users));
+                          alert("Organizer credential password updated successfully!");
+                        } else {
+                          alert("No active user records found. Log in or sign up first.");
+                        }
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    } else {
+                      alert("Password updated successfully!");
+                    }
+                    setSettingsOldPassword("");
+                    setSettingsNewPassword("");
+                  }} className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Current Password</label>
+                      <input
+                        type="password"
+                        value={settingsOldPassword}
+                        onChange={(e) => setSettingsOldPassword(e.target.value)}
+                        placeholder="Enter current password"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">New Password</label>
+                      <input
+                        type="password"
+                        required
+                        value={settingsNewPassword}
+                        onChange={(e) => setSettingsNewPassword(e.target.value)}
+                        placeholder="Enter new password"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
+                      />
+                    </div>
+                    <button type="submit" className="px-4 py-2 bg-[#00629B] text-white text-xs font-bold rounded-lg cursor-pointer hover:bg-[#004B75] transition">
+                      Update Password
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {/* Accordion 3: Security */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+              <button 
+                onClick={() => setOpenSettingSection(openSettingSection === "security" ? "" : "security")}
+                className="w-full px-6 py-4 flex items-center justify-between font-bold text-slate-800 text-left cursor-pointer hover:bg-slate-50 transition"
+              >
+                <span>Security</span>
+                <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform ${openSettingSection === "security" ? "rotate-180" : ""}`} />
+              </button>
+              
+              {openSettingSection === "security" && (
+                <div className="px-6 pb-6 pt-4 border-t border-slate-100 space-y-4 text-xs text-slate-600">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h6 className="font-bold text-slate-800">Two-Factor Authentication (2FA)</h6>
+                      <p className="text-slate-400 mt-0.5">Secure your organizer account with an extra verification layer.</p>
+                    </div>
+                    <button className="px-3 py-1.5 border border-slate-200 rounded-lg font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+                      Enable 2FA
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Accordion 4: Manage Account */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+              <button 
+                onClick={() => setOpenSettingSection(openSettingSection === "account" ? "" : "account")}
+                className="w-full px-6 py-4 flex items-center justify-between font-bold text-slate-800 text-left cursor-pointer hover:bg-slate-50 transition"
+              >
+                <span>Manage Account</span>
+                <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform ${openSettingSection === "account" ? "rotate-180" : ""}`} />
+              </button>
+              
+              {openSettingSection === "account" && (
+                <div className="px-6 pb-6 pt-4 border-t border-slate-100 space-y-4 text-xs text-slate-600">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h6 className="font-bold text-red-600">Deactivate Account</h6>
+                      <p className="text-slate-400 mt-0.5">Permanently delete your profile and event registry logs.</p>
+                    </div>
+                    <button onClick={() => {
+                      if (confirm("Are you sure you want to deactivate your account? This action is irreversible.")) {
+                        alert("Account deactivated.");
+                        navigateTo("home");
+                      }
+                    }} className="px-3 py-1.5 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition cursor-pointer">
+                      Deactivate Account
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Accordion 5: Manage Devices */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+              <button 
+                onClick={() => setOpenSettingSection(openSettingSection === "devices" ? "" : "devices")}
+                className="w-full px-6 py-4 flex items-center justify-between font-bold text-slate-800 text-left cursor-pointer hover:bg-slate-50 transition"
+              >
+                <span>Manage Devices</span>
+                <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform ${openSettingSection === "devices" ? "rotate-180" : ""}`} />
+              </button>
+              
+              {openSettingSection === "devices" && (
+                <div className="px-6 pb-6 pt-4 border-t border-slate-100 space-y-4 text-xs text-slate-600">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div>
+                        <div className="font-bold text-slate-800">Chrome on Windows 11 (Current)</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">Narsapur, India • Active Now</div>
+                      </div>
+                      <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">Active</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="text-center pt-6">
+            <button onClick={() => navigateTo("home")} className="text-xs font-bold text-slate-500 hover:text-[#00629B] transition cursor-pointer">
+              ← Return to Dashboard
+            </button>
+          </div>
         </motion.div>
       )}
 
@@ -3841,6 +3997,189 @@ export default function App() {
                   Save Settings
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ========================================================================= */}
+      {/* 5.5. STUDENT AUTHENTICATION MODAL (EXPLORE MODE REGISTRATION TRIGGER)     */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {showStudentAuthModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 text-left"
+            >
+              {/* Brand Banner */}
+              <div className="bg-gradient-to-r from-indigo-700 to-[#00629B] p-6 text-white text-center relative">
+                <button 
+                  onClick={() => setShowStudentAuthModal(false)}
+                  className="absolute top-4 right-4 text-white hover:text-slate-200 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <Globe className="w-8 h-8 mx-auto text-indigo-200 mb-2" />
+                <h2 className="text-lg font-bold font-display">IEEE Student Portal Login</h2>
+                <p className="text-[11px] text-indigo-100 mt-1">Sign in or create a student account to register for events instantly.</p>
+              </div>
+
+              {/* Tab selectors */}
+              <div className="flex border-b border-slate-100 bg-slate-50">
+                <button
+                  onClick={() => {
+                    setStudentAuthTab("login");
+                    setStudentAuthError("");
+                  }}
+                  className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                    studentAuthTab === "login"
+                      ? "border-indigo-600 text-indigo-600 bg-white"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setStudentAuthTab("signup");
+                    setStudentAuthError("");
+                  }}
+                  className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                    studentAuthTab === "signup"
+                      ? "border-indigo-600 text-indigo-600 bg-white"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Create Account
+                </button>
+              </div>
+
+              {/* Authentication Forms */}
+              <div className="p-6 space-y-4">
+                {studentAuthError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-semibold leading-relaxed">
+                    {studentAuthError}
+                  </div>
+                )}
+
+                {studentAuthTab === "login" ? (
+                  /* SIGN IN FORM */
+                  <form onSubmit={handleStudentLogin} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+                      <input
+                        type="email"
+                        required
+                        value={studentAuthEmail}
+                        onChange={(e) => setStudentAuthEmail(e.target.value)}
+                        placeholder="xyz@bvrit.ac.in"
+                        className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Password *</label>
+                      <input
+                        type="password"
+                        required
+                        value={studentAuthPassword}
+                        onChange={(e) => setStudentAuthPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-3 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow transition duration-200 uppercase tracking-widest cursor-pointer"
+                    >
+                      Sign In & Register
+                    </button>
+                  </form>
+                ) : (
+                  /* SIGN UP FORM */
+                  <form onSubmit={handleStudentSignUp} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={studentAuthName}
+                        onChange={(e) => setStudentAuthName(e.target.value)}
+                        placeholder="Your official name"
+                        className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+                      <input
+                        type="email"
+                        required
+                        value={studentAuthEmail}
+                        onChange={(e) => setStudentAuthEmail(e.target.value)}
+                        placeholder="xyz@bvrit.ac.in"
+                        className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Roll Number *</label>
+                        <input
+                          type="text"
+                          required
+                          value={studentAuthRoll}
+                          onChange={(e) => setStudentAuthRoll(e.target.value)}
+                          placeholder="e.g. 24211A04R1"
+                          className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 text-transform-uppercase"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Department *</label>
+                        <select
+                          value={studentAuthBranch}
+                          onChange={(e) => setStudentAuthBranch(e.target.value)}
+                          className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                        >
+                          <option value="ECE">ECE</option>
+                          <option value="EEE">EEE</option>
+                          <option value="CSE">CSE</option>
+                          <option value="IT">IT</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Institution/College Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={studentAuthCollege}
+                        onChange={(e) => setStudentAuthCollege(e.target.value)}
+                        placeholder="e.g. BVRIT Narsapur"
+                        className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Create Password *</label>
+                      <input
+                        type="password"
+                        required
+                        value={studentAuthPassword}
+                        onChange={(e) => setStudentAuthPassword(e.target.value)}
+                        placeholder="Minimum 6 characters"
+                        className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-3 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow transition duration-200 uppercase tracking-widest cursor-pointer"
+                    >
+                      Create Account & Register
+                    </button>
+                  </form>
+                )}
+              </div>
             </motion.div>
           </div>
         )}
