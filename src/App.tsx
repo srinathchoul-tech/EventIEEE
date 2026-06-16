@@ -48,7 +48,10 @@ import {
   Database,
   ShieldAlert,
   Home,
-  Settings
+  Settings,
+  Twitter,
+  Facebook,
+  Instagram
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import bvritLogoImg from "../assets/bvrit-logo.jpg";
@@ -3924,22 +3927,40 @@ export default function App() {
               {/* Social Media Link Buttons Grid */}
               <div className="flex gap-3 pt-2">
                 <a 
-                  href={CHAPTER_INFO.socials.linkedin} 
+                  href="https://in.linkedin.com/in/ieee-eps-bvritn-850a10416" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="bg-slate-800 hover:bg-[#00629B] text-white p-2 rounded-lg transition-colors"
-                  title="IEEE EPS College LinkedIn"
+                  className="bg-slate-800 hover:bg-[#0077B5] text-white p-2 rounded-lg transition-colors"
+                  title="LinkedIn"
                 >
                   <Linkedin className="w-4 h-4" />
                 </a>
                 <a 
-                  href={CHAPTER_INFO.socials.github} 
+                  href="https://x.com/ieee_eps_bvritn?s=11" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-lg transition-colors"
-                  title="IEEE Chapter GitHub"
+                  className="bg-slate-800 hover:bg-black text-white p-2 rounded-lg transition-colors"
+                  title="Twitter / X"
                 >
-                  <Globe className="w-4 h-4" />
+                  <Twitter className="w-4 h-4" />
+                </a>
+                <a 
+                  href="https://www.facebook.com/share/p/17eFPy7UBp/?mibextid=wwXIfr" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="bg-slate-800 hover:bg-[#1877F2] text-white p-2 rounded-lg transition-colors"
+                  title="Facebook"
+                >
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a 
+                  href="https://www.instagram.com/bvritn_ieee_eps?igsh=MW4xcmRuZzFoOHNnbA%3D%3D&utm_source=qr" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="bg-slate-800 hover:bg-[#E1306C] text-white p-2 rounded-lg transition-colors"
+                  title="Instagram"
+                >
+                  <Instagram className="w-4 h-4" />
                 </a>
               </div>
             </div>
