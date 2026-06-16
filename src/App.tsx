@@ -1066,7 +1066,7 @@ export default function App() {
       {/* 1. APPMOBILE HEADER / FLOATING NAVIGATION BAR                             */}
       {/* ========================================================================= */}
       {/* Unstop-Style Left Navigation Sidebar Rail */}
-      <aside className="fixed left-0 top-[68px] sm:top-[84px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none">
+      <aside className="fixed left-0 top-[84px] sm:top-[96px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none">
         {/* 4 Navigation Sections */}
         <div className="flex-grow w-full flex flex-col gap-5 items-center px-1">
           {[
@@ -1433,7 +1433,7 @@ export default function App() {
       {/* Main Content Area shifted to the right to accommodate the Unstop Left Rail Sidebar */}
       <div className="pl-16 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
         {/* Spacing Offset for Fixed Navbar */}
-        <div className="pt-[68px] sm:pt-[84px]"></div>
+        <div className="pt-[84px] sm:pt-[96px]"></div>
 
       {/* ========================================================================= */}
       {/* 2. DYNAMIC MAIN BODY ROUTER - HOME PAGE                                   */}
