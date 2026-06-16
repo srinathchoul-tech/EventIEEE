@@ -305,8 +305,15 @@ export const ABOUT_CONTENT = {
         linkedin: "https://www.linkedin.com/in/aishwarya-batini-ab40a5340?utm_source=share_via&utm_content=profile&utm_medium=member_android"
       },
       {
+        name: "Bhaskar Akshaya",
+        role: "Design Lead",
+        department: "ECE, 3rd year",
+        email: "24211a0437@bvrit.ac.in",
+        linkedin: "https://www.linkedin.com/in/bhaskar-akshaya-42098933b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+      },
+      {
         name: "YOGESH BALINENI",
-        role: "Design & Social Media Lead",
+        role: "Social Media Lead",
         department: "ECE, 3rd year",
         email: "24211A0421@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/yogesh-chandra-5b5682331?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
