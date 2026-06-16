@@ -336,7 +336,7 @@ export default function App() {
     ieeeId: "",
     password: "",
     year: "1st Year",
-    branch: "ECE",
+    branch: "APS",
     inquiryType: "Membership",
     message: ""
   });
@@ -643,7 +643,7 @@ export default function App() {
       ieeeId: "",
       password: "",
       year: "1st Year",
-      branch: "ECE",
+      branch: "APS",
       inquiryType: "Membership",
       message: ""
     });
@@ -2004,17 +2004,19 @@ export default function App() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Department</label>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Societies</label>
                         <select 
                           value={formData.branch}
                           onChange={e => setFormData({...formData, branch: e.target.value})}
                           className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-1"
                         >
-                          <option value="ECE">ECE</option>
-                          <option value="EEE">EEE</option>
-                          <option value="CSE">CSE</option>
-                          <option value="IT">IT</option>
-                          <option value="Other">Other</option>
+                          <option value="APS">APS</option>
+                          <option value="PES">PES</option>
+                          <option value="IETE">IETE</option>
+                          <option value="IEOM">IEOM</option>
+                          <option value="MTT-S">MTT-S</option>
+                          <option value="EPS">EPS</option>
+                          <option value="CAS">CAS</option>
                         </select>
                       </div>
                     </div>
