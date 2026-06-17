@@ -380,6 +380,7 @@ export default function App() {
     status: "Upcoming",
     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80"
   });
+  const [adminNotification, setAdminNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // Firebase Admin Console State
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
@@ -429,6 +430,14 @@ export default function App() {
       }
     }
   };
+
+  // Auto-dismiss admin toast notifications
+  useEffect(() => {
+    if (adminNotification) {
+      const timer = setTimeout(() => setAdminNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [adminNotification]);
 
   // Monitor auth state changes & load registrations on component mount
   useEffect(() => {
@@ -2546,6 +2555,30 @@ export default function App() {
           ) : (
             /* ADMIN DASHBOARD CONSOLE */
             <div className="space-y-6">
+              {/* Dynamic On-page Alert Banner */}
+              <AnimatePresence>
+                {adminNotification && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`p-4 rounded-xl border flex items-center justify-between shadow-md text-xs font-bold leading-relaxed transition ${
+                      adminNotification.type === "success" 
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800" 
+                        : "bg-red-50 border-red-200 text-red-800"
+                    }`}
+                  >
+                    <span>{adminNotification.message}</span>
+                    <button 
+                      onClick={() => setAdminNotification(null)}
+                      className="ml-4 hover:opacity-85 text-slate-400 hover:text-slate-600 font-black"
+                    >
+                      ✕
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
                 <div className="space-y-1.5">
                   <h1 className="text-2xl sm:text-3xl font-black text-slate-900 font-display tracking-tight flex items-center gap-2.5">
@@ -2966,7 +2999,7 @@ export default function App() {
                       onSubmit={(e) => {
                         e.preventDefault();
                         if (!announcementFormData.title || !announcementFormData.date || !announcementFormData.speaker || !announcementFormData.location || !announcementFormData.description) {
-                          alert("Please fill in all required announcement fields!");
+                          setAdminNotification({ type: "error", message: "Please fill in all required announcement fields!" });
                           return;
                         }
                         const newAnn = {
@@ -2987,8 +3020,8 @@ export default function App() {
                           status: "Upcoming",
                           image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80"
                         });
-                        alert("Announcement published successfully and is live on the website!");
-                      }} 
+                        setAdminNotification({ type: "success", message: "Announcement published successfully and is live on the website!" });
+                      }}
                       className="space-y-4"
                     >
                       <div>
@@ -3069,14 +3102,30 @@ export default function App() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Banner Image URL</label>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Banner Image (Upload from PC)</label>
                         <input 
-                          type="text" 
-                          value={announcementFormData.image}
-                          onChange={(e) => setAnnouncementFormData({...announcementFormData, image: e.target.value})}
-                          placeholder="Image URL"
-                          className="w-full px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B] text-xs sm:text-sm"
+                          type="file" 
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                if (typeof reader.result === "string") {
+                                  setAnnouncementFormData({...announcementFormData, image: reader.result});
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#00629B]/10 file:text-[#00629B] hover:file:bg-[#00629B]/20 cursor-pointer"
                         />
+                        {announcementFormData.image && (
+                          <div className="mt-2 text-xs text-slate-500 flex items-center gap-2">
+                            <span className="text-emerald-600 font-bold">✓ Loaded</span>
+                            <img src={announcementFormData.image} alt="Preview" className="w-8 h-8 object-cover rounded border border-slate-200" />
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -3168,7 +3217,7 @@ export default function App() {
                     onSubmit={(e) => {
                       e.preventDefault();
                       localStorage.setItem("ieee_ticker_text", tickerText);
-                      alert("News ticker updated successfully! The new text is now live on the homepage.");
+                      setAdminNotification({ type: "success", message: "News ticker updated successfully! The new text is now live on the homepage." });
                     }}
                     className="space-y-4"
                   >
