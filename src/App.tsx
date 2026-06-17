@@ -1121,7 +1121,7 @@ export default function App() {
       {/* 1. APPMOBILE HEADER / FLOATING NAVIGATION BAR                             */}
       {/* ========================================================================= */}
       {/* Unstop-Style Left Navigation Sidebar Rail */}
-      <aside className="fixed left-0 top-[72px] sm:top-[80px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none">
+      <aside className="fixed left-0 top-[84px] sm:top-[96px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none">
         {/* 4 Navigation Sections */}
         <div className="flex-grow w-full flex flex-col gap-5 items-center px-1">
           {[
@@ -1275,8 +1275,8 @@ export default function App() {
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled 
-            ? "bg-white/95 shadow-md py-1 backdrop-blur-md border-b border-sky-200" 
-            : "bg-sky-50/95 shadow-sm py-1.5 backdrop-blur-md border-b border-sky-100"
+            ? "bg-white/95 shadow-md py-2 backdrop-blur-md border-b border-sky-200" 
+            : "bg-sky-50/95 shadow-sm py-3 backdrop-blur-md border-b border-sky-100"
         }`}
       >
         <div className="max-w-full mx-auto px-4 sm:px-10">
@@ -1288,7 +1288,7 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[52px] sm:h-[62px] w-[86px] sm:w-[102px]">
+                <div className="relative shrink-0 flex items-center h-[64px] sm:h-[76px] w-[105px] sm:w-[124px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="IEEE EPS BVRIT Student Chapter combined logo" 
@@ -1509,7 +1509,7 @@ export default function App() {
       {/* Main Content Area shifted to the right to accommodate the Unstop Left Rail Sidebar */}
       <div className="pl-16 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
         {/* Spacing Offset for Fixed Navbar */}
-        <div className="pt-[72px] sm:pt-[80px]"></div>
+        <div className="pt-[84px] sm:pt-[96px]"></div>
 
       {/* ========================================================================= */}
       {/* 2. DYNAMIC MAIN BODY ROUTER - HOME PAGE                                   */}
