@@ -1288,11 +1288,11 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[52px] sm:h-[62px]">
+                <div className="relative shrink-0 flex items-center h-[52px] sm:h-[62px] w-[86px] sm:w-[102px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="IEEE EPS BVRIT Student Chapter combined logo" 
-                    className="h-[52px] sm:h-[62px] w-auto object-contain hover:scale-102 transition-transform duration-300" 
+                    className="h-full w-full object-fill hover:scale-102 transition-transform duration-300" 
                   />
                 </div>
               </div>
