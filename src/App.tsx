@@ -33,6 +33,7 @@ import {
   X, 
   ArrowRight, 
   ChevronRight, 
+  ChevronLeft,
   CheckCircle, 
   Calendar, 
   GraduationCap, 
@@ -51,7 +52,12 @@ import {
   Settings,
   Twitter,
   Facebook,
-  Instagram
+  Instagram,
+  Image,
+  Plus,
+  Edit,
+  FileText,
+  ClipboardList
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import bvritLogoImg from "../assets/bvrit-logo.jpg";
@@ -310,7 +316,113 @@ const isAdminEmail = (email: string) => {
 
 export default function App() {
   // Page routing state ('home' | 'about' | 'admin' | 'student' | 'settings')
-  const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student" | "settings">("home");
+  const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student" | "settings" | "gallery">("home");
+  
+  // Gallery state management
+  const [galleryImages, setGalleryImages] = useState<Array<{
+    id: string;
+    title: string;
+    caption: string;
+    url: string;
+    category: string;
+  }>>(() => {
+    const saved = localStorage.getItem("ieee_gallery_images");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return [
+      {
+        id: "gal-1",
+        title: "Hands-on Modeling Session",
+        caption: "Students analyzing thermodynamic plots of 3D package stacks.",
+        url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80",
+        category: "Workshops"
+      },
+      {
+        id: "gal-2",
+        title: "Chapter Orientation 2026",
+        caption: "A huge turnout of engineering enthusiasts for our initial EPS roadmap briefing.",
+        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=600&q=80",
+        category: "Inauguration"
+      },
+      {
+        id: "gal-3",
+        title: "Micro-PCB Solder Workshop",
+        caption: "Getting hands-on precision soldering with standard lead-free substrates.",
+        url: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80",
+        category: "Workshops"
+      },
+      {
+        id: "gal-4",
+        title: "Industry Expert Virtual Meet",
+        caption: "Virtual roundtable discussing Advanced Packaging innovations with Silicon Valley mentors.",
+        url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
+        category: "Seminars"
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("ieee_gallery_images", JSON.stringify(galleryImages));
+  }, [galleryImages]);
+
+  // Gallery view and interactive controls
+  const [galleryFilter, setGalleryFilter] = useState("All");
+  const [lightboxImage, setLightboxImage] = useState<any | null>(null);
+  const [showGalleryAddEditModal, setShowGalleryAddEditModal] = useState<"add" | "edit" | null>(null);
+  const [editingGalleryImage, setEditingGalleryImage] = useState<any | null>(null);
+
+  // Form states for gallery add/edit
+  const [galleryFormTitle, setGalleryFormTitle] = useState("");
+  const [galleryFormCaption, setGalleryFormCaption] = useState("");
+  const [galleryFormCategory, setGalleryFormCategory] = useState("Workshops");
+  const [galleryFormUrl, setGalleryFormUrl] = useState("");
+  const [galleryFormError, setGalleryFormError] = useState("");
+  const [galleryNotification, setGalleryNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  useEffect(() => {
+    if (galleryNotification) {
+      const timer = setTimeout(() => setGalleryNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [galleryNotification]);
+
+  // Gallery view helper variables and hooks
+  const filteredImages = galleryImages.filter(img => {
+    if (galleryFilter === "All") return true;
+    return img.category === galleryFilter;
+  });
+
+  const getCategoryCount = (cat: string) => {
+    if (cat === "All") return galleryImages.length;
+    return galleryImages.filter(img => img.category === cat).length;
+  };
+
+  useEffect(() => {
+    if (!lightboxImage) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeIndex = filteredImages.findIndex(img => img.id === lightboxImage.id);
+      if (activeIndex === -1) return;
+
+      if (e.key === "ArrowLeft") {
+        const prevIndex = (activeIndex - 1 + filteredImages.length) % filteredImages.length;
+        setLightboxImage(filteredImages[prevIndex]);
+      } else if (e.key === "ArrowRight") {
+        const nextIndex = (activeIndex + 1) % filteredImages.length;
+        setLightboxImage(filteredImages[nextIndex]);
+      } else if (e.key === "Escape") {
+        setLightboxImage(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxImage, galleryImages, galleryFilter]);
   
   // Image loading fallbacks to prevent broken image icons on CORS blocks
   const [ieeeLogoError, setIeeeLogoError] = useState(false);
@@ -364,7 +476,7 @@ export default function App() {
   // Announcements, Ticker and Admin Tabs state
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [tickerText, setTickerText] = useState("");
-  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker" | "carousel" | "pending-requests">("enquiries");
+  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker" | "carousel" | "pending-requests" | "gallery">("enquiries");
   
   // Carousel Slideshow state
   const [carouselImages, setCarouselImages] = useState<any[]>([]);
@@ -577,7 +689,7 @@ export default function App() {
   }, [currentPage, carouselImages]);
 
   // Smooth navigation helper
-  const navigateTo = (page: "home" | "about" | "admin" | "student" | "settings") => {
+  const navigateTo = (page: "home" | "about" | "admin" | "student" | "settings" | "gallery") => {
     setCurrentPage(page);
     setMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -746,6 +858,127 @@ export default function App() {
           console.error(e);
         }
       }
+    }
+  };
+
+  // Gallery Management Handlers
+  const handleOpenAddGalleryModal = () => {
+    setGalleryFormTitle("");
+    setGalleryFormCaption("");
+    setGalleryFormCategory("Workshops");
+    setGalleryFormUrl("");
+    setGalleryFormError("");
+    setEditingGalleryImage(null);
+    setShowGalleryAddEditModal("add");
+  };
+
+  const handleOpenEditGalleryModal = (img: any) => {
+    setEditingGalleryImage(img);
+    setGalleryFormTitle(img.title);
+    setGalleryFormCaption(img.caption);
+    setGalleryFormCategory(img.category);
+    setGalleryFormUrl(img.url);
+    setGalleryFormError("");
+    setShowGalleryAddEditModal("edit");
+  };
+
+  const handleSaveGalleryImage = (e: any) => {
+    e.preventDefault();
+    if (!galleryFormTitle.trim() || !galleryFormCaption.trim() || !galleryFormUrl.trim()) {
+      setGalleryFormError("Please fill in all fields and upload/provide an image.");
+      return;
+    }
+
+    if (showGalleryAddEditModal === "add") {
+      const newImg = {
+        id: "gal-" + Date.now(),
+        title: galleryFormTitle.trim(),
+        caption: galleryFormCaption.trim(),
+        category: galleryFormCategory,
+        url: galleryFormUrl
+      };
+      setGalleryImages([newImg, ...galleryImages]);
+      setGalleryNotification({ type: "success", message: "Photo added successfully to the gallery!" });
+    } else if (showGalleryAddEditModal === "edit" && editingGalleryImage) {
+      const updated = galleryImages.map((img) => 
+        img.id === editingGalleryImage.id 
+          ? { 
+              ...img, 
+              title: galleryFormTitle.trim(), 
+              caption: galleryFormCaption.trim(), 
+              category: galleryFormCategory, 
+              url: galleryFormUrl 
+            } 
+          : img
+      );
+      setGalleryImages(updated);
+      setGalleryNotification({ type: "success", message: "Photo details updated successfully!" });
+    }
+
+    setShowGalleryAddEditModal(null);
+    setEditingGalleryImage(null);
+  };
+
+  const handleDeleteGalleryImage = (id: string) => {
+    if (confirm("Are you sure you want to delete this photo from the gallery?")) {
+      const updated = galleryImages.filter((img) => img.id !== id);
+      setGalleryImages(updated);
+      setGalleryNotification({ type: "success", message: "Photo deleted successfully from the gallery!" });
+    }
+  };
+
+  const isImageUrl = (url: string) => {
+    if (!url) return false;
+    if (url.startsWith("data:image/")) return true;
+    const cleanUrl = url.toLowerCase().split(/[?#]/)[0];
+    return cleanUrl.match(/\.(jpeg|jpg|gif|png|webp|svg|bmp)$/) !== null || url.includes("unsplash.com") || url.includes("picsum.photos");
+  };
+
+  const getFileExtensionLabel = (url: string) => {
+    if (!url) return "FILE";
+    if (url.startsWith("data:")) {
+      const match = url.match(/data:(.*?);/);
+      if (match) {
+        const mime = match[1];
+        if (mime.includes("pdf")) return "PDF";
+        if (mime.includes("msword") || mime.includes("officedocument.wordprocessingml")) return "DOCX";
+        if (mime.includes("excel") || mime.includes("officedocument.spreadsheetml")) return "XLSX";
+        if (mime.includes("powerpoint") || mime.includes("officedocument.presentationml")) return "PPTX";
+        if (mime.includes("text/plain")) return "TXT";
+      }
+    }
+    const cleanUrl = url.toLowerCase().split(/[?#]/)[0];
+    const ext = cleanUrl.split('.').pop();
+    return ext ? ext.toUpperCase() : "FILE";
+  };
+
+  const getFileIcon = (url: string, className = "w-6 h-6") => {
+    const ext = getFileExtensionLabel(url);
+    if (ext === "PDF") return <FileText className={`${className} text-rose-500`} />;
+    if (ext === "DOCX" || ext === "DOC") return <FileText className={`${className} text-blue-500`} />;
+    if (ext === "XLSX" || ext === "XLS") return <FileText className={`${className} text-emerald-500`} />;
+    if (ext === "PPTX" || ext === "PPT") return <FileText className={`${className} text-amber-500`} />;
+    return <FileText className={`${className} text-slate-400`} />;
+  };
+
+  const handleViewOrDownloadFile = (url: string, title: string) => {
+    if (!url) return;
+    if (url.startsWith("data:application/pdf") || url.startsWith("data:text") || url.startsWith("data:image")) {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`<iframe src="${url}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+        newWindow.document.title = title;
+      }
+    } else if (url.startsWith("data:")) {
+      const link = document.createElement("a");
+      link.href = url;
+      const ext = getFileExtensionLabel(url).toLowerCase();
+      link.download = `${title.replace(/\s+/g, "_")}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      window.open(url, "_blank");
     }
   };
 
@@ -1198,10 +1431,33 @@ export default function App() {
                   setSearchQuery("Hackathons");
                   setStudentDashboardTab("upcoming");
                 }},
+                { name: "Cultural Events", action: () => {
+                  navigateTo("student");
+                  setSearchQuery("Cultural Events");
+                  setStudentDashboardTab("upcoming");
+                }},
+                { name: "Conferences", action: () => {
+                  navigateTo("student");
+                  setSearchQuery("Conferences");
+                  setStudentDashboardTab("upcoming");
+                }},
                 { name: "Workshops", action: () => {
                   navigateTo("student");
                   setSearchQuery("Workshops");
                   setStudentDashboardTab("upcoming");
+                }},
+                { name: "College Festivals", action: () => {
+                  navigateTo("student");
+                  setSearchQuery("College Festivals");
+                  setStudentDashboardTab("upcoming");
+                }},
+                { name: "Mentors", action: () => {
+                  navigateTo("about");
+                  setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400);
+                }},
+                { name: "Articles", action: () => {
+                  navigateTo("home");
+                  setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 400);
                 }},
                 { name: "Enrollment Desk", action: () => {
                   if (currentPage !== "home") {
@@ -1214,15 +1470,15 @@ export default function App() {
               ]
             },
             {
-              id: "vlsi",
-              name: "VLSI Design",
-              icon: <Cpu className="w-5 h-5 sm:w-6 sm:h-6" />,
+              id: "gallery",
+              name: "Society Gallery",
+              icon: <Image className="w-5 h-5 sm:w-6 sm:h-6" />,
               action: () => {
-                alert("IEEE EPS BVRIT Student Chapter specializes in advanced semiconductor packaging, system-in-package co-design, and high-speed VLSI physical architecture.");
+                navigateTo("gallery");
               },
               subsections: [
-                { name: "Semiconductor Packaging", action: () => alert("Semiconductor Packaging involves assembly processes, thermal co-design, and electrical modeling.") },
-                { name: "Thermal Co-design", action: () => alert("Thermal Co-design focuses on heat dissipation architectures in high performance compute nodes.") }
+                { name: "View Gallery", action: () => navigateTo("gallery") },
+                { name: "Photo Archive", action: () => navigateTo("gallery") }
               ]
             }
           ].map((sec) => {
@@ -1355,9 +1611,9 @@ export default function App() {
 
                       {/* Explore Grid */}
                       <div className="space-y-2.5">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Explore Opportunities</span>
                         <div className="grid grid-cols-3 gap-3">
                           {[
+                            { name: "Events Calendar", icon: "Calendar", color: "bg-amber-50 text-amber-600 hover:bg-amber-100" },
                             { name: "Competitions", icon: "Trophy", color: "bg-blue-50 text-blue-600 hover:bg-blue-100" },
                             { name: "Quizzes", icon: "HelpCircle", color: "bg-indigo-50 text-indigo-600 hover:bg-indigo-100" },
                             { name: "Hackathons", icon: "Code", color: "bg-purple-50 text-purple-600 hover:bg-purple-100" },
@@ -1366,10 +1622,12 @@ export default function App() {
                             { name: "Workshops", icon: "Wrench", color: "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" },
                             { name: "College Festivals", icon: "Building", color: "bg-teal-50 text-teal-600 hover:bg-teal-100" },
                             { name: "Mentors", icon: "GraduationCap", color: "bg-sky-50 text-sky-600 hover:bg-sky-100" },
-                            { name: "Articles", icon: "BookOpen", color: "bg-violet-50 text-violet-600 hover:bg-violet-100" }
+                            { name: "Articles", icon: "BookOpen", color: "bg-violet-50 text-violet-600 hover:bg-violet-100" },
+                            { name: "Enrollment Desk", icon: "ClipboardList", color: "bg-rose-50 text-rose-600 hover:bg-rose-100" }
                           ].map((cat) => {
                             const renderCatIcon = (name: string) => {
                               switch (name) {
+                                case "Calendar": return <Calendar className="w-5 h-5" />;
                                 case "Trophy": return <Award className="w-5 h-5" />;
                                 case "HelpCircle": return <BookOpen className="w-5 h-5" />;
                                 case "Code": return <Cpu className="w-5 h-5" />;
@@ -1379,6 +1637,7 @@ export default function App() {
                                 case "Building": return <Activity className="w-5 h-5" />;
                                 case "GraduationCap": return <GraduationCap className="w-5 h-5" />;
                                 case "BookOpen": return <BookOpen className="w-5 h-5" />;
+                                case "ClipboardList": return <ClipboardList className="w-5 h-5" />;
                                 default: return <BookOpen className="w-5 h-5" />;
                               }
                             };
@@ -1389,7 +1648,12 @@ export default function App() {
                                 type="button"
                                 onClick={() => {
                                   setIsSearchPopupOpen(false);
-                                  if (cat.name === "Mentors") {
+                                  if (cat.name === "Events Calendar") {
+                                    navigateTo("home");
+                                    setTimeout(() => {
+                                      document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
+                                    }, 400);
+                                  } else if (cat.name === "Mentors") {
                                     navigateTo("about");
                                     setTimeout(() => {
                                       document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" });
@@ -1398,6 +1662,11 @@ export default function App() {
                                     navigateTo("home");
                                     setTimeout(() => {
                                       document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
+                                    }, 400);
+                                  } else if (cat.name === "Enrollment Desk") {
+                                    navigateTo("home");
+                                    setTimeout(() => {
+                                      document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
                                     }, 400);
                                   } else {
                                     navigateTo("student");
@@ -1467,14 +1736,14 @@ export default function App() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 overflow-hidden text-xs sm:text-sm text-slate-800"
+                        className="absolute right-0 top-full mt-2 w-[260px] rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 overflow-hidden text-xs sm:text-sm text-slate-800"
                       >
                         <button
                           onClick={() => {
                             setIsRegisterDropdownOpen(false);
                             navigateTo("student");
                           }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-indigo-700 border-b border-slate-100"
+                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-indigo-700 border-b border-slate-100 cursor-pointer"
                         >
                           <Globe className="w-4 h-4 text-indigo-500" />
                           <span>Student Event Portal</span>
@@ -1491,17 +1760,17 @@ export default function App() {
                               document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
                             }
                           }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-[#00629B]"
+                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-[#00629B] cursor-pointer"
                         >
                           <GraduationCap className="w-4 h-4" />
-                          <span>Student Desk</span>
+                          <span>Chapter Enrollment Desk</span>
                         </button>
                         <button
                           onClick={() => {
                             setIsRegisterDropdownOpen(false);
                             navigateTo("admin");
                           }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-slate-900 border-t border-slate-100"
+                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-slate-900 border-t border-slate-100 cursor-pointer"
                         >
                           <Lock className="w-4 h-4 text-amber-500" />
                           <span>Organizers Console</span>
@@ -1563,11 +1832,28 @@ export default function App() {
                       idx === currentCarouselIndex ? "opacity-100 z-10" : "opacity-0 z-0"
                     }`}
                   >
-                    <img
-                      src={slide.url}
-                      alt={slide.caption}
-                      className="w-full h-full object-contain object-center"
-                    />
+                    {isImageUrl(slide.url) ? (
+                      <img
+                        src={slide.url}
+                        alt={slide.caption}
+                        className="w-full h-full object-contain object-center"
+                      />
+                    ) : (
+                      <div 
+                        onClick={() => handleViewOrDownloadFile(slide.url, slide.caption)}
+                        className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-white p-6 gap-4 cursor-pointer"
+                      >
+                        <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 hover:scale-105 transition-transform duration-300">
+                          {getFileIcon(slide.url, "w-10 h-10")}
+                        </div>
+                        <div className="text-center space-y-1">
+                          <span className="text-[10px] uppercase font-black tracking-widest px-2 py-0.5 rounded bg-amber-500 text-slate-950">
+                            {getFileExtensionLabel(slide.url)} Document
+                          </span>
+                          <p className="text-xs text-slate-300 mt-1">Click anywhere on the slide to open / download the file</p>
+                        </div>
+                      </div>
+                    )}
                     {/* Shadow overlay at bottom of photo for text legibility */}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-24 pb-8 px-6 sm:px-12 text-left z-20">
                       <p className="text-white text-base sm:text-2xl font-bold tracking-tight drop-shadow-md font-display leading-tight max-w-3xl">
@@ -1903,12 +2189,28 @@ export default function App() {
                       <div>
                         {/* Event Banner Header */}
                         <div className="relative h-48 bg-slate-100 overflow-hidden">
-                          <img 
-                            src={event.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80"} 
-                            alt={event.title} 
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                          />
+                          {isImageUrl(event.image) ? (
+                            <img 
+                              src={event.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80"} 
+                              alt={event.title} 
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            />
+                          ) : (
+                            <div 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewOrDownloadFile(event.image, event.title);
+                              }}
+                              className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-3 gap-2 cursor-pointer group-hover:bg-slate-700 transition"
+                            >
+                              {getFileIcon(event.image, "w-10 h-10")}
+                              <span className="text-[10px] uppercase font-black bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">
+                                {getFileExtensionLabel(event.image)} Document
+                              </span>
+                              <span className="text-[9px] text-slate-400">Click to open/download</span>
+                            </div>
+                          )}
                           <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-black tracking-widest uppercase ${
                             event.status === "Upcoming"
                               ? "bg-amber-400 text-slate-900 shadow-sm"
@@ -2675,6 +2977,16 @@ export default function App() {
                 >
                   Manage Carousel ({carouselImages.length})
                 </button>
+                <button
+                  onClick={() => setAdminTab("gallery")}
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                    adminTab === "gallery"
+                      ? "border-[#00629B] text-[#00629B]"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Manage Gallery ({galleryImages.length})
+                </button>
                 {isAdminEmail(loggedInAdminEmail) && (
                   <button
                     onClick={() => setAdminTab("pending-requests")}
@@ -3106,7 +3418,7 @@ export default function App() {
                         <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Banner Image (Upload from PC)</label>
                         <input 
                           type="file" 
-                          accept="image/*"
+                          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
@@ -3165,7 +3477,13 @@ export default function App() {
                         {announcements.map((ann) => (
                           <div key={ann.id} className="py-4 flex gap-4 items-start">
                             <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-slate-200">
-                              <img src={ann.image} className="w-full h-full object-cover" alt="" />
+                              {isImageUrl(ann.image) ? (
+                                <img src={ann.image} className="w-full h-full object-cover" alt="" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-slate-800 text-white">
+                                  {getFileIcon(ann.image, "w-6 h-6")}
+                                </div>
+                              )}
                             </div>
                             <div className="flex-grow space-y-1.5 min-w-0">
                               <div className="flex items-center justify-between gap-2">
@@ -3276,7 +3594,7 @@ export default function App() {
                       <label className="block text-[11px] font-bold text-slate-700 uppercase">Upload Poster / Image *</label>
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
                         required
                         onChange={(e) => {
                           const file = e.target.files?.[0];
@@ -3329,14 +3647,23 @@ export default function App() {
                         {carouselImages.map((slide, idx) => (
                           <div key={slide.id || idx} className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden flex flex-col justify-between">
                             <div className="relative h-32 bg-slate-900 flex items-center justify-center">
-                              <img 
-                                src={slide.url} 
-                                alt={slide.caption} 
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  e.currentTarget.src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=300&q=80";
-                                }}
-                              />
+                              {isImageUrl(slide.url) ? (
+                                <img 
+                                  src={slide.url} 
+                                  alt={slide.caption} 
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=300&q=80";
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-3 gap-2">
+                                  {getFileIcon(slide.url, "w-8 h-8")}
+                                  <span className="text-[9px] uppercase font-black bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">
+                                    {getFileExtensionLabel(slide.url)} Document
+                                  </span>
+                                </div>
+                              )}
                               <div className="absolute top-2 right-2">
                                 <button
                                   type="button"
@@ -3358,6 +3685,87 @@ export default function App() {
                             <div className="p-3 bg-white border-t border-slate-100">
                               <p className="text-xs font-bold text-slate-800 line-clamp-1">{slide.caption}</p>
                               <span className="text-[10px] text-slate-400 font-mono block truncate mt-1">{slide.url}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {adminTab === "gallery" && (
+                <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-6 max-w-4xl mx-auto animate-fade-in text-left">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-[#00629B] font-display flex items-center gap-2">
+                        <Database className="w-5 h-5 text-[#00629B]" />
+                        <span>Manage Society Gallery</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                        Add new event pictures, edit existing labels/categories, or remove outdated slides from the public Society Gallery tab.
+                      </p>
+                    </div>
+                    <button 
+                      onClick={handleOpenAddGalleryModal}
+                      className="bg-[#00629B] hover:bg-[#004B75] text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition duration-200 uppercase tracking-widest flex items-center gap-2 cursor-pointer shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add New Photo</span>
+                    </button>
+                  </div>
+
+                  {/* Grid or list of active gallery images */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Active Gallery Photos ({galleryImages.length})</h4>
+                    {galleryImages.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">No images currently in the gallery. Add one above.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {galleryImages.map((img) => (
+                          <div key={img.id} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden flex flex-col justify-between shadow-xs">
+                            <div className="relative h-36 bg-slate-900 flex items-center justify-center group">
+                              {isImageUrl(img.url) ? (
+                                <img 
+                                  src={img.url} 
+                                  alt={img.title} 
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-4 gap-2">
+                                  {getFileIcon(img.url, "w-10 h-10")}
+                                  <span className="text-[9px] uppercase font-black bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">
+                                    {getFileExtensionLabel(img.url)} Document
+                                  </span>
+                                </div>
+                              )}
+                              <span className="absolute top-2 left-2 bg-[#00629B]/90 text-white font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded shadow-sm">
+                                {img.category}
+                              </span>
+                              <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditGalleryModal(img)}
+                                  className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-xl transition cursor-pointer"
+                                  title="Edit image labels"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteGalleryImage(img.id)}
+                                  className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl transition cursor-pointer"
+                                  title="Delete image"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-white border-t border-slate-100 flex-grow flex flex-col justify-between">
+                              <div>
+                                <h5 className="font-bold text-slate-800 line-clamp-1">{img.title}</h5>
+                                <p className="text-slate-500 text-[10px] line-clamp-2 leading-relaxed mt-1">{img.caption}</p>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -3542,72 +3950,178 @@ export default function App() {
                 </div>
               ) : (studentDashboardTab === "upcoming" || !currentStudentUser) ? (
                 /* TAB 2: UPCOMING EVENTS & REGISTRATION */
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 font-display">Upcoming Chapter Workshops & Events</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">Register for any IEEE Electronics Packaging Society event with a single click!</p>
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 font-display">Upcoming Chapter Workshops & Events</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Register for any IEEE Electronics Packaging Society event with a single click!</p>
+                    </div>
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold self-start md:self-auto cursor-pointer"
+                      >
+                        Clear Filter: "{searchQuery}"
+                      </button>
+                    )}
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    {[
+                  {/* Horizontal Scrollable Category Filter pills */}
+                  <div className="flex flex-wrap gap-2 pb-2">
+                    {["All", "Competitions", "Quizzes", "Hackathons", "Cultural Events", "Conferences", "Workshops", "College Festivals"].map((cat) => {
+                      const isActive = (cat === "All" && !searchQuery) || (searchQuery.toLowerCase() === cat.toLowerCase());
+                      return (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            if (cat === "All") {
+                              setSearchQuery("");
+                            } else {
+                              setSearchQuery(cat);
+                            }
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                            isActive
+                              ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
+                              : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {(() => {
+                    const studentEvents = [
                       {
                         title: "Advanced Packaging BootCamp & Substrate Prototyping",
+                        category: "Workshops",
                         desc: "3-Day intensive hands-on lab. Learn substrate stackups, silicon packaging models, and physical co-design.",
                         date: "July 12-14, 2026",
                         cost: "Free (Student Member Exclusive)"
                       },
                       {
                         title: "Thermal integrity & Thermal Packaging Simulation Challenge",
+                        category: "Hackathons",
                         desc: "A collaborative thermal-flow coding challenge. Model structural packaging heat flows under standard workloads.",
                         date: "August 04-05, 2026",
                         cost: "Free for BVRIT Students"
                       },
                       {
                         title: "National Conference on Semiconductor Packing Technologies",
+                        category: "Conferences",
                         desc: "Preeminent expert panels, guest research briefings, and national coordinators roadmap discussions.",
                         date: "September 20, 2026",
                         cost: "Open to All Branches"
+                      },
+                      {
+                        title: "Global Microelectronics Layout Design Competition",
+                        category: "Competitions",
+                        desc: "Submit your custom layout files. Focus on minimizing parasitic resistance and optimizing thermal footprint.",
+                        date: "July 28, 2026",
+                        cost: "IEEE Members Only"
+                      },
+                      {
+                        title: "Packaging Technology & Silicon Physics Quiz",
+                        category: "Quizzes",
+                        desc: "Test your skills on semiconductor physics, packaging materials, and advanced interconnects.",
+                        date: "July 05, 2026",
+                        cost: "Free for all students"
+                      },
+                      {
+                        title: "Electronics Day Cultural Festival",
+                        category: "Cultural Events",
+                        desc: "Celebrate with tech-art gallery installations, science music bands, and networking dinners.",
+                        date: "November 10, 2026",
+                        cost: "Open to All Branches"
+                      },
+                      {
+                        title: "IEEE BVRIT Annual Technical Fest",
+                        category: "College Festivals",
+                        desc: "The grand annual fest hosting multiple engineering tracks, project exhibitions, and drone racing.",
+                        date: "October 18-20, 2026",
+                        cost: "Registration Required"
                       }
-                    ].map((evt, idx) => {
-                      const isRegistered = currentStudentUser && studentRegistrations.find(
-                        r => r.studentId === currentStudentUser.id && r.eventTitle === evt.title
-                      );
+                    ];
 
+                    const filteredEvents = studentEvents.filter(evt => {
+                      if (!searchQuery) return true;
+                      const q = searchQuery.toLowerCase();
                       return (
-                        <div key={idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition">
-                          <div className="space-y-2.5">
-                            <div className="flex items-center justify-between">
-                              <span className="bg-indigo-50 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded font-mono uppercase">
-                                {evt.date}
-                              </span>
-                              <span className="text-[10px] text-emerald-600 font-bold">{evt.cost}</span>
-                            </div>
-                            <h4 className="font-bold text-slate-900 text-sm font-display leading-tight">{evt.title}</h4>
-                            <p className="text-xs text-slate-500 leading-relaxed">{evt.desc}</p>
-                          </div>
-                          <div className="pt-4 border-t border-slate-100 mt-4">
-                            {isRegistered ? (
-                              <button
-                                disabled
-                                className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1"
-                              >
-                                <CheckCircle className="w-3.5 h-3.5" />
-                                <span>Already Registered</span>
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleStudentEventRegister(evt.title)}
-                                className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition flex items-center justify-center gap-1"
-                              >
-                                <span>Register Instantly</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
+                        evt.title.toLowerCase().includes(q) ||
+                        evt.category.toLowerCase().includes(q) ||
+                        evt.desc.toLowerCase().includes(q)
+                      );
+                    });
+
+                    if (filteredEvents.length === 0) {
+                      return (
+                        <div className="py-12 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          <Search className="w-10 h-10 text-slate-300 mx-auto" />
+                          <h4 className="text-sm font-bold text-slate-700">No opportunities found</h4>
+                          <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                            No upcoming events match the current filter "{searchQuery}". Try selecting another category tab above.
+                          </p>
+                          <button
+                            onClick={() => setSearchQuery("")}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-bold underline cursor-pointer"
+                          >
+                            Reset filters
+                          </button>
                         </div>
                       );
-                    })}
-                  </div>
+                    }
+
+                    return (
+                      <div className="grid sm:grid-cols-2 gap-6">
+                        {filteredEvents.map((evt, idx) => {
+                          const isRegistered = currentStudentUser && studentRegistrations.find(
+                            r => r.studentId === currentStudentUser.id && r.eventTitle === evt.title
+                          );
+
+                          return (
+                            <div key={idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition">
+                              <div className="space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="bg-indigo-50 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded font-mono uppercase">
+                                    {evt.date}
+                                  </span>
+                                  <span className="text-[10px] text-emerald-600 font-bold">{evt.cost}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="bg-indigo-100/70 text-indigo-800 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded">
+                                    {evt.category}
+                                  </span>
+                                </div>
+                                <h4 className="font-bold text-slate-900 text-sm font-display leading-tight">{evt.title}</h4>
+                                <p className="text-xs text-slate-500 leading-relaxed">{evt.desc}</p>
+                              </div>
+                              <div className="pt-4 border-t border-slate-100 mt-4">
+                                {isRegistered ? (
+                                  <button
+                                    disabled
+                                    className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1"
+                                  >
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                    <span>Already Registered</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleStudentEventRegister(evt.title)}
+                                    className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition flex items-center justify-center gap-1"
+                                  >
+                                    <span>Register Instantly</span>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 /* TAB 3: ACADEMIC RESULTS & PRIZES */
@@ -3651,6 +4165,213 @@ export default function App() {
                 ← Back to Chapter Homepage
               </button>
             </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3.10. DYNAMIC MAIN BODY ROUTER - SOCIETY GALLERY PAGE                      */}
+      {/* ========================================================================= */}
+      {currentPage === "gallery" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8"
+        >
+          {/* Gallery Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-5 gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00629B]/10 text-[#00629B] text-[10px] font-black tracking-widest uppercase mb-2">
+                <Image className="w-3.5 h-3.5" />
+                <span>Capturing Society Moments</span>
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">Society Gallery</h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Visual highlights from our lab sessions, guest lectures, campaign runs, and orientation programs.
+              </p>
+            </div>
+            
+            <button
+              onClick={() => navigateTo("home")}
+              className="text-xs text-slate-500 hover:text-[#00629B] font-bold self-start md:self-auto transition cursor-pointer"
+            >
+              ← Return to Dashboard
+            </button>
+          </div>
+
+          {/* On-page alerts */}
+          <AnimatePresence>
+            {galleryNotification && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={`p-4 rounded-xl border flex items-center justify-between shadow-md text-xs font-bold leading-relaxed transition ${
+                  galleryNotification.type === "success" 
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-800" 
+                    : "bg-red-50 border-red-200 text-red-800"
+                }`}
+              >
+                <span>{galleryNotification.message}</span>
+                <button 
+                  onClick={() => setGalleryNotification(null)}
+                  className="ml-4 hover:opacity-85 text-slate-400 hover:text-slate-600 font-black cursor-pointer"
+                >
+                  ✕
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Organizer Info panel */}
+          {isAdminLoggedIn && (
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-xs">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#00629B]">Organizer Control Center</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  You are logged in as an Organizer. You have permissions to add, edit, or delete pictures in the Society Gallery.
+                </p>
+              </div>
+              <button 
+                onClick={handleOpenAddGalleryModal}
+                className="bg-[#00629B] hover:bg-[#004B75] text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition duration-200 uppercase tracking-widest flex items-center gap-2 cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add New Photo</span>
+              </button>
+            </div>
+          )}
+
+          {/* Category Tabs */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-4">
+            {["All", "Seminars", "Workshops", "Inauguration", "Activities", "Other"].map((cat) => {
+              const isActive = galleryFilter === cat;
+              const count = getCategoryCount(cat);
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setGalleryFilter(cat)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    isActive 
+                      ? "bg-[#00629B] text-white shadow-md shadow-[#00629B]/10" 
+                      : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/50"
+                  }`}
+                >
+                  <span>{cat}</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                    isActive ? "bg-white/20 text-white" : "bg-slate-200 text-slate-600"
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Gallery Grid */}
+          {filteredImages.length === 0 ? (
+            <div className="text-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-3xl">
+              <Image className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <h3 className="font-bold text-slate-800 text-sm">No photos found in this category</h3>
+              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Upload a new photo or select a different category to explore.</p>
+              {isAdminLoggedIn && (
+                <button 
+                  onClick={handleOpenAddGalleryModal}
+                  className="mt-4 bg-[#00629B] hover:bg-[#004B75] text-white text-[10px] font-bold py-2 px-3 rounded-lg shadow-sm transition uppercase tracking-wider cursor-pointer"
+                >
+                  Upload Photo
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <AnimatePresence mode="popLayout">
+                {filteredImages.map((img) => (
+                  <motion.div
+                     key={img.id}
+                     layout
+                     initial={{ opacity: 0, scale: 0.9 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 0.9 }}
+                     transition={{ duration: 0.3 }}
+                     onClick={() => {
+                       if (isImageUrl(img.url)) {
+                         setLightboxImage(img);
+                       } else {
+                         handleViewOrDownloadFile(img.url, img.title);
+                       }
+                     }}
+                     className="group relative aspect-square overflow-hidden rounded-2xl bg-slate-100 border border-slate-200/50 shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer"
+                   >
+                     {isImageUrl(img.url) ? (
+                       <img 
+                         src={img.url} 
+                         alt={img.title} 
+                         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                         loading="lazy"
+                       />
+                     ) : (
+                       <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-6 gap-3 transition-transform duration-700 ease-out group-hover:scale-105">
+                         {getFileIcon(img.url, "w-16 h-16")}
+                         <span className="text-[10px] uppercase font-black bg-amber-500/20 text-amber-300 px-2 py-1 rounded">
+                           {getFileExtensionLabel(img.url)} Document
+                         </span>
+                       </div>
+                     )}
+                     
+                     {/* Category Badge */}
+                     <span className="absolute top-3 left-3 bg-[#00629B]/90 text-white font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded shadow-sm backdrop-blur-xs z-10">
+                       {img.category}
+                     </span>
+
+                     {/* Admin Hover Actions Overlay */}
+                     {isAdminLoggedIn && (
+                       <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                         <button
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleOpenEditGalleryModal(img);
+                           }}
+                           className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-xl transition-colors shadow-md hover:scale-105 cursor-pointer"
+                           title="Edit Details"
+                         >
+                           <Edit className="w-3.5 h-3.5" />
+                         </button>
+                         <button
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleDeleteGalleryImage(img.id);
+                           }}
+                           className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl transition-colors shadow-md hover:scale-105 cursor-pointer"
+                           title="Delete Image"
+                         >
+                           <Trash2 className="w-3.5 h-3.5" />
+                         </button>
+                       </div>
+                     )}
+
+                     {/* Details Slide-up Overlay */}
+                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
+                       <h4 className="font-bold text-sm tracking-wide line-clamp-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">{img.title}</h4>
+                       <p className="text-[10px] text-slate-200 line-clamp-2 mt-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">{img.caption}</p>
+                       <span className="text-[9px] text-[#38BDF8] font-bold mt-2 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-100 uppercase tracking-widest flex items-center gap-1">
+                         {isImageUrl(img.url) ? "Click to enlarge ↗" : "Click to view/download ↗"}
+                       </span>
+                     </div>
+                   </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+
+
+
+          <div className="text-center pt-6">
+            <button onClick={() => navigateTo("home")} className="text-xs font-bold text-slate-500 hover:text-[#00629B] transition cursor-pointer">
+              ← Return to Dashboard
+            </button>
           </div>
         </motion.div>
       )}
@@ -3893,12 +4614,25 @@ export default function App() {
             >
               {/* Image banner */}
               <div className="relative h-48 bg-slate-100">
-                <img 
-                  src={activeEvent.image} 
-                  alt={activeEvent.title} 
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover" 
-                />
+                {isImageUrl(activeEvent.image) ? (
+                  <img 
+                    src={activeEvent.image} 
+                    alt={activeEvent.title} 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div 
+                    onClick={() => handleViewOrDownloadFile(activeEvent.image, activeEvent.title)}
+                    className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-3 gap-2 cursor-pointer hover:bg-slate-700 transition"
+                  >
+                    {getFileIcon(activeEvent.image, "w-10 h-10")}
+                    <span className="text-[10px] uppercase font-black bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">
+                      {getFileExtensionLabel(activeEvent.image)} Document
+                    </span>
+                    <span className="text-[9px] text-slate-400">Click to open/download</span>
+                  </div>
+                )}
                 <button 
                   onClick={() => setActiveEvent(null)}
                   className="absolute top-3 right-3 bg-slate-950/40 hover:bg-slate-950/60 text-white p-2 rounded-full focus:outline-none backdrop-blur-sm"
@@ -4235,6 +4969,211 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxImage && (() => {
+          const activeIndex = filteredImages.findIndex(img => img.id === lightboxImage.id);
+          const handlePrev = (e?: any) => {
+            if (e) e.stopPropagation();
+            if (activeIndex === -1) return;
+            const prevIndex = (activeIndex - 1 + filteredImages.length) % filteredImages.length;
+            setLightboxImage(filteredImages[prevIndex]);
+          };
+          const handleNext = (e?: any) => {
+            if (e) e.stopPropagation();
+            if (activeIndex === -1) return;
+            const nextIndex = (activeIndex + 1) % filteredImages.length;
+            setLightboxImage(filteredImages[nextIndex]);
+          };
+
+          return (
+            <div 
+              className="fixed inset-0 z-[100] flex flex-col justify-center items-center p-4 bg-slate-950/95 backdrop-blur-md transition-all duration-300"
+              onClick={() => setLightboxImage(null)}
+            >
+              <button 
+                onClick={() => setLightboxImage(null)}
+                className="absolute top-4 right-4 bg-slate-800/80 hover:bg-slate-700/80 text-white p-2.5 rounded-full transition shadow-md z-[110] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Next/Prev buttons */}
+              <button 
+                onClick={handlePrev}
+                className="absolute left-6 bg-slate-800/85 hover:bg-slate-700/85 text-white p-3 rounded-full transition shadow-md hidden sm:block z-[110] cursor-pointer"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button 
+                onClick={handleNext}
+                className="absolute right-6 bg-slate-800/85 hover:bg-slate-700/85 text-white p-3 rounded-full transition shadow-md hidden sm:block z-[110] cursor-pointer"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              {/* Main container */}
+              <div 
+                className="max-w-4xl w-full flex flex-col items-center space-y-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img 
+                  src={lightboxImage.url} 
+                  alt={lightboxImage.title} 
+                  className="max-h-[70vh] max-w-[85vw] object-contain rounded-2xl shadow-2xl border border-slate-800 animate-zoom-in"
+                />
+                <div className="text-center space-y-1.5 px-4 max-w-xl">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="bg-[#38BDF8] text-slate-950 font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded">
+                      {lightboxImage.category}
+                    </span>
+                    <h3 className="font-bold text-white text-base sm:text-lg font-display">{lightboxImage.title}</h3>
+                  </div>
+                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{lightboxImage.caption}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* Gallery Add/Edit Form Modal */}
+      <AnimatePresence>
+        {showGalleryAddEditModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl max-w-md w-full p-6 overflow-hidden shadow-2xl border border-slate-200 space-y-4 text-left"
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <Image className="w-4 h-4 text-[#00629B]" />
+                  <span>{showGalleryAddEditModal === "add" ? "Add Photo to Gallery" : "Edit Photo Details"}</span>
+                </h3>
+                <button 
+                  onClick={() => {
+                    setShowGalleryAddEditModal(null);
+                    setEditingGalleryImage(null);
+                  }}
+                  className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {galleryFormError && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl">
+                  {galleryFormError}
+                </div>
+              )}
+
+              <form onSubmit={handleSaveGalleryImage} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={galleryFormTitle}
+                    onChange={(e) => setGalleryFormTitle(e.target.value)}
+                    placeholder="e.g. Hands-on Modeling Session"
+                    className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Caption / Description *</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={galleryFormCaption}
+                    onChange={(e) => setGalleryFormCaption(e.target.value)}
+                    placeholder="e.g. Students analyzing thermodynamic plots of 3D package stacks."
+                    className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B] resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category *</label>
+                    <select
+                      value={galleryFormCategory}
+                      onChange={(e) => setGalleryFormCategory(e.target.value)}
+                      className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-[#00629B] cursor-pointer"
+                    >
+                      <option value="Seminars">Seminars</option>
+                      <option value="Workshops">Workshops</option>
+                      <option value="Inauguration">Inauguration</option>
+                      <option value="Activities">Activities</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Image URL Option</label>
+                    <input
+                      type="text"
+                      value={galleryFormUrl}
+                      onChange={(e) => setGalleryFormUrl(e.target.value)}
+                      placeholder="Or paste direct URL"
+                      className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B]"
+                    />
+                  </div>
+                </div>
+
+                {/* Upload File Section */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Upload Photo from PC *</label>
+                  <input 
+                    type="file" 
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          if (typeof reader.result === "string") {
+                            setGalleryFormUrl(reader.result);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#00629B]/10 file:text-[#00629B] hover:file:bg-[#00629B]/20 cursor-pointer"
+                  />
+                  {galleryFormUrl && (
+                    <div className="mt-2 text-xs text-slate-500 flex items-center gap-2">
+                      <span className="text-emerald-600 font-bold">✓ Loaded</span>
+                      <img src={galleryFormUrl} alt="Preview" className="w-12 h-12 object-cover rounded-xl border border-slate-200" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="submit"
+                    className="flex-grow bg-[#00629B] hover:bg-[#004B75] text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-sm transition-colors cursor-pointer text-center"
+                  >
+                    {showGalleryAddEditModal === "add" ? "Save Photo" : "Update Photo"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowGalleryAddEditModal(null);
+                      setEditingGalleryImage(null);
+                    }}
+                    className="px-4 py-2.5 border border-slate-200 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-50 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ========================================================================= */}
       {/* 5. CONTACT & FOOTER SECTION                                              */}
       {/* ========================================================================= */}
@@ -4311,9 +5250,22 @@ export default function App() {
               <p className="text-xs text-slate-400">
                 For invitations, joint student paper collaborations, or society enrollment help, contact our advisory coordinators:
               </p>
-              <p className="text-xs text-amber-300 font-semibold italic">
-                Contact information will be updated soon.
-              </p>
+              <div className="space-y-2 pt-1">
+                <a 
+                  href="mailto:epssbc@bvrit.ac.in" 
+                  className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
+                >
+                  <Mail className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>epssbc@bvrit.ac.in</span>
+                </a>
+                <a 
+                  href="tel:+917993356248" 
+                  className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
+                >
+                  <Phone className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>+91 7993356248</span>
+                </a>
+              </div>
 
               {/* Social Media Link Buttons Grid */}
               <div className="flex gap-3 pt-2">
