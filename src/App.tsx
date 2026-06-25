@@ -5473,7 +5473,12 @@ export default function App() {
             
             {/* Column 1: Joint Affiliation and Core Details */}
             <div className="md:col-span-4 space-y-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={ieeeEpsLogoImg} 
+                  alt="IEEE EPS SBC Logo" 
+                  className="w-10 h-10 object-contain rounded-full bg-white p-0.5 border border-slate-700" 
+                />
                 <strong className="text-white text-base font-display">{CHAPTER_INFO.shortName}</strong>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
