@@ -246,7 +246,8 @@ export const ABOUT_CONTENT = {
         role: "Chair",
         department: "ECE, 3rd year",
         email: "24211A04R1@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/charansaitej-voorugonda"
+        linkedin: "https://www.linkedin.com/in/charansaitej-voorugonda",
+        image: "/student-charansaitej.png"
       },
       {
         name: "Sai Aashrita Vasagiri",
@@ -316,7 +317,8 @@ export const ABOUT_CONTENT = {
         role: "Social Media Lead",
         department: "ECE, 3rd year",
         email: "24211A0421@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/yogesh-chandra-5b5682331?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+        linkedin: "https://www.linkedin.com/in/yogesh-chandra-5b5682331?utm_source=share_via&utm_content=profile&utm_medium=member_ios",
+        image: "/student-yogesh.jpg"
       },
       {
         name: "Niharika Rathod",
@@ -330,7 +332,8 @@ export const ABOUT_CONTENT = {
         role: "Web Master & Tech Admin",
         department: "CSE, 3rd year",
         email: "24211a05b5@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/srinathchoul/"
+        linkedin: "https://www.linkedin.com/in/srinathchoul/",
+        image: "/student-srinath.jpg"
       }
     ]
   },
