@@ -1942,7 +1942,7 @@ export default function App() {
                     }}
                     className="px-4 py-2 text-xs sm:text-sm font-bold text-white tracking-wide cursor-pointer transition"
                   >
-                    Register / Enquire
+                    Register
                   </button>
                   <div className="w-[1px] bg-white/20 my-2"></div>
                   <button
