@@ -73,7 +73,7 @@ import facultyAnushaImg from "../assets/faculty-anusha.png";
 import facultyPrasannaImg from "../assets/faculty-prasanna.jpg";
 import { db, auth, isFirebaseEnabled } from "./firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc } from "firebase/firestore";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 // Import all local dataset for ease of modification
 import { 
@@ -468,7 +468,7 @@ export default function App() {
   const [studentAuthName, setStudentAuthName] = useState("");
   const [studentAuthRoll, setStudentAuthRoll] = useState("");
   const [studentAuthCollege, setStudentAuthCollege] = useState("BVRIT Narsapur");
-  const [studentAuthBranch, setStudentAuthBranch] = useState("ECE");
+  const [studentAuthBranch, setStudentAuthBranch] = useState("APS");
   const [studentAuthError, setStudentAuthError] = useState("");
   const [studentDashboardTab, setStudentDashboardTab] = useState<"registered" | "upcoming" | "results">("registered");
   const [studentRegistrations, setStudentRegistrations] = useState<any[]>([]);
@@ -494,6 +494,11 @@ export default function App() {
     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80"
   });
   const [adminNotification, setAdminNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [toast, setToast] = useState<{ type: "success" | "error" | "info" | "warning"; message: string } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" | "warning" = "success") => {
+    setToast({ type, message });
+  };
 
   // Firebase Admin Console State
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
@@ -551,6 +556,48 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [adminNotification]);
+
+  // Auto-dismiss global toast notifications
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  // Override window.alert globally to use custom inline toast notifications
+  useEffect(() => {
+    window.alert = (message) => {
+      let type: "success" | "error" | "info" | "warning" = "info";
+      const lower = message.toLowerCase();
+      if (
+        lower.includes("success") || 
+        lower.includes("created") || 
+        lower.includes("logged in") || 
+        lower.includes("updated") || 
+        lower.includes("saved") ||
+        lower.includes("added")
+      ) {
+        type = "success";
+      } else if (
+        lower.includes("failed") || 
+        lower.includes("error") || 
+        lower.includes("invalid") || 
+        lower.includes("incorrect") ||
+        lower.includes("could not") ||
+        lower.includes("no active")
+      ) {
+        type = "error";
+      } else if (
+        lower.includes("already") ||
+        lower.includes("please") ||
+        lower.includes("deactivated")
+      ) {
+        type = "warning";
+      }
+      showToast(message, type);
+    };
+  }, []);
 
   // Monitor auth state changes & load registrations on component mount
   useEffect(() => {
@@ -715,7 +762,7 @@ export default function App() {
   const handleIncompleteForm = (e: FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email || !formData.rollNumber) {
-      alert("Please fill in the required fields (Name, Email, Roll Number).");
+      showToast("Please fill in the required fields (Name, Email, Roll Number).", "warning");
       return;
     }
     const timestampStr = new Date().toLocaleString("en-US", {
@@ -750,7 +797,7 @@ export default function App() {
         })
         .catch(err => {
           console.error("Error writing to Firestore:", err);
-          alert("Could not connect to online cloud. Saving locally to browser cache.");
+          showToast("Could not connect to online cloud. Saving locally to browser cache.", "warning");
           saveToLocalStorage({ id: "enq-" + Date.now(), ...newRecord });
           setFormSubmitted(true);
         });
@@ -785,7 +832,7 @@ export default function App() {
         setReceivedEnquiries(prev => prev.filter(item => item.id !== id));
       } catch (err) {
         console.error("Error deleting from Firestore:", err);
-        alert("Failed to delete the online record.");
+        showToast("Failed to delete the online record.", "error");
       }
     } else {
       // Fallback mode: delete from local storage
@@ -814,7 +861,7 @@ export default function App() {
         setReceivedEnquiries(prev => prev.map(item => item.id === id ? { ...item, status: "approved" } : item));
       } catch (err) {
         console.error("Error updating Firestore status:", err);
-        alert("Failed to approve the online request.");
+        showToast("Failed to approve the online request.", "error");
       }
     } else {
       // Fallback local storage
@@ -843,7 +890,7 @@ export default function App() {
         setReceivedEnquiries(prev => prev.filter(item => item.id !== id));
       } catch (err) {
         console.error("Error deleting from Firestore:", err);
-        alert("Failed to reject the online request.");
+        showToast("Failed to reject the online request.", "error");
       }
     } else {
       // Fallback local storage
@@ -1120,7 +1167,7 @@ export default function App() {
       const updatedRegs = [...studentRegistrations, newReg];
       setStudentRegistrations(updatedRegs);
       localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
-      alert(`Account created! Success: registered for "${eventTitle}".`);
+      showToast(`Account created! Success: registered for "${eventTitle}".`, "success");
     }
   };
 
@@ -1168,13 +1215,179 @@ export default function App() {
           const updatedRegs = [...studentRegistrations, newReg];
           setStudentRegistrations(updatedRegs);
           localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
-          alert(`Logged in! Success: registered for "${eventTitle}".`);
+          showToast(`Logged in! Success: registered for "${eventTitle}".`, "success");
         } else {
-          alert(`Logged in! Note: You were already registered for "${eventTitle}".`);
+          showToast(`Logged in! Note: You were already registered for "${eventTitle}".`, "warning");
         }
       }
     } else {
       setStudentAuthError("Invalid student credentials. If you do not have an account, click 'Create Account' above.");
+    }
+  };
+
+  // Google Login Handlers
+  const handleStudentGoogleLogin = async () => {
+    setStudentAuthError("");
+    if (isFirebaseEnabled && auth) {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        if (user && user.email) {
+          const emailLower = user.email.toLowerCase();
+          let student = studentUsers.find(u => u.email.toLowerCase() === emailLower);
+          
+          if (!student) {
+            // Register new Google student user
+            const randomRoll = "G-" + Math.floor(100000 + Math.random() * 900000);
+            student = {
+              id: "student-" + Date.now(),
+              name: user.displayName || "Google Student",
+              email: user.email,
+              password: "google-auth-protected",
+              rollNumber: randomRoll,
+              college: "BVRIT Narsapur",
+              branch: "APS"
+            };
+            const updatedUsers = [...studentUsers, student];
+            setStudentUsers(updatedUsers);
+            localStorage.setItem("ieee_student_users", JSON.stringify(updatedUsers));
+          }
+          
+          setCurrentStudentUser(student);
+          localStorage.setItem("ieee_student_current_user", JSON.stringify(student));
+          setShowStudentAuthModal(false);
+          
+          // Auto-register pending event if any
+          if (pendingEventToRegister) {
+            const eventTitle = pendingEventToRegister;
+            setPendingEventToRegister(null);
+            
+            const alreadyRegistered = studentRegistrations.find(
+              r => r.studentId === student.id && r.eventTitle === eventTitle
+            );
+            if (!alreadyRegistered) {
+              const newReg = {
+                id: "reg-" + Date.now(),
+                studentId: student.id,
+                studentName: student.name,
+                studentRoll: student.rollNumber,
+                eventTitle: eventTitle,
+                timestamp: new Date().toLocaleString(),
+                status: "Confirmed"
+              };
+              const updatedRegs = [...studentRegistrations, newReg];
+              setStudentRegistrations(updatedRegs);
+              localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
+              showToast(`Success! Logged in via Google and registered for "${eventTitle}".`, "success");
+            } else {
+              showToast(`Success! Logged in via Google. Note: You were already registered for "${eventTitle}".`, "warning");
+            }
+          } else {
+            showToast(`Welcome back! Successfully logged in via Google.`, "success");
+          }
+        }
+      } catch (err: any) {
+        console.error("Google login error:", err);
+        setStudentAuthError(err.message || "Failed to sign in with Google.");
+      }
+    } else {
+      // Local fallback Google Sign-in Mock
+      const mockEmail = "google_student@bvrit.ac.in";
+      let student = studentUsers.find(u => u.email.toLowerCase() === mockEmail);
+      if (!student) {
+        student = {
+          id: "student-mock-google",
+          name: "Mock Google Student",
+          email: mockEmail,
+          password: "google-auth-protected",
+          rollNumber: "G-24211A0501",
+          college: "BVRIT Narsapur",
+          branch: "APS"
+        };
+        const updatedUsers = [...studentUsers, student];
+        setStudentUsers(updatedUsers);
+        localStorage.setItem("ieee_student_users", JSON.stringify(updatedUsers));
+      }
+      setCurrentStudentUser(student);
+      localStorage.setItem("ieee_student_current_user", JSON.stringify(student));
+      setShowStudentAuthModal(false);
+      
+      // Auto-register pending event if any
+      if (pendingEventToRegister) {
+        const eventTitle = pendingEventToRegister;
+        setPendingEventToRegister(null);
+        
+        const alreadyRegistered = studentRegistrations.find(
+          r => r.studentId === student.id && r.eventTitle === eventTitle
+        );
+        if (!alreadyRegistered) {
+          const newReg = {
+            id: "reg-" + Date.now(),
+            studentId: student.id,
+            studentName: student.name,
+            studentRoll: student.rollNumber,
+            eventTitle: eventTitle,
+            timestamp: new Date().toLocaleString(),
+            status: "Confirmed"
+          };
+          const updatedRegs = [...studentRegistrations, newReg];
+          setStudentRegistrations(updatedRegs);
+          localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
+          showToast(`Sandbox Mode: Logged in via Mock Google Account and registered for "${eventTitle}".`, "success");
+        } else {
+          showToast(`Sandbox Mode: Logged in via Mock Google Account. Note: You were already registered for "${eventTitle}".`, "warning");
+        }
+      } else {
+        showToast("Sandbox Mode: Successfully logged in via Mock Google Account.", "success");
+      }
+    }
+  };
+
+  const handleAdminGoogleLogin = async () => {
+    setAuthError("");
+    setIsAuthenticating(true);
+    if (isFirebaseEnabled && auth) {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        if (user && user.email) {
+          const emailLower = user.email.toLowerCase();
+          
+          // Verify if they are in the database/approvals or is the default admin
+          const matchesEnrolled = receivedEnquiries.find(
+            enq => enq.email?.toLowerCase() === emailLower
+          );
+          
+          if (emailLower === "admin@ieee.org" || (matchesEnrolled && matchesEnrolled.status !== "pending" && matchesEnrolled.status !== "rejected") || emailLower.endsWith("@bvrit.ac.in") || emailLower.endsWith("@ieee.org")) {
+            setIsAdminLoggedIn(true);
+            setLoggedInAdminEmail(emailLower);
+            localStorage.setItem("ieee_is_admin_logged_in", "true");
+            localStorage.setItem("ieee_logged_in_admin_email", emailLower);
+            fetchEnquiries();
+            showToast(`Welcome! Successfully logged in as organizer via Google.`, "success");
+          } else {
+            // Default authorization message
+            setAuthError(`Email ${emailLower} is not registered or approved as an organizer. Please complete the Chapter Enrollment Desk request first.`);
+          }
+        }
+      } catch (err: any) {
+        console.error("Admin Google login error:", err);
+        setAuthError(err.message || "Failed to sign in with Google.");
+      } finally {
+        setIsAuthenticating(false);
+      }
+    } else {
+      // Local fallback Mock Google Login for Admin
+      const mockEmail = "admin@ieee.org";
+      setIsAdminLoggedIn(true);
+      setLoggedInAdminEmail(mockEmail);
+      localStorage.setItem("ieee_is_admin_logged_in", "true");
+      localStorage.setItem("ieee_logged_in_admin_email", mockEmail);
+      fetchEnquiries();
+      showToast("Sandbox Mode: Successfully logged in as Admin via Mock Google Account.", "success");
+      setIsAuthenticating(false);
     }
   };
 
@@ -1199,7 +1412,7 @@ export default function App() {
     );
 
     if (alreadyRegistered) {
-      alert(`You are already registered for "${eventTitle}"!`);
+      showToast(`You are already registered for "${eventTitle}"!`, "warning");
       return;
     }
 
@@ -1216,13 +1429,13 @@ export default function App() {
     const updatedRegs = [...studentRegistrations, newReg];
     setStudentRegistrations(updatedRegs);
     localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
-    alert(`Success! You have registered for "${eventTitle}". View details inside your dashboard.`);
+    showToast(`Success! You have registered for "${eventTitle}". View details inside your dashboard.`, "success");
   };
 
   // CSV Export logic
   const handleExportCSV = () => {
     if (receivedEnquiries.length === 0) {
-      alert("No data available to export.");
+      showToast("No data available to export.", "warning");
       return;
     }
     
@@ -1254,7 +1467,7 @@ export default function App() {
   // Excel Export logic (Styled HTML-to-Excel)
   const handleExportExcel = () => {
     if (receivedEnquiries.length === 0) {
-      alert("No data available to export.");
+      showToast("No data available to export.", "warning");
       return;
     }
 
@@ -1480,6 +1693,21 @@ export default function App() {
                 { name: "View Gallery", action: () => navigateTo("gallery") },
                 { name: "Photo Archive", action: () => navigateTo("gallery") }
               ]
+            },
+            {
+              id: "contact",
+              name: "Contact us",
+              icon: <Phone className="w-5 h-5 sm:w-6 sm:h-6" />,
+              action: () => {
+                if (currentPage !== "home") {
+                  navigateTo("home");
+                  setTimeout(() => {
+                    document.getElementById("footer-section")?.scrollIntoView({ behavior: "smooth" });
+                  }, 300);
+                } else {
+                  document.getElementById("footer-section")?.scrollIntoView({ behavior: "smooth" });
+                }
+              }
             }
           ].map((sec) => {
             const isActive = currentPage === sec.id;
@@ -1501,25 +1729,27 @@ export default function App() {
                 </button>
 
                 {/* Hover Subsections Popover */}
-                <div className="absolute left-full top-0 ml-2 w-48 bg-white border border-slate-200 text-slate-800 rounded-xl shadow-2xl py-2 hidden group-hover:block z-[70] animate-fade-in">
-                  <div className="px-3 py-1 border-b border-slate-100 text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                    Explore {sec.name}
+                {sec.subsections && sec.subsections.length > 0 && (
+                  <div className="absolute left-full top-0 ml-2 w-48 bg-white border border-slate-200 text-slate-800 rounded-xl shadow-2xl py-2 hidden group-hover:block z-[70] animate-fade-in">
+                    <div className="px-3 py-1 border-b border-slate-100 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                      Explore {sec.name}
+                    </div>
+                    <div className="py-1">
+                      {sec.subsections.map((sub) => (
+                        <button
+                          key={sub.name}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            sub.action();
+                          }}
+                          className="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 text-slate-700 hover:text-[#00629B] transition-colors"
+                        >
+                          {sub.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="py-1">
-                    {sec.subsections.map((sub) => (
-                      <button
-                        key={sub.name}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          sub.action();
-                        }}
-                        className="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 text-slate-700 hover:text-[#00629B] transition-colors"
-                      >
-                        {sub.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                )}
               </div>
             );
           })}
@@ -2846,6 +3076,38 @@ export default function App() {
                 </button>
               </form>
 
+              {/* Google Sign In Divider & Button */}
+              <div className="relative flex items-center justify-center my-3.5">
+                <div className="border-t border-slate-200 w-full absolute"></div>
+                <span className="bg-white px-3 text-[10px] text-slate-400 font-bold uppercase relative z-10">or</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAdminGoogleLogin}
+                className="w-full py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs rounded-xl shadow-xs transition duration-200 flex items-center justify-center gap-2 cursor-pointer border-solid"
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>Continue with Google</span>
+              </button>
+
               <div className="text-center">
                 <button 
                   onClick={() => navigateTo("home")}
@@ -3238,7 +3500,7 @@ export default function App() {
                           <th className="px-6 py-3 font-semibold uppercase tracking-wider">Full Name</th>
                           <th className="px-6 py-3 font-semibold uppercase tracking-wider">Email</th>
                           <th className="px-6 py-3 font-semibold uppercase tracking-wider">Roll Number</th>
-                          <th className="px-6 py-3 font-semibold uppercase tracking-wider">Year/Branch</th>
+                          <th className="px-6 py-3 font-semibold uppercase tracking-wider">Year/Society</th>
                           <th className="px-6 py-3 font-semibold uppercase tracking-wider text-center">Actions</th>
                         </tr>
                       </thead>
@@ -3586,7 +3848,7 @@ export default function App() {
                       localStorage.setItem("ieee_carousel_images", JSON.stringify(updatedSlides));
                       setNewCarouselUrl("");
                       setNewCarouselCaption("");
-                      alert("New picture added to the carousel successfully!");
+                      showToast("New picture added to the carousel successfully!", "success");
                     }}
                     className="bg-slate-50 p-4 rounded-xl border border-slate-100 grid md:grid-cols-2 gap-4 items-end"
                   >
@@ -3848,7 +4110,7 @@ export default function App() {
                     Welcome back, {currentStudentUser.name}!
                   </h1>
                   <p className="text-sky-100 text-xs sm:text-sm">
-                    {currentStudentUser.college} • Roll: {currentStudentUser.rollNumber} • Dept: {currentStudentUser.branch}
+                    {currentStudentUser.college} • Roll: {currentStudentUser.rollNumber} • Society: {currentStudentUser.branch}
                   </p>
                 </div>
                 <button
@@ -4469,15 +4731,15 @@ export default function App() {
                         if (users.length > 0) {
                           users[0].password = settingsNewPassword.trim();
                           localStorage.setItem("student_auth_users", JSON.stringify(users));
-                          alert("Organizer credential password updated successfully!");
+                          showToast("Organizer credential password updated successfully!", "success");
                         } else {
-                          alert("No active user records found. Log in or sign up first.");
+                          showToast("No active user records found. Log in or sign up first.", "error");
                         }
                       } catch (err) {
                         console.error(err);
                       }
                     } else {
-                      alert("Password updated successfully!");
+                      showToast("Password updated successfully!", "success");
                     }
                     setSettingsOldPassword("");
                     setSettingsNewPassword("");
@@ -4555,7 +4817,7 @@ export default function App() {
                     </div>
                     <button onClick={() => {
                       if (confirm("Are you sure you want to deactivate your account? This action is irreversible.")) {
-                        alert("Account deactivated.");
+                        showToast("Account deactivated.", "warning");
                         navigateTo("home");
                       }
                     }} className="px-3 py-1.5 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition cursor-pointer">
@@ -4735,15 +4997,15 @@ export default function App() {
                       if (users.length > 0) {
                         users[0].password = settingsNewPassword.trim();
                         localStorage.setItem("student_auth_users", JSON.stringify(users));
-                        alert("Enrollment credential password updated successfully!");
+                        showToast("Enrollment credential password updated successfully!", "success");
                       } else {
-                        alert("No active user records found. Log in or sign up first.");
+                        showToast("No active user records found. Log in or sign up first.", "error");
                       }
                     } catch (err) {
                       console.error(err);
                     }
                   } else {
-                    alert("Settings updated successfully!");
+                    showToast("Settings updated successfully!", "success");
                   }
 
                   setIsSettingsOpen(false);
@@ -4919,17 +5181,19 @@ export default function App() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Department *</label>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Societies *</label>
                         <select
                           value={studentAuthBranch}
                           onChange={(e) => setStudentAuthBranch(e.target.value)}
                           className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                         >
-                          <option value="ECE">ECE</option>
-                          <option value="EEE">EEE</option>
-                          <option value="CSE">CSE</option>
-                          <option value="IT">IT</option>
-                          <option value="Other">Other</option>
+                          <option value="APS">APS</option>
+                          <option value="PES">PES</option>
+                          <option value="IETE">IETE</option>
+                          <option value="IEOM">IEOM</option>
+                          <option value="MTT-S">MTT-S</option>
+                          <option value="EPS">EPS</option>
+                          <option value="CAS">CAS</option>
                         </select>
                       </div>
                     </div>
@@ -4963,6 +5227,38 @@ export default function App() {
                     </button>
                   </form>
                 )}
+
+                {/* Google Sign In Divider & Button */}
+                <div className="relative flex items-center justify-center my-3">
+                  <div className="border-t border-slate-200 w-full absolute"></div>
+                  <span className="bg-white px-3 text-[10px] text-slate-400 font-bold uppercase relative z-10">or</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleStudentGoogleLogin}
+                  className="w-full py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs rounded-xl shadow-xs transition duration-200 flex items-center justify-center gap-2 cursor-pointer border-solid"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
               </div>
             </motion.div>
           </div>
@@ -5177,7 +5473,7 @@ export default function App() {
       {/* ========================================================================= */}
       {/* 5. CONTACT & FOOTER SECTION                                              */}
       {/* ========================================================================= */}
-      <footer className="bg-slate-900 text-slate-100 pt-16 pb-8 border-t border-slate-800">
+      <footer id="footer-section" className="bg-slate-900 text-slate-100 pt-16 pb-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-12 gap-12 pb-12 border-b border-slate-800">
             
@@ -5332,6 +5628,38 @@ export default function App() {
 
         </div>
       </footer>
+
+      {/* Dynamic Global Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={`fixed bottom-6 right-6 z-[150] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md max-w-sm ${
+              toast.type === "success"
+                ? "bg-emerald-500/95 text-white border-emerald-400 shadow-emerald-500/10"
+                : toast.type === "error"
+                ? "bg-rose-500/95 text-white border-rose-400 shadow-rose-500/10"
+                : toast.type === "warning"
+                ? "bg-amber-500/95 text-white border-amber-400 shadow-amber-500/10"
+                : "bg-slate-800/95 text-white border-slate-700 shadow-slate-800/10"
+            }`}
+          >
+            {toast.type === "success" && <CheckCircle className="w-5 h-5 shrink-0 text-emerald-100" />}
+            {toast.type === "error" && <ShieldAlert className="w-5 h-5 shrink-0 text-rose-100" />}
+            {toast.type === "warning" && <Info className="w-5 h-5 shrink-0 text-amber-100" />}
+            {toast.type === "info" && <Info className="w-5 h-5 shrink-0 text-sky-100" />}
+            <span className="text-xs font-bold leading-relaxed">{toast.message}</span>
+            <button 
+              onClick={() => setToast(null)}
+              className="text-white/60 hover:text-white ml-2 cursor-pointer font-bold text-xs"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       </div>
 
     </div>
