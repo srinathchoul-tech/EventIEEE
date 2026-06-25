@@ -2391,17 +2391,11 @@ export default function App() {
           <section id="announcements" className="py-20 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16 gap-6">
+              <div className="mb-16">
                 <div className="space-y-3">
                   <span className="text-xs font-bold text-[#00629B] tracking-widest uppercase block font-display">What's Happening</span>
                   <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">{HOME_CONTENT.events.title}</h2>
                   <p className="text-slate-500 text-sm max-w-2xl leading-relaxed">{HOME_CONTENT.events.subtitle}</p>
-                </div>
-                
-                {/* Visual Status Filter Info */}
-                <div className="inline-flex gap-3 bg-slate-100 p-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600">
-                  <span className="px-3 py-1 bg-white shadow-sm rounded-md text-[#00629B] font-semibold">All Milestones</span>
-                  <span className="px-3 py-1 grayscale opacity-60">Seminars</span>
                 </div>
               </div>
 
