@@ -14,7 +14,7 @@
  * - Use standard HTML/JSX tags here to add further structural blocks.
  */
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import { 
   Cpu, 
   Thermometer, 
@@ -320,6 +320,10 @@ export default function App() {
   
   // Mobile sidebar navigation rail toggle state
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // References for handling click-outside dismissals
+  const searchRef = useRef<HTMLDivElement>(null);
+  const registerRef = useRef<HTMLDivElement>(null);
   
   // Gallery state management
   const [galleryImages, setGalleryImages] = useState<Array<{
@@ -567,6 +571,22 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  // Click outside to dismiss search popup & register dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchPopupOpen(false);
+      }
+      if (registerRef.current && !registerRef.current.contains(event.target as Node)) {
+        setIsRegisterDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Override window.alert globally to use custom inline toast notifications
   useEffect(() => {
@@ -1811,7 +1831,7 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[64px] sm:h-[76px] w-[105px] sm:w-[124px]">
+                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[76px] w-[80px] sm:w-[124px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="IEEE EPS BVRIT Student Chapter combined logo" 
@@ -1822,8 +1842,18 @@ export default function App() {
             </div>
 
             {/* Center-left: Search Opportunities Bar */}
-            <div className="flex flex-grow max-w-[140px] sm:max-w-sm relative">
-              <div className="relative w-full">
+            <div ref={searchRef} className="relative z-50">
+              {/* Mobile Search Icon Button */}
+              <button
+                onClick={() => setIsSearchPopupOpen(!isSearchPopupOpen)}
+                className="sm:hidden p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full flex items-center justify-center shrink-0 cursor-pointer"
+                title="Search Opportunities"
+              >
+                <Search className="w-4.5 h-4.5" />
+              </button>
+
+              {/* Desktop Search Input */}
+              <div className="hidden sm:block relative w-48 md:w-64">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
@@ -1838,18 +1868,12 @@ export default function App() {
               {/* Popover / Overlay Card */}
               <AnimatePresence>
                 {isSearchPopupOpen && (
-                  <>
-                    {/* Invisible overlay to close when clicking outside */}
-                    <div 
-                      className="fixed inset-0 z-40" 
-                      onClick={() => setIsSearchPopupOpen(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 12 }}
-                      className="absolute left-0 top-full mt-2 w-[420px] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-50 space-y-4 text-left"
-                    >
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 12 }}
+                    className="fixed inset-x-4 top-20 w-auto sm:absolute sm:inset-auto sm:left-0 sm:top-full sm:mt-2 sm:w-[420px] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-50 space-y-4 text-left"
+                  >
                       <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                           <Search className="w-4 h-4 text-[#00629B]" />
@@ -1945,7 +1969,6 @@ export default function App() {
                         </div>
                       </div>
                     </motion.div>
-                  </>
                 )}
               </AnimatePresence>
             </div>
@@ -1953,7 +1976,7 @@ export default function App() {
             {/* Right Brand Area: Only Register/Enquire */}
             <div className="flex items-center shrink-0">
               {/* Split Button with Dropdown for Register/Enquire and Admin Portal */}
-              <div className="relative inline-flex items-center">
+              <div ref={registerRef} className="relative inline-flex items-center">
                 <div className="inline-flex items-stretch rounded-xl overflow-hidden bg-[#00629B] hover:bg-[#004B75] transition shadow-md shadow-[#00629B]/10">
                   <button
                     onClick={(e) => {
@@ -1983,14 +2006,8 @@ export default function App() {
 
                 <AnimatePresence>
                   {isRegisterDropdownOpen && (
-                    <>
-                      {/* Close overlay on click */}
-                      <div 
-                        className="fixed inset-0 z-40" 
-                        onClick={() => setIsRegisterDropdownOpen(false)}
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute right-0 top-full mt-2 w-[260px] rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 overflow-hidden text-xs sm:text-sm text-slate-800"
@@ -2033,7 +2050,6 @@ export default function App() {
                           <span>Organizers Console</span>
                         </button>
                       </motion.div>
-                    </>
                   )}
                 </AnimatePresence>
               </div>
