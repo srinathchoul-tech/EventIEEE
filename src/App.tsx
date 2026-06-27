@@ -318,6 +318,9 @@ export default function App() {
   // Page routing state ('home' | 'about' | 'admin' | 'student' | 'settings')
   const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student" | "settings" | "gallery">("home");
   
+  // Mobile sidebar navigation rail toggle state
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  
   // Gallery state management
   const [galleryImages, setGalleryImages] = useState<Array<{
     id: string;
@@ -1576,8 +1579,18 @@ export default function App() {
       {/* ========================================================================= */}
       {/* 1. APPMOBILE HEADER / FLOATING NAVIGATION BAR                             */}
       {/* ========================================================================= */}
+      {/* Dimmed Background Overlay on Mobile when Sidebar is Open */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 sm:hidden transition-opacity duration-300"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* Unstop-Style Left Navigation Sidebar Rail */}
-      <aside className="fixed left-0 top-[84px] sm:top-[96px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none">
+      <aside className={`fixed top-[84px] sm:top-[96px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none transition-transform duration-300 left-0 sm:translate-x-0 ${
+        isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
         {/* 4 Navigation Sections */}
         <div className="flex-grow w-full flex flex-col gap-5 items-center px-1">
           {[
@@ -1714,7 +1727,10 @@ export default function App() {
             return (
               <div key={sec.id} className="relative group w-full flex flex-col items-center">
                 <button
-                  onClick={sec.action}
+                  onClick={() => {
+                    sec.action();
+                    setIsMobileSidebarOpen(false);
+                  }}
                   className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
                     isActive 
                       ? "bg-[#00629B] text-white shadow-lg shadow-[#00629B]/25" 
@@ -1741,6 +1757,7 @@ export default function App() {
                           onClick={(e) => {
                             e.stopPropagation();
                             sub.action();
+                            setIsMobileSidebarOpen(false);
                           }}
                           className="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 text-slate-700 hover:text-[#00629B] transition-colors"
                         >
@@ -1758,7 +1775,10 @@ export default function App() {
         {/* Settings button */}
         <div className="mt-auto pb-4">
           <button
-            onClick={() => navigateTo("settings")}
+            onClick={() => {
+              navigateTo("settings");
+              setIsMobileSidebarOpen(false);
+            }}
             className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
             title="Account Settings"
           >
@@ -1777,8 +1797,15 @@ export default function App() {
       >
         <div className="max-w-full mx-auto px-4 sm:px-10">
           <div className="flex items-center justify-between gap-4">
-            {/* Left Brand Area: Logo only */}
-            <div className="flex items-center gap-2.5 shrink-0">
+            {/* Left Brand Area: Toggle & Logo */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                className="sm:hidden p-1.5 text-slate-600 hover:text-[#00629B] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer mr-1 flex items-center justify-center shrink-0"
+                title="Toggle Menu"
+              >
+                {isMobileSidebarOpen ? <X className="w-5.5 h-5.5" /> : <Menu className="w-5.5 h-5.5" />}
+              </button>
               {/* Header Brand Information */}
               <div 
                 className="flex items-center cursor-pointer select-none group" 
@@ -2016,7 +2043,7 @@ export default function App() {
       </header>
 
       {/* Main Content Area shifted to the right to accommodate the Unstop Left Rail Sidebar */}
-      <div className="pl-16 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
+      <div className="pl-0 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
         {/* Spacing Offset for Fixed Navbar */}
         <div className="pt-[84px] sm:pt-[96px]"></div>
 
