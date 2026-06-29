@@ -480,10 +480,25 @@ export default function App() {
   const [studentDashboardTab, setStudentDashboardTab] = useState<"registered" | "upcoming" | "results">("registered");
   const [studentRegistrations, setStudentRegistrations] = useState<any[]>([]);
 
+  // Competitions & Hackathons state
+  const [competitions, setCompetitions] = useState<any[]>([]);
+  const [competitionFormData, setCompetitionFormData] = useState({
+    title: "",
+    category: "Hackathons",
+    desc: "",
+    date: "",
+    cost: "Free",
+    googleFormUrl: ""
+  });
+  const [selectedCompForRegs, setSelectedCompForRegs] = useState<any | null>(null);
+  const [pastedRegsInput, setPastedRegsInput] = useState("");
+  const [selectedCompForResults, setSelectedCompForResults] = useState<any | null>(null);
+  const [resultsInput, setResultsInput] = useState("");
+
   // Announcements, Ticker and Admin Tabs state
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [tickerText, setTickerText] = useState("");
-  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker" | "carousel" | "pending-requests" | "gallery">("enquiries");
+  const [adminTab, setAdminTab] = useState<"enquiries" | "announcements" | "ticker" | "carousel" | "pending-requests" | "gallery" | "competitions">("enquiries");
   
   // Carousel Slideshow state
   const [carouselImages, setCarouselImages] = useState<any[]>([]);
@@ -679,6 +694,18 @@ export default function App() {
       } catch (e) {
         console.error(e);
       }
+    }
+
+    // Load dynamic competitions
+    const savedCompetitions = localStorage.getItem("ieee_competitions");
+    if (savedCompetitions) {
+      try {
+        setCompetitions(JSON.parse(savedCompetitions));
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setCompetitions([]);
     }
 
     // Load dynamic announcements
@@ -1421,7 +1448,7 @@ export default function App() {
   };
 
   // Student Event Registration Handler
-  const handleStudentEventRegister = (eventTitle: string) => {
+  const handleStudentEventRegister = (eventTitle: string, initialStatus: string = "Confirmed") => {
     if (!currentStudentUser) {
       setPendingEventToRegister(eventTitle);
       setStudentAuthTab("login");
@@ -1446,13 +1473,169 @@ export default function App() {
       studentRoll: currentStudentUser.rollNumber,
       eventTitle: eventTitle,
       timestamp: new Date().toLocaleString(),
-      status: "Confirmed"
+      status: initialStatus
     };
 
     const updatedRegs = [...studentRegistrations, newReg];
     setStudentRegistrations(updatedRegs);
     localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
-    showToast(`Success! You have registered for "${eventTitle}". View details inside your dashboard.`, "success");
+    
+    if (initialStatus === "Confirmed") {
+      showToast(`Success! You have registered for "${eventTitle}". View details inside your dashboard.`, "success");
+    } else {
+      showToast(`Redirecting to registration form. View status in your dashboard.`, "info");
+    }
+  };
+
+  // Create Competition / Opportunity
+  const handleCreateCompetition = (e: FormEvent) => {
+    e.preventDefault();
+    if (!competitionFormData.title || !competitionFormData.googleFormUrl) {
+      showToast("Please fill in all required fields.", "warning");
+      return;
+    }
+
+    const newComp = {
+      id: "comp-" + Date.now(),
+      title: competitionFormData.title,
+      category: competitionFormData.category,
+      desc: competitionFormData.desc,
+      date: competitionFormData.date,
+      cost: competitionFormData.cost,
+      googleFormUrl: competitionFormData.googleFormUrl,
+      results: "",
+      status: "Upcoming"
+    };
+
+    const updatedComps = [...competitions, newComp];
+    setCompetitions(updatedComps);
+    localStorage.setItem("ieee_competitions", JSON.stringify(updatedComps));
+
+    // Reset Form
+    setCompetitionFormData({
+      title: "",
+      category: "Hackathons",
+      desc: "",
+      date: "",
+      cost: "Free",
+      googleFormUrl: ""
+    });
+
+    showToast(`Opportunity "${newComp.title}" published successfully!`, "success");
+  };
+
+  // Delete Competition
+  const handleDeleteCompetition = (compId: string) => {
+    const updatedComps = competitions.filter(c => c.id !== compId);
+    setCompetitions(updatedComps);
+    localStorage.setItem("ieee_competitions", JSON.stringify(updatedComps));
+    showToast("Opportunity deleted successfully.", "info");
+  };
+
+  // Link Google Form Responses to Student Accounts & Registrations
+  const handleLinkGoogleFormResponses = (compId: string) => {
+    if (!pastedRegsInput.trim()) {
+      showToast("Please paste some roll numbers or emails.", "warning");
+      return;
+    }
+
+    const targetComp = competitions.find(c => c.id === compId);
+    if (!targetComp) return;
+
+    // Split input by newlines, commas, or semicolons
+    const tokens = pastedRegsInput
+      .split(/[\n,;]+/)
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+
+    let newlyLinkedCount = 0;
+    let accountsCreatedCount = 0;
+
+    let updatedUsers = [...studentUsers];
+    let updatedRegs = [...studentRegistrations];
+
+    tokens.forEach(token => {
+      const isEmail = token.includes("@");
+      
+      // Try to find if student user already exists
+      let matchedStudent = updatedUsers.find(u => 
+        isEmail 
+          ? u.email.toLowerCase() === token.toLowerCase() 
+          : u.rollNumber.toLowerCase() === token.toLowerCase()
+      );
+
+      // If student user does not exist, create a placeholder student account!
+      if (!matchedStudent) {
+        const dummyId = "std-" + Date.now() + Math.random().toString(36).substr(2, 5);
+        const namePart = isEmail ? token.split("@")[0] : token;
+        matchedStudent = {
+          id: dummyId,
+          email: isEmail ? token.toLowerCase() : `${token.toLowerCase()}@bvrit.ac.in`,
+          password: "password123", // Default placeholder password
+          name: namePart.toUpperCase(),
+          rollNumber: isEmail ? "LINKED-" + Date.now().toString().substr(-4) : token.toUpperCase(),
+          branch: "ECE",
+          college: "BVRIT Narsapur",
+          isVerified: true
+        };
+        updatedUsers.push(matchedStudent);
+        accountsCreatedCount++;
+      }
+
+      // Check if registration already exists for this student and this event
+      const regExists = updatedRegs.find(
+        r => r.studentId === matchedStudent.id && r.eventTitle === targetComp.title
+      );
+
+      if (!regExists) {
+        // Create registration record
+        const newReg = {
+          id: "reg-" + Date.now() + Math.random().toString(36).substr(2, 5),
+          studentId: matchedStudent.id,
+          studentName: matchedStudent.name,
+          studentRoll: matchedStudent.rollNumber,
+          eventTitle: targetComp.title,
+          timestamp: new Date().toLocaleString(),
+          status: "Confirmed" // Organizer confirmed from Google Form
+        };
+        updatedRegs.push(newReg);
+        newlyLinkedCount++;
+      } else if (regExists.status === "Pending Confirmation") {
+        // Upgrade from Pending to Confirmed!
+        regExists.status = "Confirmed";
+        newlyLinkedCount++;
+      }
+    });
+
+    setStudentUsers(updatedUsers);
+    localStorage.setItem("ieee_student_users", JSON.stringify(updatedUsers));
+
+    setStudentRegistrations(updatedRegs);
+    localStorage.setItem("ieee_student_registrations", JSON.stringify(updatedRegs));
+    
+    showToast(
+      `Successfully linked ${newlyLinkedCount} registration(s)! Created ${accountsCreatedCount} new student profile(s) with password 'password123'.`, 
+      "success"
+    );
+
+    // Clear modals
+    setSelectedCompForRegs(null);
+    setPastedRegsInput("");
+  };
+
+  // Save Competition Results / Prizes
+  const handleSaveResults = (compId: string) => {
+    const updatedComps = competitions.map(c => {
+      if (c.id === compId) {
+        return { ...c, results: resultsInput };
+      }
+      return c;
+    });
+    setCompetitions(updatedComps);
+    localStorage.setItem("ieee_competitions", JSON.stringify(updatedComps));
+    showToast(`Results updated for this opportunity.`, "success");
+    setSelectedCompForResults(null);
+    setResultsInput("");
   };
 
   // CSV Export logic
@@ -3302,6 +3485,17 @@ export default function App() {
                 >
                   Manage Gallery ({galleryImages.length})
                 </button>
+                <button
+                  onClick={() => setAdminTab("competitions")}
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                    adminTab === "competitions"
+                      ? "border-[#00629B] text-[#00629B]"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  <Award className="w-4 h-4" />
+                  <span>Manage Opportunities ({competitions.length})</span>
+                </button>
                 {isAdminEmail(loggedInAdminEmail) && (
                   <button
                     onClick={() => setAdminTab("pending-requests")}
@@ -4090,6 +4284,262 @@ export default function App() {
                 </div>
               )}
 
+              {/* TAB: MANAGE COMPETITIONS & OPPORTUNITIES */}
+              {adminTab === "competitions" && (
+                <div className="space-y-8 animate-fade-in text-left">
+                  <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-6 max-w-4xl mx-auto">
+                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
+                      <Plus className="w-5 h-5 text-[#00629B]" />
+                      <span>Post New Competition / Hackathon / Opportunity</span>
+                    </h3>
+                    <form onSubmit={handleCreateCompetition} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Opportunity Title *</label>
+                        <input
+                          type="text"
+                          required
+                          value={competitionFormData.title}
+                          onChange={(e) => setCompetitionFormData({ ...competitionFormData, title: e.target.value })}
+                          placeholder="e.g. BVRIT National Semiconductor Hackathon 2026"
+                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category / Type *</label>
+                        <select
+                          value={competitionFormData.category}
+                          onChange={(e) => setCompetitionFormData({ ...competitionFormData, category: e.target.value })}
+                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-[#00629B] cursor-pointer font-bold text-slate-700"
+                        >
+                          <option value="Competitions">Competitions</option>
+                          <option value="Quizzes">Quizzes</option>
+                          <option value="Hackathons">Hackathons</option>
+                          <option value="Cultural Events">Cultural Events</option>
+                          <option value="Conferences">Conferences</option>
+                          <option value="Workshops">Workshops</option>
+                          <option value="College Festivals">College Festivals</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Timeline / Date *</label>
+                        <input
+                          type="text"
+                          required
+                          value={competitionFormData.date}
+                          onChange={(e) => setCompetitionFormData({ ...competitionFormData, date: e.target.value })}
+                          placeholder="e.g. July 28 - August 02, 2026"
+                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Cost / Fee Info *</label>
+                        <input
+                          type="text"
+                          required
+                          value={competitionFormData.cost}
+                          onChange={(e) => setCompetitionFormData({ ...competitionFormData, cost: e.target.value })}
+                          placeholder="e.g. Free (IEEE members) / INR 150"
+                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B]"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Google Form Registration Link *</label>
+                        <input
+                          type="url"
+                          required
+                          value={competitionFormData.googleFormUrl}
+                          onChange={(e) => setCompetitionFormData({ ...competitionFormData, googleFormUrl: e.target.value })}
+                          placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B] font-mono"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Brief Description *</label>
+                        <textarea
+                          required
+                          rows={3}
+                          value={competitionFormData.desc}
+                          onChange={(e) => setCompetitionFormData({ ...competitionFormData, desc: e.target.value })}
+                          placeholder="Provide details about the hackathon tracks, prizes, and submission guidelines..."
+                          className="w-full text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[#00629B] resize-none"
+                        />
+                      </div>
+                      <div className="md:col-span-2 flex justify-end">
+                        <button
+                          type="submit"
+                          className="px-6 py-2.5 bg-[#00629B] hover:bg-[#004B75] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs transition cursor-pointer border-none"
+                        >
+                          Publish Opportunity
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Active Opportunities list */}
+                  <div className="space-y-4 max-w-4xl mx-auto">
+                    <h3 className="text-base font-bold text-slate-800">Published Opportunities ({competitions.length})</h3>
+                    {competitions.length === 0 ? (
+                      <div className="p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-slate-400 text-xs font-semibold">
+                        No opportunities posted yet. Use the form above to add a hackathon or quiz.
+                      </div>
+                    ) : (
+                      <div className="grid sm:grid-cols-2 gap-6">
+                        {competitions.map((comp) => {
+                          const compRegs = studentRegistrations.filter(r => r.eventTitle === comp.title);
+                          return (
+                            <div key={comp.id} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase px-2 py-0.5 rounded border border-indigo-100">
+                                    {comp.category}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-bold">{comp.date}</span>
+                                </div>
+                                <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">{comp.title}</h4>
+                                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{comp.desc}</p>
+                                <div className="text-[11px] text-slate-400 flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                                  <div>Fee: <span className="font-bold text-slate-600">{comp.cost}</span></div>
+                                  <div className="flex items-center gap-1">
+                                    <span>Form Link:</span>
+                                    <a href={comp.googleFormUrl} target="_blank" rel="noreferrer" className="text-indigo-600 font-bold hover:underline font-mono truncate max-w-[150px] inline-block">{comp.googleFormUrl}</a>
+                                  </div>
+                                  <div>Registrants: <span className="font-black text-[#00629B] bg-[#00629B]/10 px-1.5 py-0.5 rounded-full ml-1">{compRegs.length}</span></div>
+                                  {comp.results && (
+                                    <div className="mt-1.5 p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-[10px] text-amber-800 font-semibold">
+                                      <div className="font-bold uppercase tracking-wider flex items-center gap-1">
+                                        <Award className="w-3.5 h-3.5 text-amber-600" />
+                                        <span>Results Declared:</span>
+                                      </div>
+                                      <p className="mt-0.5 whitespace-pre-wrap leading-relaxed">{comp.results}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 mt-4 pt-3 border-t border-slate-100">
+                                <button
+                                  onClick={() => {
+                                    setSelectedCompForRegs(comp);
+                                    setPastedRegsInput("");
+                                  }}
+                                  className="flex-grow py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] uppercase tracking-wider rounded-xl transition cursor-pointer text-center border-none"
+                                >
+                                  Link Form Responses
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setSelectedCompForResults(comp);
+                                    setResultsInput(comp.results || "");
+                                  }}
+                                  className="py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-[10px] uppercase tracking-wider rounded-xl transition cursor-pointer text-center border-none"
+                                  title="Declare Results"
+                                >
+                                  Results
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteCompetition(comp.id)}
+                                  className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition cursor-pointer flex items-center justify-center border-none"
+                                  title="Delete Opportunity"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* MODAL: Link Responses */}
+                  {selectedCompForRegs && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                      <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-left">
+                        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <ClipboardList className="w-5 h-5 text-indigo-600" />
+                            <span>Link Form Responses: {selectedCompForRegs.title}</span>
+                          </h3>
+                          <button 
+                            onClick={() => setSelectedCompForRegs(null)}
+                            className="text-slate-400 hover:text-slate-600 cursor-pointer border-none bg-transparent"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                          Paste a list of roll numbers or email addresses of students who successfully registered on your Google Form (one per line, or separated by commas). The system will link their registrations and automatically generate dummy student logins (password: <code className="bg-slate-100 px-1 rounded font-bold">password123</code>) for new roll numbers.
+                        </p>
+                        <textarea
+                          rows={6}
+                          value={pastedRegsInput}
+                          onChange={(e) => setPastedRegsInput(e.target.value)}
+                          placeholder="e.g.&#10;2301A0512&#10;srinath@gmail.com&#10;2301A0544"
+                          className="w-full text-xs font-mono p-3 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500"
+                        />
+                        <div className="flex justify-end gap-3 pt-2">
+                          <button
+                            onClick={() => handleLinkGoogleFormResponses(selectedCompForRegs.id)}
+                            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer border-none"
+                          >
+                            Link Students
+                          </button>
+                          <button
+                            onClick={() => setSelectedCompForRegs(null)}
+                            className="px-4 py-2 border border-slate-200 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-50 transition cursor-pointer bg-white"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* MODAL: Declare Results */}
+                  {selectedCompForResults && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                      <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-left">
+                        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <Award className="w-5 h-5 text-amber-500" />
+                            <span>Declare Results: {selectedCompForResults.title}</span>
+                          </h3>
+                          <button 
+                            onClick={() => setSelectedCompForResults(null)}
+                            className="text-slate-400 hover:text-slate-600 cursor-pointer border-none bg-transparent"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                          Enter the prize distribution and winner names for this opportunity. This text will be displayed to all students under the results page tab.
+                        </p>
+                        <textarea
+                          rows={5}
+                          value={resultsInput}
+                          onChange={(e) => setResultsInput(e.target.value)}
+                          placeholder="e.g.&#10;🏆 1st Prize: Rahul Verma (Roll 2301A0412) - Rs 5000&#10;🥈 2nd Prize: Sneha Reddy (Roll 2301A0502) - Rs 3000&#10;🥉 3rd Prize: Amit Shah (Roll 2301A0214) - Rs 1500"
+                          className="w-full text-xs p-3 border border-slate-200 rounded-2xl focus:outline-none focus:border-amber-500"
+                        />
+                        <div className="flex justify-end gap-3 pt-2">
+                          <button
+                            onClick={() => handleSaveResults(selectedCompForResults.id)}
+                            className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer border-none"
+                          >
+                            Save Results
+                          </button>
+                          <button
+                            onClick={() => setSelectedCompForResults(null)}
+                            className="px-4 py-2 border border-slate-200 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-50 transition cursor-pointer bg-white"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Logout & Navigation back panel */}
               <div className="flex justify-between items-center pt-2">
                 <button
@@ -4308,59 +4758,7 @@ export default function App() {
                   </div>
 
                   {(() => {
-                    const studentEvents = [
-                      {
-                        title: "Advanced Packaging BootCamp & Substrate Prototyping",
-                        category: "Workshops",
-                        desc: "3-Day intensive hands-on lab. Learn substrate stackups, silicon packaging models, and physical co-design.",
-                        date: "July 12-14, 2026",
-                        cost: "Free (Student Member Exclusive)"
-                      },
-                      {
-                        title: "Thermal integrity & Thermal Packaging Simulation Challenge",
-                        category: "Hackathons",
-                        desc: "A collaborative thermal-flow coding challenge. Model structural packaging heat flows under standard workloads.",
-                        date: "August 04-05, 2026",
-                        cost: "Free for BVRIT Students"
-                      },
-                      {
-                        title: "National Conference on Semiconductor Packing Technologies",
-                        category: "Conferences",
-                        desc: "Preeminent expert panels, guest research briefings, and national coordinators roadmap discussions.",
-                        date: "September 20, 2026",
-                        cost: "Open to All Branches"
-                      },
-                      {
-                        title: "Global Microelectronics Layout Design Competition",
-                        category: "Competitions",
-                        desc: "Submit your custom layout files. Focus on minimizing parasitic resistance and optimizing thermal footprint.",
-                        date: "July 28, 2026",
-                        cost: "IEEE Members Only"
-                      },
-                      {
-                        title: "Packaging Technology & Silicon Physics Quiz",
-                        category: "Quizzes",
-                        desc: "Test your skills on semiconductor physics, packaging materials, and advanced interconnects.",
-                        date: "July 05, 2026",
-                        cost: "Free for all students"
-                      },
-                      {
-                        title: "Electronics Day Cultural Festival",
-                        category: "Cultural Events",
-                        desc: "Celebrate with tech-art gallery installations, science music bands, and networking dinners.",
-                        date: "November 10, 2026",
-                        cost: "Open to All Branches"
-                      },
-                      {
-                        title: "IEEE BVRIT Annual Technical Fest",
-                        category: "College Festivals",
-                        desc: "The grand annual fest hosting multiple engineering tracks, project exhibitions, and drone racing.",
-                        date: "October 18-20, 2026",
-                        cost: "Registration Required"
-                      }
-                    ];
-
-                    const filteredEvents = studentEvents.filter(evt => {
+                    const filteredEvents = competitions.filter(evt => {
                       if (!searchQuery) return true;
                       const q = searchQuery.toLowerCase();
                       return (
@@ -4369,6 +4767,18 @@ export default function App() {
                         evt.desc.toLowerCase().includes(q)
                       );
                     });
+
+                    if (competitions.length === 0) {
+                      return (
+                        <div className="py-12 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          <Award className="w-12 h-12 text-slate-300 mx-auto" />
+                          <h4 className="text-sm font-bold text-slate-700">No current events</h4>
+                          <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                            There are currently no active competitions, hackathons, or workshops listed. Please check back later!
+                          </p>
+                        </div>
+                      );
+                    }
 
                     if (filteredEvents.length === 0) {
                       return (
@@ -4396,8 +4806,8 @@ export default function App() {
                           );
 
                           return (
-                            <div key={idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition">
-                              <div className="space-y-2.5">
+                            <div key={evt.id || idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-md transition">
+                              <div className="space-y-2.5 text-left">
                                 <div className="flex items-center justify-between">
                                   <span className="bg-indigo-50 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded font-mono uppercase">
                                     {evt.date}
@@ -4416,17 +4826,26 @@ export default function App() {
                                 {isRegistered ? (
                                   <button
                                     disabled
-                                    className="w-full py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1"
+                                    className={`w-full py-2 border font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-1 ${
+                                      isRegistered.status === "Confirmed"
+                                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                        : "bg-amber-50 text-amber-700 border-amber-100"
+                                    }`}
                                   >
                                     <CheckCircle className="w-3.5 h-3.5" />
-                                    <span>Already Registered</span>
+                                    <span>
+                                      {isRegistered.status === "Confirmed" ? "Confirmed Registration" : "Pending Confirmation"}
+                                    </span>
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => handleStudentEventRegister(evt.title)}
-                                    className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition flex items-center justify-center gap-1"
+                                    onClick={() => {
+                                      window.open(evt.googleFormUrl, "_blank");
+                                      handleStudentEventRegister(evt.title, "Pending Confirmation");
+                                    }}
+                                    className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition flex items-center justify-center gap-1 border-none"
                                   >
-                                    <span>Register Instantly</span>
+                                    <span>Register Instantly (Google Form)</span>
                                     <ArrowRight className="w-3.5 h-3.5" />
                                   </button>
                                 )}
@@ -4440,35 +4859,57 @@ export default function App() {
                 </div>
               ) : (
                 /* TAB 3: ACADEMIC RESULTS & PRIZES */
-                <div className="space-y-6">
+                <div className="space-y-6 text-left">
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 font-display">My Achievements & Prizes Showcase</h3>
                     <p className="text-xs text-slate-500 mt-0.5">Track your certified awards and positions won in Chapter challenges.</p>
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 hover:shadow transition">
-                      <Award className="w-10 h-10 text-amber-500 shrink-0 mt-0.5" />
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">1st Prize Winner</span>
-                        <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">VLSI Layout Integrity Challenge</h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
-                          Awarded 1st Place for laying out optimal signal integrity bypass paths. Presided by Principal of BVRIT and IEEE representatives.
-                        </p>
-                      </div>
-                    </div>
+                  {(() => {
+                    const competitionsWithResults = competitions.filter(c => c.results);
 
-                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex gap-4 hover:shadow transition opacity-75">
-                      <CheckCircle className="w-10 h-10 text-indigo-500 shrink-0 mt-0.5" />
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Certified Attendee</span>
-                        <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">Advanced Thermal Simulation challenge</h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
-                          Successfully completed active research modules and simulated heat flow benchmarks. Chapter Co-Coordinator Mrs. K. Radhika.
-                        </p>
+                    if (competitionsWithResults.length === 0) {
+                      return (
+                        <div className="py-12 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          <Award className="w-12 h-12 text-slate-300 mx-auto" />
+                          <h4 className="text-sm font-bold text-slate-700">No results declared yet</h4>
+                          <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                            Coordinators haven't published results for any opportunities yet. Once results are declared, they will display here.
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="grid sm:grid-cols-2 gap-6">
+                        {competitionsWithResults.map((comp) => {
+                          const isParticipant = currentStudentUser && studentRegistrations.find(
+                            r => r.studentId === currentStudentUser.id && r.eventTitle === comp.title
+                          );
+
+                          return (
+                            <div key={comp.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex gap-4 hover:shadow transition">
+                              <Award className="w-10 h-10 text-amber-500 shrink-0 mt-0.5 animate-bounce" />
+                              <div className="space-y-2 flex-grow">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-600">
+                                    {isParticipant ? "Your Certified Result" : "Announced Winners"}
+                                  </span>
+                                  <span className="text-[9px] bg-slate-200/60 px-2 py-0.5 rounded text-slate-600 font-bold uppercase font-mono">
+                                    {comp.category}
+                                  </span>
+                                </div>
+                                <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">{comp.title}</h4>
+                                <p className="text-[11px] text-slate-700 bg-white border border-slate-100 p-2.5 rounded-xl whitespace-pre-wrap leading-relaxed mt-1 font-medium">
+                                  {comp.results}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
