@@ -1992,7 +1992,7 @@ export default function App() {
                     }}
                     className="px-4 py-2 text-xs sm:text-sm font-bold text-white tracking-wide cursor-pointer transition"
                   >
-                    Register
+                    Register/Login
                   </button>
                   <div className="w-[1px] bg-white/20 my-2"></div>
                   <button
@@ -5598,18 +5598,18 @@ export default function App() {
               </p>
               <div className="space-y-2 pt-1">
                 <a 
-                  href="mailto:epssbc@bvrit.ac.in" 
+                  href="mailto:ieeeeps090754@gmail.com" 
                   className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
                 >
                   <Mail className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>epssbc@bvrit.ac.in</span>
+                  <span>ieeeeps090754@gmail.com</span>
                 </a>
                 <a 
-                  href="tel:+917993356248" 
+                  href="tel:+919573644820" 
                   className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
                 >
                   <Phone className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>+91 7993356248</span>
+                  <span>+91 9573644820</span>
                 </a>
               </div>
 

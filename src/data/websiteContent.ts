@@ -22,8 +22,8 @@ export const CHAPTER_INFO = {
   collegeFullName: "Padmasri Dr. B.V. Raju Institute of Technology",
   universityAffiliation: "Affiliated to JNTUH, Accredited by NAAC & NBA",
   establishedYear: "2026",
-  email: "ieee.eps@bvrit.ac.in", // <-- Change this to your actual chapter email
-  contactPhone: "+91 8458 222000", // <-- Change to your contact phone
+  email: "ieeeeps090754@gmail.com", // <-- Change this to your actual chapter email
+  contactPhone: "+91 9573644820", // <-- Change to your contact phone
   location: "Narsapur, Medak District, Telangana - 502313, India",
   
   // LOGO IMAGES: Replace empty strings with actual physical file paths or Web URLs
