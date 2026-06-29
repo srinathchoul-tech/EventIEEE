@@ -316,7 +316,7 @@ const isAdminEmail = (email: string) => {
 
 export default function App() {
   // Page routing state ('home' | 'about' | 'admin' | 'student' | 'settings')
-  const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student" | "settings" | "gallery">("home");
+  const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student" | "settings" | "gallery" | "location">("home");
   
   // Mobile sidebar navigation rail toggle state
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -1740,6 +1740,14 @@ export default function App() {
                 } else {
                   document.getElementById("footer-section")?.scrollIntoView({ behavior: "smooth" });
                 }
+              }
+            },
+            {
+              id: "location",
+              name: "Location",
+              icon: <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />,
+              action: () => {
+                navigateTo("location");
               }
             }
           ].map((sec) => {
@@ -4903,6 +4911,133 @@ export default function App() {
             <button onClick={() => navigateTo("home")} className="text-xs font-bold text-slate-500 hover:text-[#00629B] transition cursor-pointer">
               ← Return to Dashboard
             </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3.10. DYNAMIC MAIN BODY ROUTER - LOCATION MAP PAGE                        */}
+      {/* ========================================================================= */}
+      {currentPage === "location" && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 15 }}
+          transition={{ duration: 0.4 }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8"
+        >
+          {/* Header Banner */}
+          <div className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden border border-slate-800">
+            <div className="absolute right-0 top-0 w-80 h-80 bg-[#00629B]/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00629B]/20 text-[#38BDF8] border border-[#00629B]/30 text-xs font-black uppercase tracking-wider">
+                  <MapPin className="w-4 h-4" />
+                  <span>Campus Location</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-display bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                  BVRIT Narsapur Campus
+                </h1>
+                <p className="text-slate-400 text-sm max-w-2xl font-semibold">
+                  Padmasri Dr. B.V. Raju Institute of Technology, located in a lush green campus at Vishnupur, Narsapur, Medak, Telangana.
+                </p>
+              </div>
+              <a 
+                href="https://maps.google.com/?q=BVRIT+Narsapur" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#00629B] hover:bg-[#004B75] text-white font-bold text-sm shadow-lg shadow-[#00629B]/20 transition-all hover:scale-102 cursor-pointer w-fit shrink-0"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Open in Google Maps</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Main Grid: Map Embed & Directions Info */}
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Interactive Map Card */}
+            <div className="lg:col-span-8 bg-white border border-slate-200 rounded-3xl p-4 shadow-sm space-y-4">
+              <div className="relative w-full h-[480px] rounded-2xl overflow-hidden border border-slate-100 bg-slate-50">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3800.4111042120853!2d78.25457617450839!3d17.725258383220687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcc0af1ba39c677%3A0xc4ae2d2cf9b35b63!2sBVRIT!5e0!3m2!1sen!2sin!4v1782752889431!5m2!1sen!2sin" 
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen={true} 
+                  loading="lazy" 
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  title="BVRIT Narsapur Location Map"
+                ></iframe>
+              </div>
+            </div>
+
+            {/* Address & Travel Directions Panel */}
+            <div className="lg:col-span-4 space-y-6">
+              
+              {/* Address card */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-[#00629B]" />
+                  <span>Campus Address</span>
+                </h3>
+                <div className="space-y-3.5 text-xs sm:text-sm">
+                  <div className="space-y-1">
+                    <div className="font-bold text-slate-800">Padmasri Dr. B.V. Raju Institute of Technology</div>
+                    <div className="text-slate-500 font-semibold leading-relaxed">
+                      Vishnupur, Narsapur,<br />
+                      Medak District, Telangana,<br />
+                      PIN - 502313, India.
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-slate-50 space-y-2">
+                    <div className="flex items-center gap-2 text-slate-600 font-semibold">
+                      <Mail className="w-4 h-4 text-slate-400" />
+                      <a href="mailto:ieeeeps090754@gmail.com" className="hover:text-[#00629B] transition-colors">
+                        ieeeeps090754@gmail.com
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-600 font-semibold">
+                      <Phone className="w-4 h-4 text-slate-400" />
+                      <a href="tel:+919573644820" className="hover:text-[#00629B] transition-colors">
+                        +91 9573644820
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Travel Directions card */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <Compass className="w-5 h-5 text-[#00629B]" />
+                  <span>How to Reach</span>
+                </h3>
+                <div className="space-y-4 text-xs font-semibold text-slate-600 leading-relaxed">
+                  <div className="space-y-1">
+                    <div className="font-bold text-slate-800">By Bus (From Hyderabad)</div>
+                    <p>
+                      Regular TSRTC buses run from Secunderabad (JBS) and Balanagar/Kukatpally towards Narsapur. College bus service is also available for registered students and faculty across major routes.
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-bold text-slate-800">Nearest Railway Station</div>
+                    <p>
+                      Secunderabad Junction (SC) or Lingampally Railway Station (LPI) are approximately 45-50 km from the campus, from where you can take a cab or bus.
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-bold text-slate-800">Nearest Airport</div>
+                    <p>
+                      Rajiv Gandhi International Airport (HYD) is about 80 km away. Cabs are readily available from the airport terminal directly to the campus via the ORR (Outer Ring Road).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </motion.div>
       )}
