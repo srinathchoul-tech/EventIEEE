@@ -2435,18 +2435,18 @@ export default function App() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 lg:pt-10 lg:pb-24 relative z-10">
               <div className="grid lg:grid-cols-12 gap-12 items-center">
-                      {/* Text Content */}
-                <div id="hero-heading" className="lg:col-span-5 space-y-6">
+                {/* Text Content */}
+                <div id="hero-heading" className="lg:col-span-6 space-y-6">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 border border-sky-100 text-[#00629B] rounded-full text-xs font-semibold tracking-wider uppercase font-display">
                     <GraduationCap className="w-4 h-4" />
                     <span>{HOME_CONTENT.hero.badge}</span>
                   </div>
                   
-                  <h1 className="text-3xl sm:text-4xl lg:text-[2.2rem] font-black leading-tight tracking-tight text-[#00629B] font-display">
+                  <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black leading-tight tracking-tight text-[#00629B] font-display">
                     {HOME_CONTENT.hero.title}
                   </h1>
                   
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
                     {HOME_CONTENT.hero.description}
                   </p>
 
@@ -2472,9 +2472,9 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Announcements Card Column */}
-                <div className="lg:col-span-3 bg-slate-100/80 border border-slate-200 rounded-3xl p-5 shadow-xs flex flex-col h-[380px] text-left relative overflow-hidden self-stretch justify-center">
-                  <h3 className="text-lg sm:text-xl font-black text-[#800000] font-display mb-3 tracking-tight">Announcements</h3>
+                {/* Announcements Card Column - Enlarged and styled with website matching colors */}
+                <div className="lg:col-span-6 bg-sky-50/40 border border-sky-100/80 rounded-3xl p-6 shadow-xs flex flex-col h-[420px] text-left relative overflow-hidden self-stretch justify-center">
+                  <h3 className="text-xl sm:text-2xl font-black text-[#00629B] font-display mb-4 tracking-tight">Announcements</h3>
                   <div className="flex-grow overflow-hidden relative">
                     {announcements.length === 0 ? (
                       <p className="text-xs text-slate-400 italic">No current announcements.</p>
@@ -2489,13 +2489,13 @@ export default function App() {
                         {announcements.map((ann) => {
                           const isMilestone = ann.type.toLowerCase().includes("milestone") || ann.title.toLowerCase().includes("welcoming");
                           return (
-                            <div key={ann.id} className="mb-4 pb-3 border-b border-slate-200/40 last:border-none">
-                              <div className="flex items-start gap-2">
-                                <span className="text-sm shrink-0">{isMilestone ? "🎉" : "📢"}</span>
+                            <div key={ann.id} className="mb-5 pb-3 border-b border-sky-100/40 last:border-none">
+                              <div className="flex items-start gap-3">
+                                <span className="text-base shrink-0">{isMilestone ? "🎉" : "📢"}</span>
                                 <div className="space-y-1">
-                                  <h4 className="font-extrabold text-xs text-slate-900 leading-snug">{ann.title}</h4>
-                                  <p className="text-[10px] text-slate-600 leading-relaxed">{ann.description}</p>
-                                  <span className="text-[8px] font-bold text-slate-400 block">{ann.date}</span>
+                                  <h4 className="font-extrabold text-sm text-slate-900 leading-snug">{ann.title}</h4>
+                                  <p className="text-xs text-slate-600 leading-relaxed">{ann.description}</p>
+                                  <span className="text-[10px] font-bold text-sky-600 block">{ann.date}</span>
                                 </div>
                               </div>
                             </div>
@@ -2503,93 +2503,6 @@ export default function App() {
                         })}
                       </marquee>
                     )}
-                  </div>
-                </div>
-
-                {/* Interactive Visual Semiconductor Box (3D Package simulation concept) */}
-                <div id="hero-interactive" className="lg:col-span-4 relative self-stretch flex items-center justify-center">
-                  
-                  {/* Decorative Back Plate */}
-                  <div className="absolute -inset-1.5 bg-gradient-to-r from-sky-200 to-[#00629B]/40 rounded-3xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-
-                  {/* Card Container representing standard PCB circuit stack representation */}
-                  <div className="relative bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden p-6">
-                    
-                    {/* Header Area representing package pin matrix layout */}
-                    <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-red-400"></span>
-                        <span className="w-3 h-3 rounded-full bg-amber-400"></span>
-                        <span className="w-3 h-3 rounded-full bg-emerald-400"></span>
-                      </div>
-                      <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-widest">EPS System Package Layout</span>
-                    </div>
-
-                    <div className="py-8 text-center relative">
-                      
-                      {/* Silicon Chip illustration using CSS & standard SVG vector elements */}
-                      <div className="w-44 h-44 mx-auto bg-slate-900 rounded-xl relative p-3 flex flex-col justify-between shadow-2xl overflow-hidden border-2 border-slate-700">
-                        {/* Interactive circuit board gold signal pins around edge */}
-                        <div className="absolute top-0 inset-x-0 h-1 flex justify-around px-2">
-                          {[1,2,3,4,5,6].map(i => <div key={i} className="w-1 h-2 bg-amber-400"></div>)}
-                        </div>
-                        <div className="absolute bottom-0 inset-x-0 h-1 flex justify-around px-2">
-                          {[1,2,3,4,5,6].map(i => <div key={i} className="w-1 h-2 bg-amber-400"></div>)}
-                        </div>
-                        <div className="absolute left-0 inset-y-0 w-1 flex flex-col justify-around py-2">
-                          {[1,2,3,4,5,6].map(i => <div key={i} className="w-2 h-1 bg-amber-400"></div>)}
-                        </div>
-                        <div className="absolute right-0 inset-y-0 w-1 flex flex-col justify-around py-2">
-                          {[1,2,3,4,5,6].map(i => <div key={i} className="w-2 h-1 bg-amber-400"></div>)}
-                        </div>
-
-                        {/* Core Silicon Die representations inside */}
-                        <div className="flex justify-between items-center h-full">
-                          {/* Core Die A */}
-                          <div className="bg-[#00629B] text-white p-1.5 rounded text-[8px] font-bold w-[45%] h-[80%] flex flex-col justify-center items-center shadow border border-sky-300">
-                            <span className="opacity-80 block text-[6px]">Die [A]</span>
-                            <span>GPU/AI CORES</span>
-                          </div>
-                          
-                          {/* Die Bonding Interconnect tracks */}
-                          <div className="w-[10%] flex flex-col items-center justify-center gap-2 border-t border-b border-dashed border-amber-300/60 py-2">
-                            <div className="h-0.5 w-full bg-amber-400 animate-pulse"></div>
-                            <div className="h-0.5 w-full bg-amber-400 animate-pulse"></div>
-                          </div>
-
-                          {/* Core Die B */}
-                          <div className="bg-[#004B75] text-white p-1.5 rounded text-[8px] font-bold w-[45%] h-[80%] flex flex-col justify-center items-center shadow border border-sky-400">
-                            <span className="opacity-80 block text-[6px]">Die [B]</span>
-                            <span>HBM MEMORY</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Package heat spreader block details */}
-                      <p className="mt-5 text-xs text-slate-500 font-semibold font-display">System-In-Package (SiP) Co-design Demo</p>
-                      <p className="text-[11px] text-[#00629B] font-mono mt-1">Package Interconnect Pitch: &lt; 10 microns</p>
-                    </div>
-
-                    {/* Bottom Status Panel */}
-                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                      <div className="flex items-center gap-1.5">
-                        <Thermometer className="w-4 h-4 text-amber-500" />
-                        <span>Thermal Delta: <b className="text-slate-700">OK</b></span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Activity className="w-4 h-4 text-[#00629B]" />
-                        <span>Signaling: <b className="text-slate-700">99.8% Perfect</b></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Floating Chapter details pill */}
-                  <div className="absolute -bottom-6 -right-4 bg-[#00629B] text-white p-3 rounded-xl shadow-xl border border-sky-400 flex items-center gap-3">
-                    <Award className="w-8 h-8 text-amber-300 shrink-0" />
-                    <div>
-                      <p className="text-[10px] uppercase text-sky-200 tracking-wider leading-none">MEMBERSHIP DRIVEN</p>
-                      <p className="text-xs font-bold font-display">Active IEEE EPS Chapters</p>
-                    </div>
                   </div>
                 </div>
 
