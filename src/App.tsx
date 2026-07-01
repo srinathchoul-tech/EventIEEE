@@ -324,6 +324,10 @@ export default function App() {
   // References for handling click-outside dismissals
   const searchRef = useRef<HTMLDivElement>(null);
   const registerRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  // Profile dropdown menu state
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   
   // Gallery state management
   const [galleryImages, setGalleryImages] = useState<Array<{
@@ -595,6 +599,9 @@ export default function App() {
       }
       if (registerRef.current && !registerRef.current.contains(event.target as Node)) {
         setIsRegisterDropdownOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -1791,8 +1798,10 @@ export default function App() {
       )}
 
       {/* Unstop-Style Left Navigation Sidebar Rail */}
-      <aside className={`fixed top-[84px] sm:top-[96px] bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none transition-transform duration-300 left-0 sm:translate-x-0 ${
+      <aside className={`fixed bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none transition-all duration-300 left-0 sm:translate-x-0 ${
         isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } ${
+        currentPage === "home" ? "top-[128px] sm:top-[140px]" : "top-[84px] sm:top-[96px]"
       }`}>
         {/* 4 Navigation Sections */}
         <div className="flex-grow w-full flex flex-col gap-5 items-center px-1">
@@ -1829,21 +1838,13 @@ export default function App() {
               name: "Updates",
               icon: <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />,
               action: () => {
-                if (currentPage !== "home") {
-                  navigateTo("home");
-                  setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 300);
-                } else {
-                  document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-                }
+                navigateTo("student");
+                setStudentDashboardTab("upcoming");
               },
               subsections: [
                 { name: "Events Calendar", action: () => {
-                  if (currentPage !== "home") {
-                    navigateTo("home");
-                    setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 300);
-                  } else {
-                    document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-                  }
+                  navigateTo("student");
+                  setStudentDashboardTab("upcoming");
                 }},
                 { name: "Competitions", action: () => {
                   navigateTo("student");
@@ -1982,21 +1983,6 @@ export default function App() {
             );
           })}
         </div>
-
-        {/* Settings button */}
-        <div className="mt-auto pb-4">
-          <button
-            onClick={() => {
-              navigateTo("settings");
-              setIsMobileSidebarOpen(false);
-            }}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-            title="Account Settings"
-          >
-            <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="text-[9px] sm:text-[10px] font-bold tracking-tight mt-1 leading-none">Settings</span>
-          </button>
-        </div>
       </aside>
 
       <header 
@@ -2034,27 +2020,14 @@ export default function App() {
 
             {/* Center-left: Search Opportunities Bar */}
             <div ref={searchRef} className="relative z-50">
-              {/* Mobile Search Icon Button */}
+              {/* Search Icon Button */}
               <button
                 onClick={() => setIsSearchPopupOpen(!isSearchPopupOpen)}
-                className="sm:hidden p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full flex items-center justify-center shrink-0 cursor-pointer"
+                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-[#00629B] rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-xs"
                 title="Search Opportunities"
               >
                 <Search className="w-4.5 h-4.5" />
               </button>
-
-              {/* Desktop Search Input */}
-              <div className="hidden sm:block relative w-48 md:w-64">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search Opportunities"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchPopupOpen(true)}
-                  className="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200/70 focus:bg-white border border-slate-200 focus:border-[#00629B] rounded-full text-[10px] sm:text-xs font-semibold text-slate-700 placeholder-slate-400 focus:outline-none transition-all"
-                />
-              </div>
 
               {/* Popover / Overlay Card */}
               <AnimatePresence>
@@ -2121,10 +2094,8 @@ export default function App() {
                                 onClick={() => {
                                   setIsSearchPopupOpen(false);
                                   if (cat.name === "Events Calendar") {
-                                    navigateTo("home");
-                                    setTimeout(() => {
-                                      document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-                                    }, 400);
+                                    navigateTo("student");
+                                    setStudentDashboardTab("upcoming");
                                   } else if (cat.name === "Mentors") {
                                     navigateTo("about");
                                     setTimeout(() => {
@@ -2164,41 +2135,132 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            {/* Right Brand Area: Only Register/Enquire */}
+            {/* Right Brand Area: Only Register/Enquire / Profile */}
             <div className="flex items-center shrink-0">
-              {/* Split Button with Dropdown for Register/Enquire and Admin Portal */}
-              <div ref={registerRef} className="relative inline-flex items-center">
-                <div className="inline-flex items-stretch rounded-xl overflow-hidden bg-[#00629B] hover:bg-[#004B75] transition shadow-md shadow-[#00629B]/10">
+              {isAdminLoggedIn || currentStudentUser ? (
+                /* USER PROFILE DROPDOWN */
+                <div ref={profileRef} className="relative z-50">
                   <button
-                    onClick={(e) => {
-                      if (currentPage !== "home") {
-                        navigateTo("home");
-                        setTimeout(() => {
-                          document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                        }, 300);
-                      } else {
-                        document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                      }
-                      setIsRegisterDropdownOpen(false);
-                    }}
-                    className="px-4 py-2 text-xs sm:text-sm font-bold text-white tracking-wide cursor-pointer transition"
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#00629B]/10 hover:bg-[#00629B]/20 text-[#00629B] border-2 border-[#00629B]/30 flex items-center justify-center cursor-pointer transition-all duration-200 relative"
+                    title="User Profile"
                   >
-                    Register/Login
+                    <span className="font-extrabold text-xs">
+                      {isAdminLoggedIn ? "AD" : (currentStudentUser?.name?.substr(0, 2).toUpperCase() || "ST")}
+                    </span>
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span>
                   </button>
-                  <div className="w-[1px] bg-white/20 my-2"></div>
-                  <button
-                    onClick={() => setIsRegisterDropdownOpen(!isRegisterDropdownOpen)}
-                    className="px-2.5 text-white transition flex items-center justify-center cursor-pointer hover:bg-white/10"
-                    title="Console Options"
-                  >
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isRegisterDropdownOpen ? "rotate-180" : ""}`} />
-                  </button>
-                </div>
 
-                <AnimatePresence>
-                  {isRegisterDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
+                  <AnimatePresence>
+                    {isProfileDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 top-full mt-2 w-[240px] rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 overflow-hidden text-xs text-slate-800 text-left"
+                      >
+                        {/* Header Info */}
+                        <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
+                          <div className="font-bold text-slate-800">
+                            {isAdminLoggedIn ? "System Admin Console" : currentStudentUser.name}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+                            {isAdminLoggedIn ? loggedInAdminEmail : currentStudentUser.email}
+                          </div>
+                        </div>
+
+                        {/* Options */}
+                        <div className="py-1">
+                          {isAdminLoggedIn ? (
+                            <button
+                              onClick={() => {
+                                setIsProfileDropdownOpen(false);
+                                navigateTo("admin");
+                              }}
+                              className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-slate-700 cursor-pointer border-none bg-transparent"
+                            >
+                              <Lock className="w-4 h-4 text-slate-400" />
+                              <span>Organizers Console</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setIsProfileDropdownOpen(false);
+                                navigateTo("student");
+                              }}
+                              className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-slate-700 cursor-pointer border-none bg-transparent"
+                            >
+                              <Globe className="w-4 h-4 text-slate-400" />
+                              <span>Student Event Portal</span>
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => {
+                              setIsProfileDropdownOpen(false);
+                              navigateTo("settings");
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-slate-700 cursor-pointer border-none bg-transparent"
+                          >
+                            <Settings className="w-4 h-4 text-slate-400" />
+                            <span>Account Settings</span>
+                          </button>
+
+                          <div className="w-full my-1 border-t border-slate-100"></div>
+
+                          <button
+                            onClick={() => {
+                              setIsProfileDropdownOpen(false);
+                              if (isAdminLoggedIn) {
+                                handleAdminSignOut();
+                              } else {
+                                handleStudentLogout();
+                              }
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600 flex items-center gap-2 font-semibold cursor-pointer border-none bg-transparent"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Log Out</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                /* ANONYMOUS REGISTER/LOGIN DROPDOWN */
+                <div ref={registerRef} className="relative inline-flex items-center">
+                  <div className="inline-flex items-stretch rounded-xl overflow-hidden bg-[#00629B] hover:bg-[#004B75] transition shadow-md shadow-[#00629B]/10">
+                    <button
+                      onClick={(e) => {
+                        if (currentPage !== "home") {
+                          navigateTo("home");
+                          setTimeout(() => {
+                            document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
+                          }, 300);
+                        } else {
+                          document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
+                        }
+                        setIsRegisterDropdownOpen(false);
+                      }}
+                      className="px-4 py-2 text-xs sm:text-sm font-bold text-white tracking-wide cursor-pointer transition border-none"
+                    >
+                      Register/Login
+                    </button>
+                    <div className="w-[1px] bg-white/20 my-2"></div>
+                    <button
+                      onClick={() => setIsRegisterDropdownOpen(!isRegisterDropdownOpen)}
+                      className="px-2.5 text-white transition flex items-center justify-center cursor-pointer hover:bg-white/10 border-none bg-transparent"
+                      title="Console Options"
+                    >
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isRegisterDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  </div>
+
+                  <AnimatePresence>
+                    {isRegisterDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute right-0 top-full mt-2 w-[260px] rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 overflow-hidden text-xs sm:text-sm text-slate-800"
@@ -2208,7 +2270,7 @@ export default function App() {
                             setIsRegisterDropdownOpen(false);
                             navigateTo("student");
                           }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-indigo-700 border-b border-slate-100 cursor-pointer"
+                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-indigo-700 border-b border-slate-100 cursor-pointer border-none bg-transparent"
                         >
                           <Globe className="w-4 h-4 text-indigo-500" />
                           <span>Student Event Portal</span>
@@ -2225,47 +2287,25 @@ export default function App() {
                               document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
                             }
                           }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-[#00629B] cursor-pointer"
+                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-[#00629B] cursor-pointer border-none bg-transparent"
                         >
-                          <GraduationCap className="w-4 h-4" />
+                          <GraduationCap className="w-4 h-4 text-[#00629B]" />
                           <span>Chapter Enrollment Desk</span>
                         </button>
-                        <button
-                          onClick={() => {
-                            setIsRegisterDropdownOpen(false);
-                            navigateTo("admin");
-                          }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-slate-900 border-t border-slate-100 cursor-pointer"
-                        >
-                          <Lock className="w-4 h-4 text-amber-500" />
-                          <span>Organizers Console</span>
-                        </button>
                       </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area shifted to the right to accommodate the Unstop Left Rail Sidebar */}
-      <div className="pl-0 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
-        {/* Spacing Offset for Fixed Navbar */}
-        <div className="pt-[84px] sm:pt-[96px]"></div>
-
-      {/* ========================================================================= */}
-      {/* 2. DYNAMIC MAIN BODY ROUTER - HOME PAGE                                   */}
-      {/* ========================================================================= */}
+      {/* FULL-WIDTH LIVE UPDATES NEWS TICKER BANNER (visible only on Home Page) */}
       {currentPage === "home" && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          {/* DYNAMIC SCROLLING NEWS TICKER BANNER */}
-          <section className="bg-gradient-to-r from-[#00629B] to-[#004B75] text-white py-3 relative overflow-hidden shadow-inner border-b border-sky-300/30 flex items-center">
+        <div className="fixed left-0 right-0 top-[84px] sm:top-[96px] z-30 shadow-inner">
+          <section className="bg-gradient-to-r from-[#00629B] to-[#004B75] text-white py-3 relative overflow-hidden border-b border-sky-300/30 flex items-center h-11">
             <div className="bg-[#003B5C] px-6 py-1.5 z-20 font-black tracking-wider uppercase text-[10px] sm:text-xs skew-x-12 -ml-2 shadow-lg flex items-center gap-2 shrink-0 border-r border-sky-400">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
               <span className="-skew-x-12">Live Updates</span>
@@ -2283,6 +2323,26 @@ export default function App() {
               </marquee>
             </div>
           </section>
+        </div>
+      )}
+
+      {/* Main Content Area shifted to the right to accommodate the Unstop Left Rail Sidebar */}
+      <div className="pl-0 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
+        {/* Spacing Offset for Fixed Navbar & Live Updates Ribbon */}
+        <div className={`transition-all duration-300 ${
+          currentPage === "home" ? "pt-[128px] sm:pt-[140px]" : "pt-[84px] sm:pt-[96px]"
+        }`}></div>
+
+      {/* ========================================================================= */}
+      {/* 2. DYNAMIC MAIN BODY ROUTER - HOME PAGE                                   */}
+      {/* ========================================================================= */}
+      {currentPage === "home" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+        >
 
           {/* PICTURE PROFILE SECTION (DYNAMIC CAROUSEL SLIDESHOW) */}
           {carouselImages.length > 0 && (
@@ -2407,16 +2467,6 @@ export default function App() {
                       <span>{HOME_CONTENT.hero.secondaryButtonText}</span>
                       <Calendar className="w-4 h-4" />
                     </a>
-                  </div>
-
-                  {/* Institution Banner Quick Tag */}
-                  <div className="border-t border-slate-100 pt-6 mt-8">
-                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2">Proudly Hosted By</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                      <span className="text-sm font-semibold text-slate-700">{CHAPTER_INFO.collegeFullName}</span>
-                    </div>
-                    <span className="text-xs text-slate-400 ml-3.5">{CHAPTER_INFO.universityAffiliation}</span>
                   </div>
                 </div>
 
@@ -2730,7 +2780,7 @@ export default function App() {
                     href="#inquiry-section" 
                     className="block text-center bg-[#00629B] hover:bg-[#004B75] text-white font-bold text-sm px-6 py-3.5 rounded-xl transition duration-300 shadow-md shadow-[#00629B]/20"
                   >
-                    Register Instantly
+                    Instant Registration
                   </a>
                 </div>
               </div>
@@ -4845,7 +4895,7 @@ export default function App() {
                                     }}
                                     className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition flex items-center justify-center gap-1 border-none"
                                   >
-                                    <span>Register Instantly (Google Form)</span>
+                                    <span>Instant Registration (Google Form)</span>
                                     <ArrowRight className="w-3.5 h-3.5" />
                                   </button>
                                 )}
@@ -6169,23 +6219,20 @@ export default function App() {
             {/* Column 3: Contact Details */}
             <div className="md:col-span-5 space-y-4">
               <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display">Office Enquiries</h4>
-              <p className="text-xs text-slate-400">
-                For invitations, joint student paper collaborations, or society enrollment help, contact our advisory coordinators:
-              </p>
               <div className="space-y-2 pt-1">
+                <a 
+                  href="tel:+918523009720" 
+                  className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
+                >
+                  <Phone className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>Tech Admin: +91 85230 09720</span>
+                </a>
                 <a 
                   href="mailto:ieeeeps090754@gmail.com" 
                   className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
                 >
                   <Mail className="w-4 h-4 text-amber-500 shrink-0" />
                   <span>ieeeeps090754@gmail.com</span>
-                </a>
-                <a 
-                  href="tel:+919573644820" 
-                  className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
-                >
-                  <Phone className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>+91 9573644820</span>
                 </a>
               </div>
 
