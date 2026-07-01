@@ -71,6 +71,8 @@ import facultyKausalyaImg from "../assets/faculty-kausalya.png";
 import facultyVandanaImg from "../assets/faculty-vandana.png";
 import facultyAnushaImg from "../assets/faculty-anusha.png";
 import facultyPrasannaImg from "../assets/faculty-prasanna.jpg";
+import aboutBvritImg from "../assets/about-bvrit.jpg";
+import aboutHyderabadImg from "../assets/about-hyderabad.png";
 import { db, auth, isFirebaseEnabled } from "./firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -2512,110 +2514,77 @@ export default function App() {
 
           {/* Removed old news ticker banner section from here */}
 
-          {/* WHAT IS ELECTRONICS PACKAGING INFOCARDS */}
-          <section className="py-20 bg-slate-50 border-b border-slate-100">
+          {/* ABOUT EPS SECTION (No image to the right) */}
+          <section id="about-eps-section" className="py-16 bg-slate-50 border-b border-slate-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-                <span className="text-xs font-bold text-[#00629B] tracking-widest uppercase block font-display">Specialty Focus</span>
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">{HOME_CONTENT.quickIntro.title}</h2>
-                <p className="text-slate-500 text-sm sm:text-base leading-relaxed">{HOME_CONTENT.quickIntro.subtitle}</p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-8">
-                {HOME_CONTENT.quickIntro.points.map((pt, ind) => (
-                  <div key={ind} className="bg-white rounded-xl p-6 border border-slate-200/80 hover:border-[#00629B]/50 hover:shadow-lg transition-all duration-300 group">
-                    <div className="w-11 h-11 rounded-lg bg-sky-50 text-[#00629B] font-extrabold flex items-center justify-center mb-4 text-lg border border-sky-100 group-hover:bg-[#00629B] group-hover:text-white transition-colors duration-300">
-                      0{ind + 1}
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-2 font-display">{pt.title}</h3>
-                    <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">{pt.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* CORE TECHNOLOGY PILLARS */}
-          <section className="py-20 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-                <span className="text-xs font-bold text-[#00629B] tracking-widest uppercase block font-display">Scientific Disciplines</span>
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">{HOME_CONTENT.pillars.title}</h2>
-                <p className="text-slate-500 text-sm sm:text-base leading-relaxed">{HOME_CONTENT.pillars.subtitle}</p>
-              </div>
-
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {HOME_CONTENT.pillars.list.map((pillar, idx) => (
-                  <div key={idx} className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
-                    <div>
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-200/50 flex items-center justify-center">
-                          {renderPillarIcon(pillar.icon)}
-                        </div>
-                        <span className="text-[10px] font-mono font-bold text-slate-400 tracking-wider bg-slate-200/40 px-2 py-1 rounded">
-                          {pillar.code}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-bold text-slate-800 mb-3 font-display">{pillar.title}</h3>
-                      <p className="text-slate-500 text-xs leading-relaxed mb-4">{pillar.description}</p>
-                    </div>
-                    <div className="pt-2 border-t border-slate-100 mt-2 flex items-center text-[11px] text-[#00629B] font-semibold">
-                      <span>Learn technical core details</span>
-                      <ChevronRight className="w-3.5 h-3.5 ml-1" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* CHAPTER INITIATIVES / CORE VALUE PROPOSITION */}
-          <section className="py-20 bg-slate-50 border-t border-b border-slate-100 overflow-hidden relative">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid lg:grid-cols-12 gap-12 items-center">
-                
-                {/* Left Side: Information */}
-                <div className="lg:col-span-5 space-y-6">
-                  <span className="text-xs font-bold text-[#00629B] tracking-widest uppercase block font-display">Student Enablers</span>
-                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">
-                    {HOME_CONTENT.initiatives.title}
-                  </h2>
-                  <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
-                    {HOME_CONTENT.initiatives.subtitle}
-                  </p>
-                  
-                  <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-start gap-3">
-                    <Info className="w-5 h-5 text-[#00629B] shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-bold text-slate-800">IEEE Membership Advantage</p>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                        Registered members of IEEE EPS enjoy access to technical libraries, student travel grants for conferences, and direct career networking.
-                      </p>
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => navigateTo("about")}
-                    className="mt-2 text-sm font-bold text-[#00629B] hover:text-[#004B75] flex items-center gap-1 group"
+              <div className="max-w-4xl mx-auto space-y-4 text-justify">
+                <h2 className="text-2xl sm:text-3xl font-black text-[#00629B] font-display">About EPS</h2>
+                <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
+                  <strong>IEEE Electronics Packaging Society (EPS)</strong> is a global community dedicated to advancing the science and technology of electronics packaging. It brings together students, researchers, and industry professionals to foster innovation through technical knowledge, collaboration, and professional development. IEEE EPS promotes learning in areas such as semiconductor packaging, microelectronics, thermal management, and advanced manufacturing. Through workshops, seminars, competitions, and networking opportunities, it empowers members to build technical expertise and prepare for future careers in electronics. <button 
+                    onClick={() => navigateTo("about")} 
+                    className="text-[#00629B] hover:text-[#004B75] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer text-sm sm:text-base inline-block"
                   >
-                    <span>Read about our Vision & Mission</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    Explore more
                   </button>
-                </div>
+                </p>
+              </div>
+            </div>
+          </section>
 
-                {/* Right Side: Interactive initiatives card layouts */}
-                <div className="lg:col-span-7 grid sm:grid-cols-2 gap-6">
-                  {HOME_CONTENT.initiatives.list.map((init, index) => (
-                    <div key={index} className="bg-white rounded-xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="w-10 h-10 bg-[#00629B] rounded-lg flex items-center justify-center mb-4 text-white shadow-sm shadow-[#00629B]/15">
-                        {renderInitiativeIcon(init.icon)}
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-800 mb-1.5 font-display">{init.title}</h3>
-                      <p className="text-slate-500 text-xs leading-relaxed">{init.description}</p>
-                    </div>
-                  ))}
+          {/* ABOUT BVRIT SECTION (Image to the right) */}
+          <section id="about-bvrit-section" className="py-16 bg-white border-b border-slate-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid md:grid-cols-12 gap-8 items-center">
+                <div className="md:col-span-7 space-y-4 text-justify">
+                  <h2 className="text-2xl sm:text-3xl font-black text-[#00629B] font-display">About BVRIT</h2>
+                  <p className="text-slate-700 text-xs sm:text-sm leading-relaxed">
+                    B V Raju Institute of Technology (BVRIT) was established in 1997 by the eminent philanthropist (Late) Padma Bhushan Dr. B V Raju under the aegis of the Sri Vishnu Educational Society (SVES). The institute is approved by the AICTE, affiliated with Jawaharlal Nehru Technological University (JNTU), Hyderabad, and was granted UGC–Autonomous status in 2014. Accredited by NAAC with an A+ grade, BVRIT is widely recognized for its academic excellence, modern infrastructure, and student-centric ecosystem. The institution is governed by a distinguished body of professionals from IITs, academia, and industry, led by Sri K V Vishnu Raju Garu, a Chemical Engineering graduate from REC Trichy (now NIT Trichy) and a postgraduate from Michigan Technological University, USA. Under his visionary leadership, BVRIT has made significant strides in innovation, research, and teaching-learning practices. The institute is known for its strong student intake, excellent placement records, industry collaborations, and global academic partnerships. With vibrant student clubs, research initiatives, entrepreneurship support, and a focus on holistic development, BVRIT has emerged as a leading institution in technical education, empowering students to become future-ready professionals. <a 
+                      href={CHAPTER_INFO.socials.collegeWebsite} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[#00629B] hover:text-[#004B75] font-bold hover:underline text-xs inline-block"
+                    >
+                      Explore more
+                    </a>
+                  </p>
                 </div>
+                <div className="md:col-span-5">
+                  <img 
+                    src={aboutBvritImg} 
+                    alt="BVRIT Campus" 
+                    className="w-full h-auto rounded-3xl shadow-md border border-slate-200 object-cover max-h-[320px]" 
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
 
+          {/* ABOUT HYDERABAD SECTION (Image to the right) */}
+          <section id="about-hyderabad-section" className="py-16 bg-slate-50 border-b border-slate-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid md:grid-cols-12 gap-8 items-center">
+                <div className="md:col-span-7 space-y-4 text-justify">
+                  <h2 className="text-2xl sm:text-3xl font-black text-[#00629B] font-display">About Hyderabad</h2>
+                  <p className="text-slate-700 text-xs sm:text-sm leading-relaxed">
+                    <strong>Hyderabad – The City of Pearls</strong>
+                    <br />
+                    Hyderabad, the capital of Telangana and a major city in southern India, is a vibrant blend of history, culture, and modern development. Founded in 1591 by Muhammad Quli Qutb Shah, the city is renowned for its rich heritage, iconic landmarks, and thriving economy. One of Hyderabad’s most famous symbols is the Charminar, a grand monument located in the heart of the old city, surrounded by bustling bazaars like Laad Bazaar, known for pearls, bangles, and traditional handicrafts. The city also boasts magnificent historical sites such as Golconda Fort, Chowmahalla Palace, and the grand Qutb Shahi Tombs. Hyderabad is equally famous for its culinary delights, especially the world-renowned Hyderabadi Biryani — a flavorful dish that reflects the city’s Mughal, Persian, and Telugu influences. In recent decades, Hyderabad has emerged as a major technology and business hub, earning the nickname “Cyberabad” due to its thriving IT industry and presence of global tech giants. The HITEC City and Financial District symbolize its modern growth, while research institutions and start-ups continue to drive innovation. The city also stands out for its cosmopolitan lifestyle, diverse communities, and unique blend of the old and new — where ancient mosques and palaces coexist with skyscrapers and shopping malls. With its warm hospitality, rich traditions, and forward-looking spirit, Hyderabad continues to be a city that charms both residents and visitors alike. <a 
+                      href="https://en.wikipedia.org/wiki/Hyderabad" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[#00629B] hover:text-[#004B75] font-bold hover:underline text-xs inline-block"
+                    >
+                      Explore more
+                    </a>
+                  </p>
+                </div>
+                <div className="md:col-span-5">
+                  <img 
+                    src={aboutHyderabadImg} 
+                    alt="Hyderabad Statue" 
+                    className="w-full h-auto rounded-3xl shadow-md border border-slate-200 object-cover max-h-[320px]" 
+                  />
+                </div>
               </div>
             </div>
           </section>
