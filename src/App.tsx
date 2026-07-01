@@ -2435,43 +2435,79 @@ export default function App() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 lg:pt-10 lg:pb-24 relative z-10">
               <div className="grid lg:grid-cols-12 gap-12 items-center">
-                
-                {/* Text Content */}
-                <div id="hero-heading" className="lg:col-span-7 space-y-6">
+                      {/* Text Content */}
+                <div id="hero-heading" className="lg:col-span-5 space-y-6">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 border border-sky-100 text-[#00629B] rounded-full text-xs font-semibold tracking-wider uppercase font-display">
                     <GraduationCap className="w-4 h-4" />
                     <span>{HOME_CONTENT.hero.badge}</span>
                   </div>
                   
-                  <h1 className="text-4xl sm:text-5xl lg:text-[2.85rem] font-black leading-tight tracking-tight text-[#00629B] font-display">
+                  <h1 className="text-3xl sm:text-4xl lg:text-[2.2rem] font-black leading-tight tracking-tight text-[#00629B] font-display">
                     {HOME_CONTENT.hero.title}
                   </h1>
                   
-                  <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
                     {HOME_CONTENT.hero.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-4 pt-2">
+                  <div className="flex flex-wrap gap-3 pt-2">
                     <button 
                       onClick={() => navigateTo("about")}
-                      className="bg-[#00629B] hover:bg-[#004B75] text-white font-semibold text-sm px-6 py-3.5 rounded-xl shadow-lg shadow-[#00629B]/15 hover:shadow-xl hover:shadow-[#00629B]/20 transition-all duration-300 flex items-center gap-2 group cursor-pointer"
+                      className="bg-[#00629B] hover:bg-[#004B75] text-white font-semibold text-xs px-5 py-3 rounded-xl shadow-lg shadow-[#00629B]/15 hover:shadow-xl hover:shadow-[#00629B]/20 transition-all duration-300 flex items-center gap-2 group cursor-pointer border-none"
                     >
                       <span>{HOME_CONTENT.hero.primaryButtonText}</span>
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     
-                    <a 
-                      href="#announcements"
-                      className="bg-white hover:bg-slate-50 text-slate-700 hover:text-[#00629B] font-semibold text-sm px-6 py-3.5 rounded-xl border border-slate-200 shadow-sm transition-all duration-300 flex items-center gap-2"
+                    <button 
+                      onClick={() => {
+                        navigateTo("student");
+                        setStudentDashboardTab("upcoming");
+                      }}
+                      className="bg-white hover:bg-slate-50 text-slate-700 hover:text-[#00629B] font-semibold text-xs px-5 py-3 rounded-xl border border-slate-200 shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer"
                     >
                       <span>{HOME_CONTENT.hero.secondaryButtonText}</span>
                       <Calendar className="w-4 h-4" />
-                    </a>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Announcements Card Column */}
+                <div className="lg:col-span-3 bg-slate-100/80 border border-slate-200 rounded-3xl p-5 shadow-xs flex flex-col h-[380px] text-left relative overflow-hidden self-stretch justify-center">
+                  <h3 className="text-lg sm:text-xl font-black text-[#800000] font-display mb-3 tracking-tight">Announcements</h3>
+                  <div className="flex-grow overflow-hidden relative">
+                    {announcements.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">No current announcements.</p>
+                    ) : (
+                      <marquee
+                        direction="up"
+                        scrollamount="2"
+                        className="h-full w-full"
+                        onMouseOver={(e) => e.currentTarget.stop()}
+                        onMouseOut={(e) => e.currentTarget.start()}
+                      >
+                        {announcements.map((ann) => {
+                          const isMilestone = ann.type.toLowerCase().includes("milestone") || ann.title.toLowerCase().includes("welcoming");
+                          return (
+                            <div key={ann.id} className="mb-4 pb-3 border-b border-slate-200/40 last:border-none">
+                              <div className="flex items-start gap-2">
+                                <span className="text-sm shrink-0">{isMilestone ? "🎉" : "📢"}</span>
+                                <div className="space-y-1">
+                                  <h4 className="font-extrabold text-xs text-slate-900 leading-snug">{ann.title}</h4>
+                                  <p className="text-[10px] text-slate-600 leading-relaxed">{ann.description}</p>
+                                  <span className="text-[8px] font-bold text-slate-400 block">{ann.date}</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </marquee>
+                    )}
                   </div>
                 </div>
 
                 {/* Interactive Visual Semiconductor Box (3D Package simulation concept) */}
-                <div id="hero-interactive" className="lg:col-span-5 relative">
+                <div id="hero-interactive" className="lg:col-span-4 relative self-stretch flex items-center justify-center">
                   
                   {/* Decorative Back Plate */}
                   <div className="absolute -inset-1.5 bg-gradient-to-r from-sky-200 to-[#00629B]/40 rounded-3xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
@@ -2671,101 +2707,10 @@ export default function App() {
             </div>
           </section>
 
-          {/* CALENDAR OF EVENTS / ANNOUNCEMENTS */}
-          <section id="announcements" className="py-20 bg-white">
+          {/* BVRIT Joint Affiliation Promotion */}
+          <section className="bg-white py-12 border-b border-slate-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              
-              <div className="mb-16">
-                <div className="space-y-3">
-                  <span className="text-xs font-bold text-[#00629B] tracking-widest uppercase block font-display">What's Happening</span>
-                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">{HOME_CONTENT.events.title}</h2>
-                  <p className="text-slate-500 text-sm max-w-2xl leading-relaxed">{HOME_CONTENT.events.subtitle}</p>
-                </div>
-              </div>
-
-              {/* Grid of Event Cards */}
-              {announcements.length === 0 ? (
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center max-w-lg mx-auto">
-                  <Calendar className="w-12 h-12 text-[#00629B]/30 mx-auto mb-3" />
-                  <h3 className="font-bold text-slate-700 text-sm">No announcements scheduled</h3>
-                  <p className="text-xs text-slate-500 mt-1">Check back later or log in as organizer to publish announcements!</p>
-                </div>
-              ) : (
-                <div className="grid md:grid-cols-3 gap-8">
-                  {announcements.map((event) => (
-                    <div key={event.id} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md transition">
-                      <div>
-                        {/* Event Banner Header */}
-                        <div className="relative h-48 bg-slate-100 overflow-hidden">
-                          {isImageUrl(event.image) ? (
-                            <img 
-                              src={event.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80"} 
-                              alt={event.title} 
-                              referrerPolicy="no-referrer"
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                            />
-                          ) : (
-                            <div 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewOrDownloadFile(event.image, event.title);
-                              }}
-                              className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-3 gap-2 cursor-pointer group-hover:bg-slate-700 transition"
-                            >
-                              {getFileIcon(event.image, "w-10 h-10")}
-                              <span className="text-[10px] uppercase font-black bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">
-                                {getFileExtensionLabel(event.image)} Document
-                              </span>
-                              <span className="text-[9px] text-slate-400">Click to open/download</span>
-                            </div>
-                          )}
-                          <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-black tracking-widest uppercase ${
-                            event.status === "Upcoming"
-                              ? "bg-amber-400 text-slate-900 shadow-sm"
-                              : "bg-emerald-500 text-white shadow-md"
-                          }`}>
-                            {event.status}
-                          </div>
-                          <div className="absolute bottom-3 right-3 px-3 py-1 bg-slate-900/70 backdrop-blur-sm rounded text-[11px] font-bold text-white tracking-wide">
-                            {event.date}
-                          </div>
-                        </div>
-
-                        {/* Event Text Metadata */}
-                        <div className="p-6 space-y-3">
-                          <span className="text-[10px] font-bold tracking-wider text-[#00629B] uppercase block">
-                            {event.type}
-                          </span>
-                          <h3 className="font-bold text-slate-800 text-base leading-snug line-clamp-2 font-display min-h-[44px]">
-                            {event.title}
-                          </h3>
-                          <p className="text-slate-500 text-xs leading-relaxed line-clamp-3">
-                            {event.description}
-                          </p>
-
-                          <div className="border-t border-slate-100 pt-3 mt-3 text-[11px] text-slate-500 space-y-1">
-                            <p className="truncate"><strong className="text-slate-700">Coord:</strong> {event.speaker}</p>
-                            <p className="truncate"><strong className="text-slate-700">Venue:</strong> {event.location}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Quick registration drawer button */}
-                      <div className="p-6 pt-0 border-t border-slate-100">
-                        <button 
-                          onClick={() => setActiveEvent(event)}
-                          className="w-full text-center mt-3 bg-slate-100 hover:bg-[#00629B] hover:text-white text-slate-700 font-semibold py-2 rounded-lg text-xs transition-colors duration-300 cursor-pointer"
-                        >
-                          View Full Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* BVRIT Joint Affiliation Promotion */}
-              <div className="mt-16 bg-blue-50 border border-blue-100 rounded-2xl p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
                 <div className="absolute right-0 bottom-0 opacity-10">
                   <Globe className="w-64 h-64 text-sky-900" />
                 </div>
@@ -2784,7 +2729,6 @@ export default function App() {
                   </a>
                 </div>
               </div>
-
             </div>
           </section>
 
