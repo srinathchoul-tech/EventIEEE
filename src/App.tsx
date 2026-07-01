@@ -2018,26 +2018,29 @@ export default function App() {
               </div>
             </div>
 
-            {/* Center-left: Search Opportunities Bar */}
-            <div ref={searchRef} className="relative z-50">
-              {/* Search Icon Button */}
-              <button
-                onClick={() => setIsSearchPopupOpen(!isSearchPopupOpen)}
-                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-[#00629B] rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-xs"
-                title="Search Opportunities"
-              >
-                <Search className="w-4.5 h-4.5" />
-              </button>
+            {/* Right Brand Area: Search opportunities + Register/Enquire / Profile */}
+            <div className="flex items-center gap-4 shrink-0">
+              
+              {/* Search opportunities Icon button relocated here */}
+              <div ref={searchRef} className="relative z-50">
+                {/* Search Icon Button - larger size */}
+                <button
+                  onClick={() => setIsSearchPopupOpen(!isSearchPopupOpen)}
+                  className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-[#00629B] rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-xs"
+                  title="Search Opportunities"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
 
-              {/* Popover / Overlay Card */}
-              <AnimatePresence>
-                {isSearchPopupOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 12 }}
-                    className="fixed inset-x-4 top-20 w-auto sm:absolute sm:inset-auto sm:left-0 sm:top-full sm:mt-2 sm:w-[420px] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-50 space-y-4 text-left"
-                  >
+                {/* Popover / Overlay Card */}
+                <AnimatePresence>
+                  {isSearchPopupOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 12 }}
+                      className="fixed inset-x-4 top-20 w-auto sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-[420px] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-50 space-y-4 text-left"
+                    >
                       <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                           <Search className="w-4 h-4 text-[#00629B]" />
@@ -2131,12 +2134,9 @@ export default function App() {
                         </div>
                       </div>
                     </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Right Brand Area: Only Register/Enquire / Profile */}
-            <div className="flex items-center shrink-0">
+                  )}
+                </AnimatePresence>
+              </div>
               {isAdminLoggedIn || currentStudentUser ? (
                 /* USER PROFILE DROPDOWN */
                 <div ref={profileRef} className="relative z-50">
@@ -6150,13 +6150,13 @@ export default function App() {
             
             {/* Column 1: Joint Affiliation and Core Details */}
             <div className="md:col-span-4 space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 h-10">
                 <img 
                   src={ieeeEpsLogoImg} 
                   alt="IEEE EPS SBC Logo" 
-                  className="w-10 h-10 object-contain rounded-full bg-white p-0.5 border border-slate-700" 
+                  className="w-10 h-10 object-contain rounded-full bg-white p-0.5 border border-slate-700 shrink-0" 
                 />
-                <strong className="text-white text-base font-display">{CHAPTER_INFO.shortName}</strong>
+                <strong className="text-white text-base font-display leading-none">{CHAPTER_INFO.shortName}</strong>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Empowering ECE and allied engineering students at BVRIT Narsapur to develop skills in semiconductor assembly, system integration, high-frequency design, and packaging.
@@ -6169,7 +6169,9 @@ export default function App() {
 
             {/* Column 2: Easy Navigation Toggles */}
             <div className="md:col-span-3 space-y-4">
-              <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display">Sitemap Links</h4>
+              <div className="flex items-center h-10">
+                <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display leading-none">Sitemap Links</h4>
+              </div>
               <ul className="space-y-2 text-xs text-slate-400">
                 <li>
                   <button onClick={() => navigateTo("home")} className="hover:text-amber-400 transition flex items-center gap-1">
@@ -6216,22 +6218,23 @@ export default function App() {
               </ul>
             </div>
 
-            {/* Column 3: Contact Details */}
             <div className="md:col-span-5 space-y-4">
-              <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display">Office Enquiries</h4>
+              <div className="flex items-center h-10">
+                <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display leading-none">Office Enquiries</h4>
+              </div>
               <div className="space-y-2 pt-1">
                 <a 
                   href="tel:+918523009720" 
-                  className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
+                  className="flex items-center gap-2.5 text-xs text-slate-400 hover:text-amber-400 font-semibold transition-colors w-fit"
                 >
-                  <Phone className="w-4 h-4 text-amber-500 shrink-0" />
+                  <Phone className="w-4 h-4 text-slate-500 shrink-0" />
                   <span>Tech Admin: +91 85230 09720</span>
                 </a>
                 <a 
                   href="mailto:ieeeeps090754@gmail.com" 
-                  className="flex items-center gap-2.5 text-xs text-amber-300 hover:text-amber-400 font-semibold transition-colors w-fit"
+                  className="flex items-center gap-2.5 text-xs text-slate-400 hover:text-amber-400 font-semibold transition-colors w-fit"
                 >
-                  <Mail className="w-4 h-4 text-amber-500 shrink-0" />
+                  <Mail className="w-4 h-4 text-slate-500 shrink-0" />
                   <span>ieeeeps090754@gmail.com</span>
                 </a>
               </div>
