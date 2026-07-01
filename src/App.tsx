@@ -2437,19 +2437,19 @@ export default function App() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 lg:pt-10 lg:pb-24 relative z-10">
               <div className="grid lg:grid-cols-12 gap-12 items-center">
-                {/* Text Content */}
+                {/* Text Content - Replaced with About EPS */}
                 <div id="hero-heading" className="lg:col-span-6 space-y-6">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 border border-sky-100 text-[#00629B] rounded-full text-xs font-semibold tracking-wider uppercase font-display">
                     <GraduationCap className="w-4 h-4" />
-                    <span>{HOME_CONTENT.hero.badge}</span>
+                    <span>About Our Society</span>
                   </div>
                   
                   <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black leading-tight tracking-tight text-[#00629B] font-display">
-                    {HOME_CONTENT.hero.title}
+                    About EPS
                   </h1>
                   
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
-                    {HOME_CONTENT.hero.description}
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl text-justify">
+                    <strong>IEEE Electronics Packaging Society (EPS)</strong> is a global community dedicated to advancing the science and technology of electronics packaging. It brings together students, researchers, and industry professionals to foster innovation through technical knowledge, collaboration, and professional development. IEEE EPS promotes learning in areas such as semiconductor packaging, microelectronics, thermal management, and advanced manufacturing. Through workshops, seminars, competitions, and networking opportunities, it empowers members to build technical expertise and prepare for future careers in electronics.
                   </p>
 
                   <div className="flex flex-wrap gap-3 pt-2">
@@ -2457,7 +2457,7 @@ export default function App() {
                       onClick={() => navigateTo("about")}
                       className="bg-[#00629B] hover:bg-[#004B75] text-white font-semibold text-xs px-5 py-3 rounded-xl shadow-lg shadow-[#00629B]/15 hover:shadow-xl hover:shadow-[#00629B]/20 transition-all duration-300 flex items-center gap-2 group cursor-pointer border-none"
                     >
-                      <span>{HOME_CONTENT.hero.primaryButtonText}</span>
+                      <span>Explore Who We Are</span>
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     
@@ -2468,7 +2468,7 @@ export default function App() {
                       }}
                       className="bg-white hover:bg-slate-50 text-slate-700 hover:text-[#00629B] font-semibold text-xs px-5 py-3 rounded-xl border border-slate-200 shadow-sm transition-all duration-300 flex items-center gap-2 cursor-pointer"
                     >
-                      <span>{HOME_CONTENT.hero.secondaryButtonText}</span>
+                      <span>Upcoming Events</span>
                       <Calendar className="w-4 h-4" />
                     </button>
                   </div>
@@ -2585,6 +2585,57 @@ export default function App() {
                     className="w-full h-auto rounded-3xl shadow-md border border-slate-200 object-cover max-h-[320px]" 
                   />
                 </div>
+              </div>
+            </div>
+          </section>
+
+          {/* CHAPTER INITIATIVES / CORE VALUE PROPOSITION */}
+          <section className="py-20 bg-slate-50 border-t border-b border-slate-100 overflow-hidden relative">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid lg:grid-cols-12 gap-12 items-center">
+                
+                {/* Left Side: Information */}
+                <div className="lg:col-span-5 space-y-6">
+                  <span className="text-xs font-bold text-[#00629B] tracking-widest uppercase block font-display">Student Enablers</span>
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">
+                    {HOME_CONTENT.initiatives.title}
+                  </h2>
+                  <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
+                    {HOME_CONTENT.initiatives.subtitle}
+                  </p>
+                  
+                  <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-start gap-3">
+                    <Info className="w-5 h-5 text-[#00629B] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">IEEE Membership Advantage</p>
+                      <p className="text-xs text-slate-500 leading-relaxed mt-1">
+                        Registered members of IEEE EPS enjoy access to technical libraries, student travel grants for conferences, and direct career networking.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => navigateTo("about")}
+                    className="mt-2 text-sm font-bold text-[#00629B] hover:text-[#004B75] flex items-center gap-1 group"
+                  >
+                    <span>Read about our Vision & Mission</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+
+                {/* Right Side: Interactive initiatives card layouts */}
+                <div className="lg:col-span-7 grid sm:grid-cols-2 gap-6">
+                  {HOME_CONTENT.initiatives.list.map((init, index) => (
+                    <div key={index} className="bg-white rounded-xl p-5 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="w-10 h-10 bg-[#00629B] rounded-lg flex items-center justify-center mb-4 text-white shadow-sm shadow-[#00629B]/15">
+                        {renderInitiativeIcon(init.icon)}
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-800 mb-1.5 font-display">{init.title}</h3>
+                      <p className="text-slate-500 text-xs leading-relaxed">{init.description}</p>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             </div>
           </section>
