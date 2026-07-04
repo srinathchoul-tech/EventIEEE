@@ -320,9 +320,6 @@ export default function App() {
   // Page routing state ('home' | 'about' | 'admin' | 'student' | 'settings')
   const [currentPage, setCurrentPage] = useState<"home" | "about" | "admin" | "student" | "settings" | "gallery" | "location">("home");
   
-  // Mobile sidebar navigation rail toggle state
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-
   // References for handling click-outside dismissals
   const searchRef = useRef<HTMLDivElement>(null);
   const registerRef = useRef<HTMLDivElement>(null);
@@ -1788,535 +1785,19 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-[#00629B]/20 selection:text-[#00629B]">
       
-      {/* ========================================================================= */}
-      {/* 1. APPMOBILE HEADER / FLOATING NAVIGATION BAR                             */}
-      {/* ========================================================================= */}
-      {/* Dimmed Background Overlay on Mobile when Sidebar is Open */}
-      {isMobileSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 sm:hidden transition-opacity duration-300"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
-
-      {/* Unstop-Style Left Navigation Sidebar Rail */}
-      <aside className={`fixed bottom-0 w-16 sm:w-20 bg-[#0F172A] border-r border-slate-800 z-40 flex flex-col items-center py-5 gap-6 shadow-2xl text-white select-none transition-all duration-300 left-0 sm:translate-x-0 ${
-        isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } ${
-        currentPage === "home" ? "top-[128px] sm:top-[140px]" : "top-[84px] sm:top-[96px]"
-      }`}>
-        {/* 4 Navigation Sections */}
-        <div className="flex-grow w-full flex flex-col gap-5 items-center px-1">
-          {[
-            {
-              id: "home",
-              name: "Home",
-              icon: <Home className="w-5 h-5 sm:w-6 sm:h-6" />,
-              action: () => navigateTo("home"),
-              subsections: [
-                { name: "Main Dashboard", action: () => { navigateTo("home"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
-                { name: "Semiconductor SiP Layout", action: () => { navigateTo("home"); setTimeout(() => document.getElementById("hero-interactive")?.scrollIntoView({ behavior: "smooth" }), 200); } },
-                { name: "Live Ticker Banner", action: () => { navigateTo("home"); setTimeout(() => document.getElementById("hero-heading")?.scrollIntoView({ behavior: "smooth" }), 200); } }
-              ]
-            },
-            {
-              id: "about",
-              name: "About Us",
-              icon: <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />,
-              action: () => navigateTo("about"),
-              subsections: [
-                { name: "Vision 2026-2030", action: () => { navigateTo("about"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
-                { name: "Advisory Coordinators", action: () => { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 200); } },
-                { name: "Core Executive Committee", action: () => { navigateTo("about"); setTimeout(() => {
-                  const el = document.getElementById("advisory-section");
-                  if (el) {
-                    el.scrollIntoView({ behavior: "smooth" });
-                  }
-                }, 200); } }
-              ]
-            },
-            {
-              id: "announcements",
-              name: "Updates",
-              icon: <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />,
-              action: () => {
-                navigateTo("student");
-                setStudentDashboardTab("upcoming");
-              },
-              subsections: [
-                { name: "Events Calendar", action: () => {
-                  navigateTo("student");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "Competitions", action: () => {
-                  navigateTo("student");
-                  setSearchQuery("Competitions");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "Quizzes", action: () => {
-                  navigateTo("student");
-                  setSearchQuery("Quizzes");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "Hackathons", action: () => {
-                  navigateTo("student");
-                  setSearchQuery("Hackathons");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "Cultural Events", action: () => {
-                  navigateTo("student");
-                  setSearchQuery("Cultural Events");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "Conferences", action: () => {
-                  navigateTo("student");
-                  setSearchQuery("Conferences");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "Workshops", action: () => {
-                  navigateTo("student");
-                  setSearchQuery("Workshops");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "College Festivals", action: () => {
-                  navigateTo("student");
-                  setSearchQuery("College Festivals");
-                  setStudentDashboardTab("upcoming");
-                }},
-                { name: "Mentors", action: () => {
-                  navigateTo("about");
-                  setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400);
-                }},
-                { name: "Articles", action: () => {
-                  navigateTo("home");
-                  setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 400);
-                }},
-                { name: "Enrollment Desk", action: () => {
-                  if (currentPage !== "home") {
-                    navigateTo("home");
-                    setTimeout(() => document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }), 300);
-                  } else {
-                    document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-              ]
-            },
-            {
-              id: "gallery",
-              name: "Society Gallery",
-              icon: <Image className="w-5 h-5 sm:w-6 sm:h-6" />,
-              action: () => {
-                navigateTo("gallery");
-              },
-              subsections: [
-                { name: "View Gallery", action: () => navigateTo("gallery") },
-                { name: "Photo Archive", action: () => navigateTo("gallery") }
-              ]
-            },
-            {
-              id: "contact",
-              name: "Contact us",
-              icon: <Phone className="w-5 h-5 sm:w-6 sm:h-6" />,
-              action: () => {
-                if (currentPage !== "home") {
-                  navigateTo("home");
-                  setTimeout(() => {
-                    document.getElementById("footer-section")?.scrollIntoView({ behavior: "smooth" });
-                  }, 300);
-                } else {
-                  document.getElementById("footer-section")?.scrollIntoView({ behavior: "smooth" });
-                }
-              }
-            },
-            {
-              id: "location",
-              name: "Location",
-              icon: <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />,
-              action: () => {
-                navigateTo("location");
-              }
-            }
-          ].map((sec) => {
-            const isActive = currentPage === sec.id;
-            return (
-              <div key={sec.id} className="relative group w-full flex flex-col items-center">
-                <button
-                  onClick={() => {
-                    sec.action();
-                    setIsMobileSidebarOpen(false);
-                  }}
-                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
-                    isActive 
-                      ? "bg-[#00629B] text-white shadow-lg shadow-[#00629B]/25" 
-                      : "text-slate-400 hover:text-white hover:bg-slate-800"
-                  }`}
-                >
-                  {sec.icon}
-                  <span className="text-[9px] sm:text-[10px] font-bold tracking-tight mt-1 leading-none">{sec.name}</span>
-                  {isActive && (
-                    <span className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-[#38BDF8] rounded-r-md"></span>
-                  )}
-                </button>
-
-                {/* Hover Subsections Popover */}
-                {sec.subsections && sec.subsections.length > 0 && (
-                  <div className="absolute left-full top-0 ml-2 w-48 bg-white border border-slate-200 text-slate-800 rounded-xl shadow-2xl py-2 hidden group-hover:block z-[70] animate-fade-in">
-                    <div className="px-3 py-1 border-b border-slate-100 text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                      Explore {sec.name}
-                    </div>
-                    <div className="py-1">
-                      {sec.subsections.map((sub) => (
-                        <button
-                          key={sub.name}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            sub.action();
-                            setIsMobileSidebarOpen(false);
-                          }}
-                          className="w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 text-slate-700 hover:text-[#00629B] transition-colors"
-                        >
-                          {sub.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </aside>
-
-      <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? "bg-white/95 shadow-md py-2 backdrop-blur-md border-b border-sky-200" 
-            : "bg-sky-50/95 shadow-sm py-3 backdrop-blur-md border-b border-sky-100"
-        }`}
-      >
-        <div className="max-w-full mx-auto px-4 sm:px-10">
-          <div className="flex items-center justify-between gap-4">
-            {/* Left Brand Area: Toggle & Logo */}
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-                className="sm:hidden p-1.5 text-slate-600 hover:text-[#00629B] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer mr-1 flex items-center justify-center shrink-0"
-                title="Toggle Menu"
-              >
-                {isMobileSidebarOpen ? <X className="w-5.5 h-5.5" /> : <Menu className="w-5.5 h-5.5" />}
-              </button>
-              {/* Header Brand Information */}
-              <div 
-                className="flex items-center cursor-pointer select-none group" 
-                onClick={() => navigateTo("home")}
-              >
-                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[76px] w-[80px] sm:w-[124px]">
-                  <img 
-                    src={combinedLogoImg} 
-                    alt="IEEE EPS BVRIT Student Chapter combined logo" 
-                    className="h-full w-full object-fill hover:scale-102 transition-transform duration-300" 
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Right Brand Area: Search opportunities + Register/Enquire / Profile */}
-            <div className="flex items-center gap-4 shrink-0">
-              
-              {/* Search opportunities Icon button relocated here */}
-              <div ref={searchRef} className="relative z-50">
-                {/* Search Icon Button - larger size */}
-                <button
-                  onClick={() => setIsSearchPopupOpen(!isSearchPopupOpen)}
-                  className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-[#00629B] rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-xs"
-                  title="Search Opportunities"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-
-                {/* Popover / Overlay Card */}
-                <AnimatePresence>
-                  {isSearchPopupOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 12 }}
-                      className="fixed inset-x-4 top-20 w-auto sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-[420px] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-50 space-y-4 text-left"
-                    >
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                          <Search className="w-4 h-4 text-[#00629B]" />
-                          <span>Search Opportunities</span>
-                        </div>
-                        <button 
-                          onClick={() => {
-                            setSearchQuery("");
-                            setIsSearchPopupOpen(false);
-                          }}
-                          className="text-[11px] text-slate-400 hover:text-slate-600 font-bold"
-                        >
-                          Clear
-                        </button>
-                      </div>
-
-                      {/* Explore Grid */}
-                      <div className="space-y-2.5">
-                        <div className="grid grid-cols-3 gap-3">
-                          {[
-                            { name: "Events Calendar", icon: "Calendar", color: "bg-amber-50 text-amber-600 hover:bg-amber-100" },
-                            { name: "Competitions", icon: "Trophy", color: "bg-blue-50 text-blue-600 hover:bg-blue-100" },
-                            { name: "Quizzes", icon: "HelpCircle", color: "bg-indigo-50 text-indigo-600 hover:bg-indigo-100" },
-                            { name: "Hackathons", icon: "Code", color: "bg-purple-50 text-purple-600 hover:bg-purple-100" },
-                            { name: "Cultural Events", icon: "Music", color: "bg-pink-50 text-pink-600 hover:bg-pink-100" },
-                            { name: "Conferences", icon: "Users", color: "bg-orange-50 text-orange-600 hover:bg-orange-100" },
-                            { name: "Workshops", icon: "Wrench", color: "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" },
-                            { name: "College Festivals", icon: "Building", color: "bg-teal-50 text-teal-600 hover:bg-teal-100" },
-                            { name: "Mentors", icon: "GraduationCap", color: "bg-sky-50 text-sky-600 hover:bg-sky-100" },
-                            { name: "Articles", icon: "BookOpen", color: "bg-violet-50 text-violet-600 hover:bg-violet-100" },
-                            { name: "Enrollment Desk", icon: "ClipboardList", color: "bg-rose-50 text-rose-600 hover:bg-rose-100" }
-                          ].map((cat) => {
-                            const renderCatIcon = (name: string) => {
-                              switch (name) {
-                                case "Calendar": return <Calendar className="w-5 h-5" />;
-                                case "Trophy": return <Award className="w-5 h-5" />;
-                                case "HelpCircle": return <BookOpen className="w-5 h-5" />;
-                                case "Code": return <Cpu className="w-5 h-5" />;
-                                case "Music": return <Globe className="w-5 h-5" />;
-                                case "Users": return <Compass className="w-5 h-5" />;
-                                case "Wrench": return <Wrench className="w-5 h-5" />;
-                                case "Building": return <Activity className="w-5 h-5" />;
-                                case "GraduationCap": return <GraduationCap className="w-5 h-5" />;
-                                case "BookOpen": return <BookOpen className="w-5 h-5" />;
-                                case "ClipboardList": return <ClipboardList className="w-5 h-5" />;
-                                default: return <BookOpen className="w-5 h-5" />;
-                              }
-                            };
-
-                            return (
-                              <button
-                                key={cat.name}
-                                type="button"
-                                onClick={() => {
-                                  setIsSearchPopupOpen(false);
-                                  if (cat.name === "Events Calendar") {
-                                    navigateTo("student");
-                                    setStudentDashboardTab("upcoming");
-                                  } else if (cat.name === "Mentors") {
-                                    navigateTo("about");
-                                    setTimeout(() => {
-                                      document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" });
-                                    }, 400);
-                                  } else if (cat.name === "Articles") {
-                                    navigateTo("home");
-                                    setTimeout(() => {
-                                      document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-                                    }, 400);
-                                  } else if (cat.name === "Enrollment Desk") {
-                                    navigateTo("home");
-                                    setTimeout(() => {
-                                      document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                                    }, 400);
-                                  } else {
-                                    navigateTo("student");
-                                    setSearchQuery(cat.name);
-                                    setStudentDashboardTab("upcoming");
-                                  }
-                                }}
-                                className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group"
-                              >
-                                <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors shadow-xs ${cat.color}`}>
-                                  {renderCatIcon(cat.icon)}
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#00629B] text-center leading-tight">
-                                  {cat.name}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              {isAdminLoggedIn || currentStudentUser ? (
-                /* USER PROFILE DROPDOWN */
-                <div ref={profileRef} className="relative z-50">
-                  <button
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#00629B]/10 hover:bg-[#00629B]/20 text-[#00629B] border-2 border-[#00629B]/30 flex items-center justify-center cursor-pointer transition-all duration-200 relative"
-                    title="User Profile"
-                  >
-                    <span className="font-extrabold text-xs">
-                      {isAdminLoggedIn ? "AD" : (currentStudentUser?.name?.substr(0, 2).toUpperCase() || "ST")}
-                    </span>
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span>
-                  </button>
-
-                  <AnimatePresence>
-                    {isProfileDropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 top-full mt-2 w-[240px] rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 overflow-hidden text-xs text-slate-800 text-left"
-                      >
-                        {/* Header Info */}
-                        <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
-                          <div className="font-bold text-slate-800">
-                            {isAdminLoggedIn ? "System Admin Console" : currentStudentUser.name}
-                          </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5 truncate">
-                            {isAdminLoggedIn ? loggedInAdminEmail : currentStudentUser.email}
-                          </div>
-                        </div>
-
-                        {/* Options */}
-                        <div className="py-1">
-                          {isAdminLoggedIn ? (
-                            <button
-                              onClick={() => {
-                                setIsProfileDropdownOpen(false);
-                                navigateTo("admin");
-                              }}
-                              className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-slate-700 cursor-pointer border-none bg-transparent"
-                            >
-                              <Lock className="w-4 h-4 text-slate-400" />
-                              <span>Organizers Console</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setIsProfileDropdownOpen(false);
-                                navigateTo("student");
-                              }}
-                              className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-slate-700 cursor-pointer border-none bg-transparent"
-                            >
-                              <Globe className="w-4 h-4 text-slate-400" />
-                              <span>Student Event Portal</span>
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => {
-                              setIsProfileDropdownOpen(false);
-                              navigateTo("settings");
-                            }}
-                            className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-slate-700 cursor-pointer border-none bg-transparent"
-                          >
-                            <Settings className="w-4 h-4 text-slate-400" />
-                            <span>Account Settings</span>
-                          </button>
-
-                          <div className="w-full my-1 border-t border-slate-100"></div>
-
-                          <button
-                            onClick={() => {
-                              setIsProfileDropdownOpen(false);
-                              if (isAdminLoggedIn) {
-                                handleAdminSignOut();
-                              } else {
-                                handleStudentLogout();
-                              }
-                            }}
-                            className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600 flex items-center gap-2 font-semibold cursor-pointer border-none bg-transparent"
-                          >
-                            <LogOut className="w-4 h-4" />
-                            <span>Log Out</span>
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                /* ANONYMOUS REGISTER/LOGIN DROPDOWN */
-                <div ref={registerRef} className="relative inline-flex items-center">
-                  <div className="inline-flex items-stretch rounded-xl overflow-hidden bg-[#00629B] hover:bg-[#004B75] transition shadow-md shadow-[#00629B]/10">
-                    <button
-                      onClick={(e) => {
-                        if (currentPage !== "home") {
-                          navigateTo("home");
-                          setTimeout(() => {
-                            document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                          }, 300);
-                        } else {
-                          document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                        }
-                        setIsRegisterDropdownOpen(false);
-                      }}
-                      className="px-4 py-2 text-xs sm:text-sm font-bold text-white tracking-wide cursor-pointer transition border-none"
-                    >
-                      Register/Login
-                    </button>
-                    <div className="w-[1px] bg-white/20 my-2"></div>
-                    <button
-                      onClick={() => setIsRegisterDropdownOpen(!isRegisterDropdownOpen)}
-                      className="px-2.5 text-white transition flex items-center justify-center cursor-pointer hover:bg-white/10 border-none bg-transparent"
-                      title="Console Options"
-                    >
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isRegisterDropdownOpen ? "rotate-180" : ""}`} />
-                    </button>
-                  </div>
-
-                  <AnimatePresence>
-                    {isRegisterDropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 top-full mt-2 w-[260px] rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50 overflow-hidden text-xs sm:text-sm text-slate-800"
-                      >
-                        <button
-                          onClick={() => {
-                            setIsRegisterDropdownOpen(false);
-                            navigateTo("student");
-                          }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-bold text-indigo-700 border-b border-slate-100 cursor-pointer border-none bg-transparent"
-                        >
-                          <Globe className="w-4 h-4 text-indigo-500" />
-                          <span>Student Event Portal</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsRegisterDropdownOpen(false);
-                            if (currentPage !== "home") {
-                              navigateTo("home");
-                              setTimeout(() => {
-                                document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                              }, 300);
-                            } else {
-                              document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" });
-                            }
-                          }}
-                          className="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center gap-2 font-semibold text-[#00629B] cursor-pointer border-none bg-transparent"
-                        >
-                          <GraduationCap className="w-4 h-4 text-[#00629B]" />
-                          <span>Chapter Enrollment Desk</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* FULL-WIDTH LIVE UPDATES NEWS TICKER BANNER (visible only on Home Page) */}
+      {/* FULL-WIDTH LIVE UPDATES NEWS TICKER BANNER (Top of the page) */}
       {currentPage === "home" && (
-        <div className="fixed left-0 right-0 top-[84px] sm:top-[96px] z-30 shadow-inner">
+        <div className="fixed left-0 right-0 top-0 z-[70] shadow-inner">
           <section className="bg-gradient-to-r from-[#00629B] to-[#004B75] text-white py-3 relative overflow-hidden border-b border-sky-300/30 flex items-center h-11">
             <div className="bg-[#003B5C] px-6 py-1.5 z-20 font-black tracking-wider uppercase text-[10px] sm:text-xs skew-x-12 -ml-2 shadow-lg flex items-center gap-2 shrink-0 border-r border-sky-400">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
               <span className="-skew-x-12">Live Updates</span>
             </div>
             <div className="w-full overflow-hidden select-none z-10 flex items-center">
-              <marquee 
-                scrollamount="4" 
-                behavior="scroll" 
-                direction="left" 
+              <marquee
+                scrollamount="4"
+                behavior="scroll"
+                direction="left"
                 className="font-semibold text-xs sm:text-sm tracking-wide py-1 text-sky-100"
                 onMouseOver={(e) => e.currentTarget.stop()}
                 onMouseOut={(e) => e.currentTarget.start()}
@@ -2328,11 +1809,353 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Content Area shifted to the right to accommodate the Unstop Left Rail Sidebar */}
-      <div className="pl-0 sm:pl-20 min-h-screen flex flex-col transition-all duration-300">
-        {/* Spacing Offset for Fixed Navbar & Live Updates Ribbon */}
+      {/* HORIZONTAL NAVIGATION BAR (Consolidated Branding & Actions) */}
+      <nav className={`fixed left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-md transition-all duration-300 ${
+        currentPage === "home" ? "top-11" : "top-0"
+      }`}>
+        <div className="max-w-full mx-auto px-4 sm:px-10 h-auto sm:h-[80px]">
+          <div className="flex flex-col sm:flex-row items-center justify-between h-full gap-2 sm:gap-4 py-2 sm:py-0">
+
+            {/* Top Row on Mobile: Logo and Register Actions */}
+            <div className="flex items-center justify-between w-full sm:w-auto shrink-0">
+              {/* 1. Logo */}
+              <div
+                className="flex items-center cursor-pointer select-none group" 
+                onClick={() => navigateTo("home")}
+              >
+                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[60px] sm:w-[110px]">
+                  <img 
+                    src={combinedLogoImg} 
+                    alt="Logo"
+                    className="h-full w-full object-contain hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              </div>
+
+              {/* Mobile Actions (Visible only on mobile here) */}
+              <div className="flex items-center gap-2 sm:hidden">
+                {/* Search Toggle */}
+                <div ref={searchRef} className="relative">
+                  <button
+                    onClick={() => setIsSearchPopupOpen(!isSearchPopupOpen)}
+                    className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-[#00629B] rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-sm"
+                    title="Search Opportunities"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                  <AnimatePresence>
+                    {isSearchPopupOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 12 }}
+                        className="fixed inset-x-4 top-24 bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-[110] text-left"
+                      >
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-widest">
+                            <Search className="w-4 h-4 text-[#00629B]" />
+                            <span>Quick Explore</span>
+                          </div>
+                          <X className="w-4 h-4 text-slate-400 cursor-pointer" onClick={() => setIsSearchPopupOpen(false)} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {["Competitions", "Workshops", "Hackathons", "Quizzes", "Mentors", "Articles"].map(cat => (
+                            <button
+                              key={cat}
+                              onClick={() => {
+                                setIsSearchPopupOpen(false);
+                                if (cat === "Mentors") { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400); }
+                                else if (cat === "Articles") { navigateTo("home"); setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 400); }
+                                else { navigateTo("student"); setSearchQuery(cat); setStudentDashboardTab("upcoming"); }
+                              }}
+                              className="px-4 py-2.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-[#00629B] rounded-xl border border-slate-100 text-left transition-colors"
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {isAdminLoggedIn || currentStudentUser ? (
+                  <div ref={profileRef} className="relative">
+                    <button
+                      onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                      className="w-10 h-10 rounded-full bg-[#00629B]/10 hover:bg-[#00629B]/20 text-[#00629B] border-2 border-[#00629B]/30 flex items-center justify-center cursor-pointer transition-all relative"
+                    >
+                      <span className="font-extrabold text-xs">{isAdminLoggedIn ? "AD" : (currentStudentUser?.name?.substr(0, 2).toUpperCase() || "ST")}</span>
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span>
+                    </button>
+                    <AnimatePresence>
+                      {isProfileDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 shadow-2xl rounded-xl py-2 z-50 text-left"
+                        >
+                          <div className="px-4 py-2 mb-1 border-b border-slate-50 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">User Options</div>
+                          <button onClick={() => { setIsProfileDropdownOpen(false); navigateTo(isAdminLoggedIn ? "admin" : "student"); }} className="w-full px-4 py-2.5 text-left hover:bg-slate-50 text-[11px] font-bold text-slate-700 flex items-center gap-2 border-none bg-transparent cursor-pointer">
+                            <Activity className="w-4 h-4 text-[#00629B]" /> Dashboard
+                          </button>
+                          <button onClick={() => { setIsProfileDropdownOpen(false); if (isAdminLoggedIn) handleAdminSignOut(); else handleStudentLogout(); }} className="w-full px-4 py-2.5 text-left hover:bg-red-50 text-[11px] font-bold text-red-600 flex items-center gap-2 border-none bg-transparent cursor-pointer">
+                            <LogOut className="w-4 h-4" /> Sign Out
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <div ref={registerRef} className="relative inline-flex items-center">
+                    <div className="inline-flex items-stretch rounded-xl overflow-hidden bg-[#00629B] hover:bg-[#004B75] transition shadow-md">
+                      <button
+                        onClick={() => { if (currentPage !== "home") { navigateTo("home"); setTimeout(() => document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }), 300); } else { document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }); } }}
+                        className="px-4 py-2 text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase cursor-pointer border-none"
+                      >
+                        Register/Login
+                      </button>
+                      <div className="w-[1px] bg-white/20 my-2"></div>
+                      <button onClick={() => setIsRegisterDropdownOpen(!isRegisterDropdownOpen)} className="px-2.5 text-white transition flex items-center justify-center cursor-pointer hover:bg-white/10 border-none bg-transparent">
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isRegisterDropdownOpen ? "rotate-180" : ""}`} />
+                      </button>
+                    </div>
+                    <AnimatePresence>
+                      {isRegisterDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute right-0 top-full mt-2 w-60 bg-white border border-slate-200 shadow-2xl rounded-xl py-2 z-50 text-left"
+                        >
+                          <button onClick={() => { setIsRegisterDropdownOpen(false); navigateTo("student"); }} className="w-full px-4 py-2.5 text-left hover:bg-slate-50 text-[11px] font-bold text-indigo-700 flex items-center gap-3 border-none bg-transparent cursor-pointer">
+                            <Globe className="w-4 h-4" /> Student Event Portal
+                          </button>
+                          <button onClick={() => { setIsRegisterDropdownOpen(false); navigateTo("home"); setTimeout(() => document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }), 300); }} className="w-full px-4 py-2.5 text-left hover:bg-slate-50 text-[11px] font-bold text-[#00629B] flex items-center gap-3 border-none bg-transparent cursor-pointer">
+                            <GraduationCap className="w-4 h-4" /> Enrollment Desk
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Row 2 on Mobile, Center on Desktop: Navigation Links (Scrollable on mobile) */}
+            <div className="flex items-center justify-start sm:justify-center w-full sm:h-full gap-0 overflow-x-auto no-scrollbar scroll-smooth px-4 sm:px-2 border-t border-slate-100 sm:border-none pt-1 sm:pt-0">
+              {[
+                {
+                  id: "home",
+                  name: "Home",
+                  action: () => navigateTo("home"),
+                  subsections: [
+                    { name: "Main Dashboard", action: () => { navigateTo("home"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+                    { name: "Semiconductor SiP Layout", action: () => { navigateTo("home"); setTimeout(() => document.getElementById("hero-interactive")?.scrollIntoView({ behavior: "smooth" }), 200); } }
+                  ]
+                },
+                {
+                  id: "about",
+                  name: "About Us",
+                  action: () => navigateTo("about"),
+                  subsections: [
+                    { name: "Vision 2026-2030", action: () => { navigateTo("about"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+                    { name: "Advisory Coordinators", action: () => { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 200); } }
+                  ]
+                },
+                {
+                  id: "announcements",
+                  name: "Updates",
+                  action: () => { navigateTo("student"); setStudentDashboardTab("upcoming"); },
+                  subsections: [
+                    { name: "Events Calendar", action: () => { navigateTo("student"); setStudentDashboardTab("upcoming"); } },
+                    { name: "Competitions", action: () => { navigateTo("student"); setSearchQuery("Competitions"); setStudentDashboardTab("upcoming"); } },
+                    { name: "Quizzes", action: () => { navigateTo("student"); setSearchQuery("Quizzes"); setStudentDashboardTab("upcoming"); } }
+                  ]
+                },
+                {
+                  id: "gallery",
+                  name: "Society Gallery",
+                  action: () => navigateTo("gallery"),
+                  subsections: [
+                    { name: "View Gallery", action: () => navigateTo("gallery") }
+                  ]
+                },
+                {
+                  id: "contact",
+                  name: "Contact us",
+                  action: () => {
+                    if (currentPage !== "home") {
+                      navigateTo("home");
+                      setTimeout(() => document.getElementById("footer-section")?.scrollIntoView({ behavior: "smooth" }), 300);
+                    } else {
+                      document.getElementById("footer-section")?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }
+                },
+                {
+                  id: "location",
+                  name: "Location",
+                  action: () => navigateTo("location")
+                }
+              ].map((sec) => {
+                const isActive = currentPage === sec.id;
+                return (
+                  <div key={sec.id} className="relative group h-full flex items-center shrink-0">
+                    <button
+                      onClick={() => sec.action()}
+                      className={`h-full px-3 sm:px-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5 transition-all duration-300 cursor-pointer ${
+                        isActive
+                          ? "text-[#00629B] border-b-2 border-[#00629B] bg-sky-50/40"
+                          : "text-slate-600 border-b-2 border-transparent hover:text-[#00629B] hover:bg-slate-50"
+                      }`}
+                    >
+                      <span className="whitespace-nowrap">{sec.name}</span>
+                      {sec.subsections && sec.subsections.length > 0 && <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform hidden sm:block" />}
+                    </button>
+
+                    {sec.subsections && sec.subsections.length > 0 && (
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-64 bg-white border border-slate-100 shadow-2xl py-3 hidden group-hover:block z-[100] animate-fade-in rounded-b-xl ring-1 ring-black/5">
+                        <div className="px-4 py-2 mb-1 border-b border-slate-50 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                          Explore {sec.name}
+                        </div>
+                        {sec.subsections.map((sub) => (
+                          <button
+                            key={sub.name}
+                            onClick={(e) => { e.stopPropagation(); sub.action(); }}
+                            className="w-full text-left px-4 py-2.5 text-[11px] font-bold hover:bg-slate-50 text-slate-600 hover:text-[#00629B] transition-colors uppercase tracking-tight"
+                          >
+                            {sub.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 3. RIGHT: Search & Register Actions (Desktop Only) */}
+            <div className="hidden sm:flex items-center gap-2 sm:gap-4 shrink-0">
+              
+              {/* Search Toggle */}
+              <div ref={searchRef} className="relative">
+                <button
+                  onClick={() => setIsSearchPopupOpen(!isSearchPopupOpen)}
+                  className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-[#00629B] rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-sm"
+                  title="Search Opportunities"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+                <AnimatePresence>
+                  {isSearchPopupOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 12 }}
+                      className="fixed inset-x-4 top-24 sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-4 sm:w-[400px] bg-white border border-slate-200 shadow-2xl rounded-2xl p-5 z-[110] text-left"
+                    >
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-widest">
+                          <Search className="w-4 h-4 text-[#00629B]" />
+                          <span>Quick Explore</span>
+                        </div>
+                        <X className="w-4 h-4 text-slate-400 cursor-pointer" onClick={() => setIsSearchPopupOpen(false)} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Competitions", "Workshops", "Hackathons", "Quizzes", "Mentors", "Articles"].map(cat => (
+                          <button
+                            key={cat}
+                            onClick={() => {
+                              setIsSearchPopupOpen(false);
+                              if (cat === "Mentors") { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400); }
+                              else if (cat === "Articles") { navigateTo("home"); setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 400); }
+                              else { navigateTo("student"); setSearchQuery(cat); setStudentDashboardTab("upcoming"); }
+                            }}
+                            className="px-4 py-2.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-[#00629B] rounded-xl border border-slate-100 text-left transition-colors"
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {isAdminLoggedIn || currentStudentUser ? (
+                <div ref={profileRef} className="relative">
+                  <button
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="w-10 h-10 rounded-full bg-[#00629B]/10 hover:bg-[#00629B]/20 text-[#00629B] border-2 border-[#00629B]/30 flex items-center justify-center cursor-pointer transition-all relative"
+                  >
+                    <span className="font-extrabold text-xs">{isAdminLoggedIn ? "AD" : (currentStudentUser?.name?.substr(0, 2).toUpperCase() || "ST")}</span>
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span>
+                  </button>
+                  <AnimatePresence>
+                    {isProfileDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 shadow-2xl rounded-xl py-2 z-50 text-left"
+                      >
+                        <div className="px-4 py-2 mb-1 border-b border-slate-50 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">User Options</div>
+                        <button onClick={() => { setIsProfileDropdownOpen(false); navigateTo(isAdminLoggedIn ? "admin" : "student"); }} className="w-full px-4 py-2.5 text-left hover:bg-slate-50 text-[11px] font-bold text-slate-700 flex items-center gap-2 border-none bg-transparent cursor-pointer">
+                          <Activity className="w-4 h-4 text-[#00629B]" /> Dashboard
+                        </button>
+                        <button onClick={() => { setIsProfileDropdownOpen(false); if (isAdminLoggedIn) handleAdminSignOut(); else handleStudentLogout(); }} className="w-full px-4 py-2.5 text-left hover:bg-red-50 text-[11px] font-bold text-red-600 flex items-center gap-2 border-none bg-transparent cursor-pointer">
+                          <LogOut className="w-4 h-4" /> Sign Out
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <div ref={registerRef} className="relative inline-flex items-center">
+                  <div className="inline-flex items-stretch rounded-xl overflow-hidden bg-[#00629B] hover:bg-[#004B75] transition shadow-md">
+                    <button
+                      onClick={() => { if (currentPage !== "home") { navigateTo("home"); setTimeout(() => document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }), 300); } else { document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }); } }}
+                      className="px-4 py-2 text-[10px] sm:text-xs font-bold text-white tracking-widest uppercase cursor-pointer border-none"
+                    >
+                      Register/Login
+                    </button>
+                    <div className="w-[1px] bg-white/20 my-2"></div>
+                    <button onClick={() => setIsRegisterDropdownOpen(!isRegisterDropdownOpen)} className="px-2.5 text-white transition flex items-center justify-center cursor-pointer hover:bg-white/10 border-none bg-transparent">
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isRegisterDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  </div>
+                  <AnimatePresence>
+                    {isRegisterDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 top-full mt-2 w-60 bg-white border border-slate-200 shadow-2xl rounded-xl py-2 z-50 text-left"
+                      >
+                        <button onClick={() => { setIsRegisterDropdownOpen(false); navigateTo("student"); }} className="w-full px-4 py-2.5 text-left hover:bg-slate-50 text-[11px] font-bold text-indigo-700 flex items-center gap-3 border-none bg-transparent cursor-pointer">
+                          <Globe className="w-4 h-4" /> Student Event Portal
+                        </button>
+                        <button onClick={() => { setIsRegisterDropdownOpen(false); navigateTo("home"); setTimeout(() => document.getElementById("inquiry-section")?.scrollIntoView({ behavior: "smooth" }), 300); }} className="w-full px-4 py-2.5 text-left hover:bg-slate-50 text-[11px] font-bold text-[#00629B] flex items-center gap-3 border-none bg-transparent cursor-pointer">
+                          <GraduationCap className="w-4 h-4" /> Enrollment Desk
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content Area */}
+      <div className="pl-0 min-h-screen flex flex-col transition-all duration-300">
+        {/* Spacing Offset for Fixed Navbar & Live Updates Ribbon & Horizontal Nav */}
         <div className={`transition-all duration-300 ${
-          currentPage === "home" ? "pt-[128px] sm:pt-[140px]" : "pt-[84px] sm:pt-[96px]"
+          currentPage === "home" ? "pt-[144px] sm:pt-[124px]" : "pt-[104px] sm:pt-[80px]"
         }`}></div>
 
       {/* ========================================================================= */}
@@ -2494,10 +2317,10 @@ export default function App() {
                             <div key={ann.id} className="mb-5 pb-3 border-b border-sky-100/40 last:border-none">
                               <div className="flex items-start gap-3">
                                 <span className="text-base shrink-0">{isMilestone ? "🎉" : "📢"}</span>
-                                <div className="space-y-1">
-                                  <h4 className="font-extrabold text-sm text-slate-900 leading-snug">{ann.title}</h4>
-                                  <p className="text-xs text-slate-600 leading-relaxed">{ann.description}</p>
-                                  <span className="text-[10px] font-bold text-sky-600 block">{ann.date}</span>
+                                <div className="space-y-1.5">
+                                  <h4 className="font-extrabold text-base sm:text-lg text-slate-900 leading-snug">{ann.title}</h4>
+                                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed">{ann.description}</p>
+                                  <span className="text-xs font-bold text-sky-600 block">{ann.date}</span>
                                 </div>
                               </div>
                             </div>
@@ -2536,8 +2359,8 @@ export default function App() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-7 space-y-4 text-justify">
-                  <h2 className="text-2xl sm:text-3xl font-black text-[#00629B] font-display">About BVRIT</h2>
-                  <p className="text-slate-700 text-xs sm:text-sm leading-relaxed">
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#00629B] font-display">About BVRIT</h2>
+                  <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
                     B V Raju Institute of Technology (BVRIT) was established in 1997 by the eminent philanthropist (Late) Padma Bhushan Dr. B V Raju under the aegis of the Sri Vishnu Educational Society (SVES). The institute is approved by the AICTE, affiliated with Jawaharlal Nehru Technological University (JNTU), Hyderabad, and was granted UGC–Autonomous status in 2014. Accredited by NAAC with an A+ grade, BVRIT is widely recognized for its academic excellence, modern infrastructure, and student-centric ecosystem. The institution is governed by a distinguished body of professionals from IITs, academia, and industry, led by Sri K V Vishnu Raju Garu, a Chemical Engineering graduate from REC Trichy (now NIT Trichy) and a postgraduate from Michigan Technological University, USA. Under his visionary leadership, BVRIT has made significant strides in innovation, research, and teaching-learning practices. The institute is known for its strong student intake, excellent placement records, industry collaborations, and global academic partnerships. With vibrant student clubs, research initiatives, entrepreneurship support, and a focus on holistic development, BVRIT has emerged as a leading institution in technical education, empowering students to become future-ready professionals. <a 
                       href={CHAPTER_INFO.socials.collegeWebsite} 
                       target="_blank" 
@@ -2552,7 +2375,7 @@ export default function App() {
                   <img 
                     src={aboutBvritImg} 
                     alt="BVRIT Campus" 
-                    className="w-full h-auto rounded-3xl shadow-md border border-slate-200 object-cover max-h-[320px]" 
+                    className="w-full h-auto rounded-3xl shadow-md border border-slate-200 object-cover max-h-[450px]"
                   />
                 </div>
               </div>
@@ -2564,8 +2387,8 @@ export default function App() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-7 space-y-4 text-justify">
-                  <h2 className="text-2xl sm:text-3xl font-black text-[#00629B] font-display">About Hyderabad</h2>
-                  <p className="text-slate-700 text-xs sm:text-sm leading-relaxed">
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#00629B] font-display">About Hyderabad</h2>
+                  <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
                     <strong>Hyderabad – The City of Pearls</strong>
                     <br />
                     Hyderabad, the capital of Telangana and a major city in southern India, is a vibrant blend of history, culture, and modern development. Founded in 1591 by Muhammad Quli Qutb Shah, the city is renowned for its rich heritage, iconic landmarks, and thriving economy. One of Hyderabad’s most famous symbols is the Charminar, a grand monument located in the heart of the old city, surrounded by bustling bazaars like Laad Bazaar, known for pearls, bangles, and traditional handicrafts. The city also boasts magnificent historical sites such as Golconda Fort, Chowmahalla Palace, and the grand Qutb Shahi Tombs. Hyderabad is equally famous for its culinary delights, especially the world-renowned Hyderabadi Biryani — a flavorful dish that reflects the city’s Mughal, Persian, and Telugu influences. In recent decades, Hyderabad has emerged as a major technology and business hub, earning the nickname “Cyberabad” due to its thriving IT industry and presence of global tech giants. The HITEC City and Financial District symbolize its modern growth, while research institutions and start-ups continue to drive innovation. The city also stands out for its cosmopolitan lifestyle, diverse communities, and unique blend of the old and new — where ancient mosques and palaces coexist with skyscrapers and shopping malls. With its warm hospitality, rich traditions, and forward-looking spirit, Hyderabad continues to be a city that charms both residents and visitors alike. <a 
@@ -2582,7 +2405,7 @@ export default function App() {
                   <img 
                     src={aboutHyderabadImg} 
                     alt="Hyderabad Statue" 
-                    className="w-full h-auto rounded-3xl shadow-md border border-slate-200 object-cover max-h-[320px]" 
+                    className="w-full h-auto rounded-3xl shadow-md border border-slate-200 object-cover max-h-[450px]"
                   />
                 </div>
               </div>
@@ -2604,13 +2427,19 @@ export default function App() {
                     {HOME_CONTENT.initiatives.subtitle}
                   </p>
                   
-                  <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-start gap-3">
-                    <Info className="w-5 h-5 text-[#00629B] shrink-0 mt-0.5" />
+                  <div className="bg-[#00629B] border border-[#00629B] rounded-2xl p-6 shadow-2xl flex items-start gap-4 transform hover:scale-[1.02] transition-transform duration-300 ring-4 ring-[#00629B]/10">
+                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/30">
+                      <Award className="w-8 h-8 text-white animate-pulse" />
+                    </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-800">IEEE Membership Advantage</p>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                        Registered members of IEEE EPS enjoy access to technical libraries, student travel grants for conferences, and direct career networking.
+                      <p className="text-base font-black text-white uppercase tracking-wider font-display">IEEE Membership Advantage</p>
+                      <p className="text-xs text-sky-50 leading-relaxed mt-2 font-medium text-justify">
+                        Join a global network of professionals. Members enjoy exclusive access to the IEEE Xplore® digital library, student travel grants, and direct mentorship from industry leaders.
                       </p>
+                      <div className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-black text-[#00629B] bg-white px-3 py-1 rounded-full uppercase tracking-[0.1em] shadow-lg">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>Highly Recommended</span>
+                      </div>
                     </div>
                   </div>
 
@@ -4927,127 +4756,72 @@ export default function App() {
             </div>
           )}
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-4">
-            {["All", "Seminars", "Workshops", "Inauguration", "Activities", "Other"].map((cat) => {
-              const isActive = galleryFilter === cat;
-              const count = getCategoryCount(cat);
+          {/* Salon-Style Organized Gallery: Grouped by Category */}
+          <div className="space-y-16">
+            {["Seminars", "Workshops", "Inauguration", "Activities", "Other"].map((cat) => {
+              const catImages = galleryImages.filter(img => img.category === cat);
+              if (catImages.length === 0) return null;
+
               return (
-                <button
-                  key={cat}
-                  onClick={() => setGalleryFilter(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    isActive 
-                      ? "bg-[#00629B] text-white shadow-md shadow-[#00629B]/10" 
-                      : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/50"
-                  }`}
-                >
-                  <span>{cat}</span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
-                    isActive ? "bg-white/20 text-white" : "bg-slate-200 text-slate-600"
-                  }`}>
-                    {count}
-                  </span>
-                </button>
+                <section key={cat} className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-xl font-black text-slate-900 font-display uppercase tracking-widest">{cat}</h3>
+                    <div className="h-px bg-slate-200 flex-grow"></div>
+                    <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-full">{catImages.length} Photos</span>
+                  </div>
+
+                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                    {catImages.map((img, idx) => (
+                      <motion.div
+                        key={img.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: idx * 0.05 }}
+                        onClick={() => {
+                          if (isImageUrl(img.url)) setLightboxImage(img);
+                          else handleViewOrDownloadFile(img.url, img.title);
+                        }}
+                        className={`break-inside-avoid relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer group ${
+                          idx % 3 === 0 ? "aspect-[4/5]" : idx % 2 === 0 ? "aspect-square" : "aspect-[4/3]"
+                        }`}
+                      >
+                        <div className="h-full w-full">
+                          {isImageUrl(img.url) ? (
+                            <img
+                              src={img.url}
+                              alt={img.title}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-6 gap-3">
+                              {getFileIcon(img.url, "w-12 h-12")}
+                              <span className="text-[10px] uppercase font-black bg-amber-500/20 text-amber-300 px-2 py-1 rounded">{getFileExtensionLabel(img.url)} Document</span>
+                            </div>
+                          )}
+
+                          {/* Admin Controls */}
+                          {isAdminLoggedIn && (
+                            <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                              <button onClick={(e) => { e.stopPropagation(); handleOpenEditGalleryModal(img); }} className="bg-white/90 backdrop-blur-md hover:bg-amber-500 text-amber-600 hover:text-white p-2.5 rounded-2xl transition-all shadow-lg cursor-pointer"><Edit className="w-4 h-4" /></button>
+                              <button onClick={(e) => { e.stopPropagation(); handleDeleteGalleryImage(img.id); }} className="bg-white/90 backdrop-blur-md hover:bg-red-600 text-red-600 hover:text-white p-2.5 rounded-2xl transition-all shadow-lg cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                            </div>
+                          )}
+
+                          {/* Info Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-6 text-white text-left">
+                            <h4 className="font-bold text-base tracking-tight mb-1">{img.title}</h4>
+                            <p className="text-[11px] text-slate-300 line-clamp-2">{img.caption}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </section>
               );
             })}
           </div>
-
-          {/* Gallery Grid */}
-          {filteredImages.length === 0 ? (
-            <div className="text-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-3xl">
-              <Image className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="font-bold text-slate-800 text-sm">No photos found in this category</h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Upload a new photo or select a different category to explore.</p>
-              {isAdminLoggedIn && (
-                <button 
-                  onClick={handleOpenAddGalleryModal}
-                  className="mt-4 bg-[#00629B] hover:bg-[#004B75] text-white text-[10px] font-bold py-2 px-3 rounded-lg shadow-sm transition uppercase tracking-wider cursor-pointer"
-                >
-                  Upload Photo
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              <AnimatePresence mode="popLayout">
-                {filteredImages.map((img) => (
-                  <motion.div
-                     key={img.id}
-                     layout
-                     initial={{ opacity: 0, scale: 0.9 }}
-                     animate={{ opacity: 1, scale: 1 }}
-                     exit={{ opacity: 0, scale: 0.9 }}
-                     transition={{ duration: 0.3 }}
-                     onClick={() => {
-                       if (isImageUrl(img.url)) {
-                         setLightboxImage(img);
-                       } else {
-                         handleViewOrDownloadFile(img.url, img.title);
-                       }
-                     }}
-                     className="group relative aspect-square overflow-hidden rounded-2xl bg-slate-100 border border-slate-200/50 shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer"
-                   >
-                     {isImageUrl(img.url) ? (
-                       <img 
-                         src={img.url} 
-                         alt={img.title} 
-                         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                         loading="lazy"
-                       />
-                     ) : (
-                       <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-white p-6 gap-3 transition-transform duration-700 ease-out group-hover:scale-105">
-                         {getFileIcon(img.url, "w-16 h-16")}
-                         <span className="text-[10px] uppercase font-black bg-amber-500/20 text-amber-300 px-2 py-1 rounded">
-                           {getFileExtensionLabel(img.url)} Document
-                         </span>
-                       </div>
-                     )}
-                     
-                     {/* Category Badge */}
-                     <span className="absolute top-3 left-3 bg-[#00629B]/90 text-white font-black text-[9px] uppercase tracking-wider px-2 py-0.5 rounded shadow-sm backdrop-blur-xs z-10">
-                       {img.category}
-                     </span>
-
-                     {/* Admin Hover Actions Overlay */}
-                     {isAdminLoggedIn && (
-                       <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                         <button
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             handleOpenEditGalleryModal(img);
-                           }}
-                           className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-xl transition-colors shadow-md hover:scale-105 cursor-pointer"
-                           title="Edit Details"
-                         >
-                           <Edit className="w-3.5 h-3.5" />
-                         </button>
-                         <button
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             handleDeleteGalleryImage(img.id);
-                           }}
-                           className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl transition-colors shadow-md hover:scale-105 cursor-pointer"
-                           title="Delete Image"
-                         >
-                           <Trash2 className="w-3.5 h-3.5" />
-                         </button>
-                       </div>
-                     )}
-
-                     {/* Details Slide-up Overlay */}
-                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
-                       <h4 className="font-bold text-sm tracking-wide line-clamp-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">{img.title}</h4>
-                       <p className="text-[10px] text-slate-200 line-clamp-2 mt-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">{img.caption}</p>
-                       <span className="text-[9px] text-[#38BDF8] font-bold mt-2 translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-100 uppercase tracking-widest flex items-center gap-1">
-                         {isImageUrl(img.url) ? "Click to enlarge ↗" : "Click to view/download ↗"}
-                       </span>
-                     </div>
-                   </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
 
 
 
@@ -5325,24 +5099,8 @@ export default function App() {
           {/* Main Grid: Map Embed & Directions Info */}
           <div className="grid lg:grid-cols-12 gap-8 items-start">
             
-            {/* Interactive Map Card */}
-            <div className="lg:col-span-8 bg-white border border-slate-200 rounded-3xl p-4 shadow-sm space-y-4">
-              <div className="relative w-full h-[480px] rounded-2xl overflow-hidden border border-slate-100 bg-slate-50">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3800.4111042120853!2d78.25457617450839!3d17.725258383220687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcc0af1ba39c677%3A0xc4ae2d2cf9b35b63!2sBVRIT!5e0!3m2!1sen!2sin!4v1782752889431!5m2!1sen!2sin" 
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  allowFullScreen={true} 
-                  loading="lazy" 
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  title="BVRIT Narsapur Location Map"
-                ></iframe>
-              </div>
-            </div>
-
-            {/* Address & Travel Directions Panel */}
-            <div className="lg:col-span-4 space-y-6">
+            {/* Address & Travel Directions Panel (Now on the Left) */}
+            <div className="lg:col-span-7 space-y-6 order-2 lg:order-1">
               
               {/* Address card */}
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
@@ -5404,6 +5162,22 @@ export default function App() {
                 </div>
               </div>
 
+            </div>
+
+            {/* Interactive Map Card (Now on the Right and Resized) */}
+            <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-4 shadow-sm space-y-4 order-1 lg:order-2">
+              <div className="relative w-full h-[400px] rounded-2xl overflow-hidden border border-slate-100 bg-slate-50">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3800.4111042120853!2d78.25457617450839!3d17.725258383220687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcc0af1ba39c677%3A0xc4ae2d2cf9b35b63!2sBVRIT!5e0!3m2!1sen!2sin!4v1782752889431!5m2!1sen!2sin"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={true}
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  title="BVRIT Narsapur Location Map"
+                ></iframe>
+              </div>
             </div>
 
           </div>
@@ -6087,75 +5861,83 @@ export default function App() {
                   </a>
                 </li>
                 <li>
-                  <button onClick={() => navigateTo("admin")} className="hover:text-amber-400 transition flex items-center gap-1 text-left font-medium">
-                    <ChevronRight className="w-3 h-3 text-amber-500" />
-                    <span className="text-amber-300 font-semibold">Organizers Console (Admin)</span>
+                  <button onClick={() => navigateTo("admin")} className="hover:text-[#7E9AB8] transition flex items-center gap-1 text-left font-medium">
+                    <ChevronRight className="w-3 h-3 text-[#7E9AB8]" />
+                    <span className="text-[#7E9AB8] font-semibold">Organizers Console (Admin)</span>
                   </button>
                 </li>
               </ul>
             </div>
 
-            <div className="md:col-span-5 space-y-4">
-              <div className="flex items-center h-10">
-                <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display leading-none">Office Enquiries</h4>
-              </div>
-              <div className="space-y-2 pt-1">
-                <a 
-                  href="tel:+918523009720" 
-                  className="flex items-center gap-2.5 text-xs text-slate-400 hover:text-amber-400 font-semibold transition-colors w-fit"
-                >
-                  <Phone className="w-4 h-4 text-slate-500 shrink-0" />
-                  <span>Tech Admin: +91 85230 09720</span>
-                </a>
-                <a 
-                  href="mailto:ieeeeps090754@gmail.com" 
-                  className="flex items-center gap-2.5 text-xs text-slate-400 hover:text-amber-400 font-semibold transition-colors w-fit"
-                >
-                  <Mail className="w-4 h-4 text-slate-500 shrink-0" />
-                  <span>ieeeeps090754@gmail.com</span>
-                </a>
-              </div>
+            <div className="md:col-span-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="flex items-center h-4">
+                    <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display leading-none">CONTACT US</h4>
+                  </div>
+                  <div className="space-y-2 pt-1">
+                    <a
+                      href="tel:+918523009720"
+                      className="flex items-center gap-2.5 text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors w-fit"
+                    >
+                      <Phone className="w-4 h-4 text-slate-500 shrink-0" />
+                      <span>Tech Admin: +91 85230 09720</span>
+                    </a>
+                    <a
+                      href="mailto:ieeeeps090754@gmail.com"
+                      className="flex items-center gap-2.5 text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors w-fit"
+                    >
+                      <Mail className="w-4 h-4 text-slate-500 shrink-0" />
+                      <span>ieeeeps090754@gmail.com</span>
+                    </a>
+                  </div>
+                </div>
 
-              {/* Social Media Link Buttons Grid */}
-              <div className="flex gap-3 pt-2">
-                <a 
-                  href="https://in.linkedin.com/in/ieee-eps-bvritn-850a10416" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-slate-800 hover:bg-[#0077B5] text-white p-2 rounded-lg transition-colors"
-                  title="LinkedIn"
-                >
-                  <Linkedin className="w-4 h-4" />
-                </a>
-                 <a 
-                  href="https://x.com/ieee_eps_bvritn?s=11" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-slate-800 hover:bg-black text-white p-2 rounded-lg transition-colors flex items-center justify-center"
-                  title="Twitter / X"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </a>
-                <a 
-                  href="https://www.facebook.com/share/p/17eFPy7UBp/?mibextid=wwXIfr" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-slate-800 hover:bg-[#1877F2] text-white p-2 rounded-lg transition-colors"
-                  title="Facebook"
-                >
-                  <Facebook className="w-4 h-4" />
-                </a>
-                <a 
-                  href="https://www.instagram.com/bvritn_ieee_eps?igsh=MW4xcmRuZzFoOHNnbA%3D%3D&utm_source=qr" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="bg-slate-800 hover:bg-[#E1306C] text-white p-2 rounded-lg transition-colors"
-                  title="Instagram"
-                >
-                  <Instagram className="w-4 h-4" />
-                </a>
+                <div className="space-y-4">
+                  <div className="flex items-center h-4">
+                    <h4 className="text-xs font-bold uppercase text-white tracking-wider font-display leading-none">OUR SOCIAL MEDIA HANDLES</h4>
+                  </div>
+                  <div className="flex flex-col gap-2 pt-1">
+                    <a
+                      href="https://in.linkedin.com/in/ieee-eps-bvritn-850a10416"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors flex items-center gap-2 w-fit"
+                    >
+                      <Linkedin className="w-3.5 h-3.5" />
+                      <span>LinkedIn</span>
+                    </a>
+                    <a
+                      href="https://x.com/ieee_eps_bvritn?s=11"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors flex items-center gap-2 w-fit"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                      <span>Twitter / X</span>
+                    </a>
+                    <a
+                      href="https://www.facebook.com/share/p/17eFPy7UBp/?mibextid=wwXIfr"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors flex items-center gap-2 w-fit"
+                    >
+                      <Facebook className="w-3.5 h-3.5" />
+                      <span>Facebook</span>
+                    </a>
+                    <a
+                      href="https://www.instagram.com/bvritn_ieee_eps?igsh=MW4xcmRuZzFoOHNnbA%3D%3D&utm_source=qr"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors flex items-center gap-2 w-fit"
+                    >
+                      <Instagram className="w-3.5 h-3.5" />
+                      <span>Instagram</span>
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -6173,7 +5955,7 @@ export default function App() {
               <span>•</span>
               <span className="hover:underline cursor-pointer" onClick={() => navigateTo("about")}>About Society</span>
               <span>•</span>
-              <span className="hover:underline cursor-pointer text-amber-300 font-semibold" onClick={() => navigateTo("admin")}>Admin Console</span>
+              <span className="hover:underline cursor-pointer text-[#7E9AB8] font-semibold" onClick={() => navigateTo("admin")}>Admin Console</span>
               <span>•</span>
               <a href="https://www.ieee.org" target="_blank" rel="noopener noreferrer" className="hover:underline">IEEE.org Main</a>
             </div>
