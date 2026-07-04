@@ -2337,22 +2337,7 @@ export default function App() {
 
           {/* Removed old news ticker banner section from here */}
 
-          {/* ABOUT EPS SECTION (No image to the right) */}
-          <section id="about-eps-section" className="py-16 bg-slate-50 border-b border-slate-100">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="max-w-4xl mx-auto space-y-4 text-justify">
-                <h2 className="text-2xl sm:text-3xl font-black text-[#00629B] font-display">About EPS</h2>
-                <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
-                  <strong>IEEE Electronics Packaging Society (EPS)</strong> is a global community dedicated to advancing the science and technology of electronics packaging. It brings together students, researchers, and industry professionals to foster innovation through technical knowledge, collaboration, and professional development. IEEE EPS promotes learning in areas such as semiconductor packaging, microelectronics, thermal management, and advanced manufacturing. Through workshops, seminars, competitions, and networking opportunities, it empowers members to build technical expertise and prepare for future careers in electronics. <button 
-                    onClick={() => navigateTo("about")} 
-                    className="text-[#00629B] hover:text-[#004B75] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer text-sm sm:text-base inline-block"
-                  >
-                    Explore more
-                  </button>
-                </p>
-              </div>
-            </div>
-          </section>
+
 
           {/* ABOUT BVRIT SECTION (Image to the right) */}
           <section id="about-bvrit-section" className="py-16 bg-white border-b border-slate-100">
