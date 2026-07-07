@@ -254,21 +254,24 @@ export const ABOUT_CONTENT = {
         role: "Co-Chair",
         department: "ECE, 3rd year",
         email: "24211A04Q3@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/vasagiri-sai-aashrita-b41bb6327?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/vasagiri-sai-aashrita-b41bb6327?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-aashrita.jpg"
       },
       {
         name: "Vaishnavi Cherukuri",
         role: "Secretary",
         department: "ECE, 3rd year",
         email: "24211A0452@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/vaishnavi-cherukuri-b6aa5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/vaishnavi-cherukuri-b6aa5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-vaishnavi.jpg"
       },
       {
         name: "SREEJAN GOUD ROUTHU",
         role: "Treasurer",
         department: "ECE, 3rd year",
         email: "24211A04M8@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/sreejan-goud-routhu-15ba4033b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/sreejan-goud-routhu-15ba4033b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-sreejan.jpg"
       },
       {
         name: "P V Lalith Surya",
@@ -303,7 +306,8 @@ export const ABOUT_CONTENT = {
         role: "Public & Industry Relation Lead",
         department: "ECE, 3rd year",
         email: "24211A0429@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/aishwarya-batini-ab40a5340?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/aishwarya-batini-ab40a5340?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-aishwarya.jpg"
       },
       {
         name: "Bhaskar Akshaya",

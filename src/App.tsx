@@ -2925,7 +2925,7 @@ export default function App() {
                   <div key={sIdx} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-[#00629B]/30 hover:shadow-md transition flex flex-col justify-between text-center items-center">
                     <div className="space-y-3 w-full">
                       {/* Student profile photo / avatar */}
-                      <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center border border-slate-300 mx-auto text-slate-400 overflow-hidden shrink-0 shadow-inner">
+                      <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center border border-slate-300 mx-auto text-slate-400 overflow-hidden shrink-0 shadow-inner">
                         {('image' in student && student.image) ? (
                           <img 
                             src={student.image} 
@@ -2933,7 +2933,7 @@ export default function App() {
                             className="w-full h-full object-cover" 
                           />
                         ) : (
-                          <svg className="w-10 h-10 mt-2" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-14 h-14 mt-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                           </svg>
                         )}
