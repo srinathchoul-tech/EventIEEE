@@ -66,7 +66,7 @@ import combinedLogoImg from "../assets/ieee-eps-combined-logo.png";
 import mentorSanjayImg from "../assets/mentor-sanjay-dubey.png";
 import mentorSanjeevaImg from "../assets/mentor-sanjeeva-reddy.png";
 import mentorNareshImg from "../assets/mentor-naresh-kumar.png";
-import facultyGnaneshwaraImg from "../assets/faculty-gnaneshwara.png";
+import facultyGnaneshwaraImg from "../assets/faculty-gnaneshwara.jpg";
 import facultyKausalyaImg from "../assets/faculty-kausalya.png";
 import facultyVandanaImg from "../assets/faculty-vandana.png";
 import facultyAnushaImg from "../assets/faculty-anusha.png";
@@ -2854,7 +2854,7 @@ export default function App() {
                     name: "Dr. U. Gnaneshwara Chary",
                     role: "Assistant Professor, ECE Dept.",
                     email: "Gnaneshwara.chary@bvrit.ac.in",
-                    image: facultyPrasannaImg,
+                    image: facultyGnaneshwaraImg,
                     qualifications: "B.Tech (ECE – Jatipita College of Engg, 2006), M.Tech (VLSI – VNR VJIET, 2010), Ph.D (K L University, Vijayawada)",
                     linkedin: "https://www.linkedin.com/in/dr-gnaneshwara-chary-udari-05577176?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   },

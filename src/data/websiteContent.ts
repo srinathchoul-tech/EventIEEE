@@ -278,7 +278,8 @@ export const ABOUT_CONTENT = {
         role: "Technical Lead",
         department: "ECE, 3rd year",
         email: "24211A04G9@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/pv-lalith-surya-577ab733b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/pv-lalith-surya-577ab733b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-lalith.jpg"
       },
       {
         name: "BANDI REDDAPPA VENKATESH",
@@ -314,7 +315,8 @@ export const ABOUT_CONTENT = {
         role: "Design Lead",
         department: "ECE, 3rd year",
         email: "24211a0437@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/bhaskar-akshaya-42098933b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/bhaskar-akshaya-42098933b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-akshaya.jpg"
       },
       {
         name: "YOGESH BALINENI",
@@ -329,7 +331,8 @@ export const ABOUT_CONTENT = {
         role: "Membership Development & OutReach head",
         department: "ECE, 3rd year",
         email: "24211A04K3@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/niharika-rathod-14a681223?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/niharika-rathod-14a681223?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-niharika.jpg"
       },
       {
         name: "Choul Srinath",
