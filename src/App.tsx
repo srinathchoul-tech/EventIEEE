@@ -4436,14 +4436,22 @@ export default function App() {
                       {studentRegistrations.filter(r => r.studentId === currentStudentUser.id).map(reg => (
                         <div key={reg.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4 hover:shadow transition">
                           <div className="flex items-center justify-between">
-                            <span className="bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-emerald-100">
+                            <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${
+                              reg.status === "Confirmed"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                : "bg-amber-50 text-amber-700 border-amber-100"
+                            }`}>
                               {reg.status}
                             </span>
                             <span className="text-[10px] text-slate-400 font-mono">{reg.timestamp}</span>
                           </div>
                           <div>
                             <h4 className="font-bold text-slate-800 text-sm font-display leading-tight">{reg.eventTitle}</h4>
-                            <p className="text-xs text-slate-500 mt-1.5">Official seat allocated. Dynamic attendance card issued.</p>
+                            <p className="text-xs text-slate-500 mt-1.5">
+                              {reg.status === "Confirmed"
+                                ? "Official seat allocated. Dynamic attendance card issued."
+                                : "Awaiting payment & registration verification by organizers."}
+                            </p>
                           </div>
                           <div className="pt-3 border-t border-slate-200/50 flex justify-between items-center text-xs">
                             <span className="text-indigo-600 font-bold">Dynamic Registration ID</span>
