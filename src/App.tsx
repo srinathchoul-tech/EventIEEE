@@ -1783,7 +1783,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-[#00629B]/20 selection:text-[#00629B]">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-[#00629B]/20 selection:text-[#00629B] w-full max-w-full overflow-x-hidden">
       
       {/* FULL-WIDTH LIVE UPDATES NEWS TICKER BANNER (Top of the page) */}
       {currentPage === "home" && (
@@ -2925,7 +2925,7 @@ export default function App() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[70vh] flex flex-col justify-start"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[70vh] flex flex-col justify-start w-full max-w-full overflow-x-hidden"
         >
           {!isAdminLoggedIn ? (
             /* ADMIN LOGIN PANEL */
@@ -5841,13 +5841,24 @@ export default function App() {
                   </div>
                   <div className="flex flex-col gap-2 pt-1">
                     <a
-                      href="https://in.linkedin.com/in/ieee-eps-bvritn-850a10416"
+                      href="https://www.linkedin.com/in/ieee-eps-bvritn-414693419?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors flex items-center gap-2 w-fit"
                     >
                       <Linkedin className="w-3.5 h-3.5" />
                       <span>LinkedIn</span>
+                    </a>
+                    <a
+                      href="https://chat.whatsapp.com/FXqQ6q3cGjj7kTdUEHlbPn"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors flex items-center gap-2 w-fit"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.403.002 9.794-4.392 9.797-9.799.002-2.618-1.017-5.08-2.87-6.934-1.852-1.854-4.311-2.875-6.93-2.875-5.4.0-9.79 4.39-9.794 9.795-.002 1.543.41 3.055 1.195 4.386L1.818 22.25l4.829-1.264zm12.383-6.953c-.328-.164-1.94-.959-2.241-1.07-.301-.11-.52-.164-.738.164-.219.329-.848 1.07-1.039 1.29-.192.218-.384.245-.712.081-.328-.164-1.386-.51-2.64-1.627-.975-.87-1.633-1.946-1.825-2.274-.192-.329-.02-.507.144-.67.147-.146.328-.384.492-.575.164-.191.219-.328.328-.547.11-.219.055-.411-.027-.575-.082-.164-.738-1.777-1.012-2.434-.267-.641-.533-.55-.738-.55-.189-.01-.41-.01-.628-.01-.218 0-.575.081-.875.411-.3.328-1.148 1.121-1.148 2.736 0 1.614 1.175 3.173 1.339 3.393.164.22 2.313 3.532 5.6 4.95 1.52.656 2.47.85 3.33.918.988.077 1.88-.09 2.585-.195.783-.118 1.94-.793 2.215-1.52.275-.727.275-1.353.192-1.488-.083-.135-.302-.218-.63-.382z"/>
+                      </svg>
+                      <span>WhatsApp Community</span>
                     </a>
                     <a
                       href="https://x.com/ieee_eps_bvritn?s=11"
@@ -5866,7 +5877,9 @@ export default function App() {
                       rel="noopener noreferrer"
                       className="text-xs text-slate-400 hover:text-[#7E9AB8] font-semibold transition-colors flex items-center gap-2 w-fit"
                     >
-                      <Facebook className="w-3.5 h-3.5" />
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
                       <span>Facebook</span>
                     </a>
                     <a

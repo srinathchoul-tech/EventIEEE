@@ -286,21 +286,24 @@ export const ABOUT_CONTENT = {
         role: "Web Master & Tech Admin",
         department: "ECE, 3rd year",
         email: "24211A0423@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/bandireddappa-venkatesh-889a3533b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/bandireddappa-venkatesh-889a3533b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-venkatesh.jpg"
       },
       {
         name: "HASINI PRIYA AVULA",
         role: "Event Coordinator",
         department: "ECE, 3rd year",
         email: "24211A0418@bvrit.ac.in",
-        linkedin: "https://www.linkedin.com/in/avula-hasini-priya-7aa98433b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/avula-hasini-priya-7aa98433b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-hasini.jpg"
       },
       {
         name: "Patlolla Rushitha",
         role: "Logistics Lead",
         department: "ECE, 3rd year",
         email: "24211A04H9@bvritr.ac.in",
-        linkedin: "https://www.linkedin.com/in/rushitha-p-6a8a5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+        linkedin: "https://www.linkedin.com/in/rushitha-p-6a8a5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        image: "/student-rushitha.png"
       },
       {
         name: "AISHWARYA BATINI",
