@@ -4,12 +4,12 @@ import { getAuth } from "firebase/auth";
 
 // Read environment variables loaded by Vite
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyDOrCEnpFjreCRhxYOOLESjUHEUoOgjWbs",
+  authDomain: "eventieee-7d83f.firebaseapp.com",
+  projectId: "eventieee-7d83f",
+  storageBucket: "eventieee-7d83f.firebasestorage.app",
+  messagingSenderId: "756622414456",
+  appId: "1:756622414456:web:685cc0a98f9c3a3abcd38d",
 };
 
 // Check if all essential keys are provided
