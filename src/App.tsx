@@ -1823,7 +1823,7 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[60px] sm:w-[110px]">
+                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[160px] sm:w-[280px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="Logo"
@@ -1859,12 +1859,12 @@ export default function App() {
                           <X className="w-4 h-4 text-slate-400 cursor-pointer" onClick={() => setIsSearchPopupOpen(false)} />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          {["Competitions", "Workshops", "Hackathons", "Quizzes", "Mentors", "Articles"].map(cat => (
+                          {["Competitions", "Workshops", "Hackathons", "Quizzes", "Advisors", "Articles"].map(cat => (
                             <button
                               key={cat}
                               onClick={() => {
                                 setIsSearchPopupOpen(false);
-                                if (cat === "Mentors") { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400); }
+                                if (cat === "Advisors") { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400); }
                                 else if (cat === "Articles") { navigateTo("home"); setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 400); }
                                 else { navigateTo("student"); setSearchQuery(cat); setStudentDashboardTab("upcoming"); }
                               }}
@@ -2064,12 +2064,12 @@ export default function App() {
                         <X className="w-4 h-4 text-slate-400 cursor-pointer" onClick={() => setIsSearchPopupOpen(false)} />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        {["Competitions", "Workshops", "Hackathons", "Quizzes", "Mentors", "Articles"].map(cat => (
+                        {["Competitions", "Workshops", "Hackathons", "Quizzes", "Advisors", "Articles"].map(cat => (
                           <button
                             key={cat}
                             onClick={() => {
                               setIsSearchPopupOpen(false);
-                              if (cat === "Mentors") { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400); }
+                              if (cat === "Advisors") { navigateTo("about"); setTimeout(() => document.getElementById("advisory-section")?.scrollIntoView({ behavior: "smooth" }), 400); }
                               else if (cat === "Articles") { navigateTo("home"); setTimeout(() => document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" }), 400); }
                               else { navigateTo("student"); setSearchQuery(cat); setStudentDashboardTab("upcoming"); }
                             }}
@@ -2682,165 +2682,16 @@ export default function App() {
             </div>
           </section>
 
-          {/* VISION & MISSION BLOCKS */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              
-              {/* Vision block */}
-              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-                <div className="absolute top-0 left-0 w-2 h-full bg-[#00629B]"></div>
-                <div>
-                  <div className="inline-flex p-3 bg-sky-50 text-[#00629B] rounded-xl mb-6">
-                    <Globe className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-4 font-display">Chapter Vision</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    {ABOUT_CONTENT.aboutIntro.chapterVision}
-                  </p>
-                </div>
-                <div className="text-xs text-[#00629B] font-bold font-mono tracking-wider uppercase mt-8 block">IEEE EPS BVRIT - VISION 2026-2030</div>
-              </div>
-
-              {/* Mission block */}
-              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-                <div className="absolute top-0 left-0 w-2 h-full bg-[#004B75]"></div>
-                <div>
-                  <div className="inline-flex p-3 bg-slate-100 text-[#004B75] rounded-xl mb-6">
-                    <Award className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-4 font-display">Chapter Mission</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    {ABOUT_CONTENT.aboutIntro.chapterMission}
-                  </p>
-                </div>
-                <div className="text-xs text-[#004B75] font-bold font-mono tracking-wider uppercase mt-8 block">IEEE EPS BVRIT - CORE OBJECTIVE</div>
-              </div>
-
-            </div>
-          </section>
-
-          {/* EDUCATIONAL METRICS EXPLANATION - WHAT IS PACKAGING */}
-          <section className="py-16 bg-slate-900 text-white rounded-3xl max-w-7xl mx-auto px-6 sm:px-12 relative overflow-hidden">
-            <div className="absolute left-0 bottom-0 opacity-5 pointer-events-none">
-              <Cpu className="w-96 h-96" />
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-12 relative z-10 items-center">
-              <div className="space-y-6">
-                <span className="text-xs font-bold text-sky-400 uppercase tracking-widest font-display">The Next Computing Frontier</span>
-                <h3 className="text-2xl sm:text-3.5xl font-extrabold tracking-tight font-display text-white">
-                  {ABOUT_CONTENT.whatIsPackaging.title}
-                </h3>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  {ABOUT_CONTENT.whatIsPackaging.explanation}
-                </p>
-                
-                <div className="pt-4 border-t border-slate-800">
-                  <p className="text-xs italic text-slate-400">
-                    "Packaging is where chemistry, physical mechanics, heat dissipation algorithms & VLSI join forces."
-                  </p>
-                </div>
-              </div>
-
-              {/* Visual Metrics list */}
-              <div className="grid sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-1 gap-6">
-                {ABOUT_CONTENT.whatIsPackaging.highlights.map((hlt, hIdx) => (
-                  <div key={hIdx} className="bg-white/5 border border-white/10 p-5 rounded-2xl flex items-start gap-4">
-                    <div className="text-2xl sm:text-3xl font-black text-amber-400 font-display shrink-0 mt-0.5 leading-none">
-                      {hlt.metric}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white mb-1 font-display">{hlt.label}</h4>
-                      <p className="text-slate-400 text-xs leading-relaxed">{hlt.detail}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
           {/* FACULTY AND STUDENT ADVISORS COMMITTEE */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <section id="advisory-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
               <span className="text-xs font-bold text-[#00629B] tracking-widest uppercase block font-display">Chapter Leadership</span>
               <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-display">{ABOUT_CONTENT.committee.title}</h2>
               <p className="text-slate-500 text-sm sm:text-base leading-relaxed">{ABOUT_CONTENT.committee.subtitle}</p>
             </div>
 
-            {/* CHAPTER MENTORS BLOCK */}
-            <div className="space-y-6">
-              <div className="border-b border-slate-200 pb-3">
-                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 font-display">
-                  <Award className="w-5 h-5 text-[#00629B]" />
-                  <span>Mentors</span>
-                </h3>
-              </div>
-
-              <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  {
-                    name: "Dr. Sanjay Dubey",
-                    role: "Professor & Principal",
-                    email: "sanjay.dubey@bvrit.ac.in",
-                    image: mentorSanjayImg,
-                    qualifications: "B.E. (ECE), M.Tech. (WMC, JNTUH), Ph.D. (JNTUH on FPGA based Robotics)",
-                    linkedin: "https://www.linkedin.com/in/sanjay-dubey?utm_source=share_via&utm_content=profile&utm_medium=member_android"
-                  },
-                  {
-                    name: "Dr. B.R. Sanjeeva Reddy",
-                    role: "Professor & HoD ECE",
-                    email: "hod.ece@bvrit.ac.in",
-                    image: mentorSanjeevaImg,
-                    qualifications: "B.E. (ECE), M.Tech. (Microwave Engg, COEP), Ph.D. (NIT Warangal on RF & Microwaves)",
-                    linkedin: "https://www.linkedin.com/in/sanjeev-reddy-b-r-46a75439?utm_source=share_via&utm_content=profile&utm_medium=member_android"
-                  },
-                  {
-                    name: "Dr. B. Naresh Kumar",
-                    role: "Assistant Professor, ECE Dept.",
-                    email: "nareshkumar.b@bvrit.ac.in",
-                    image: mentorNareshImg,
-                    qualifications: "B.Tech. (ECE), M.Tech. (ECE, JNTUH), Ph.D. (Lovely Professional University, 2024)",
-                    linkedin: "https://www.linkedin.com/in/dr-b-naresh-kumar-9979aa337?utm_source=share_via&utm_content=profile&utm_medium=member_android"
-                  }
-                ].map((member, fIdx) => (
-                  <div key={fIdx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-md transition text-center items-center">
-                    <div className="w-36 h-44 rounded-xl bg-slate-50 overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center shrink-0">
-                      <img 
-                        src={member.image} 
-                        alt={member.name} 
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
-                      />
-                    </div>
-
-                    <div className="space-y-3 flex-grow flex flex-col justify-between w-full">
-                      <div className="space-y-2">
-                        <div>
-                          <strong className="block text-slate-800 text-base font-display leading-tight">{member.name}</strong>
-                          <span className="text-[11px] font-semibold text-[#00629B] block mt-0.5">{member.role}</span>
-                        </div>
-                        <div className="text-[11px] text-slate-600 space-y-1">
-                          <p className="leading-relaxed"><strong>Qual:</strong> {member.qualifications}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-center gap-4 text-xs mt-auto">
-                        <a href={`mailto:${member.email}`} className="text-slate-500 hover:text-[#00629B] p-1 rounded hover:bg-slate-50 transition" title={member.email}>
-                          <Mail className="w-4 h-4" />
-                        </a>
-                        {member.linkedin && (
-                          <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-[#0A66C2] p-1 rounded hover:bg-slate-50 transition" title="LinkedIn Profile">
-                            <Linkedin className="w-4 h-4" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* FACULTY ADVISORS BLOCK */}
-            <div className="space-y-6 pt-6">
+            <div className="space-y-6">
               <div className="border-b border-slate-200 pb-3">
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 font-display">
                   <GraduationCap className="w-5 h-5 text-[#00629B]" />
@@ -2857,6 +2708,30 @@ export default function App() {
                     image: facultyGnaneshwaraImg,
                     qualifications: "B.Tech (ECE – Jatipita College of Engg, 2006), M.Tech (VLSI – VNR VJIET, 2010), Ph.D (K L University, Vijayawada)",
                     linkedin: "https://www.linkedin.com/in/dr-gnaneshwara-chary-udari-05577176?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                  },
+                  {
+                    name: "Dr. B.R. Sanjeeva Reddy",
+                    role: "Professor & HoD ECE",
+                    email: "hod.ece@bvrit.ac.in",
+                    image: mentorSanjeevaImg,
+                    qualifications: "B.E. (ECE), M.Tech. (Microwave Engg, COEP), Ph.D. (NIT Warangal on RF & Microwaves)",
+                    linkedin: "https://www.linkedin.com/in/sanjeev-reddy-b-r-46a75439?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                  },
+                  {
+                    name: "Dr. B. Naresh Kumar",
+                    role: "Assistant Professor, ECE Dept.",
+                    email: "nareshkumar.b@bvrit.ac.in",
+                    image: mentorNareshImg,
+                    qualifications: "B.Tech. (ECE), M.Tech. (ECE, JNTUH), Ph.D. (Lovely Professional University, 2024)",
+                    linkedin: "https://www.linkedin.com/in/dr-b-naresh-kumar-9979aa337?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                  },
+                  {
+                    name: "Dr. Sanjay Dubey",
+                    role: "Professor & Principal",
+                    email: "sanjay.dubey@bvrit.ac.in",
+                    image: mentorSanjayImg,
+                    qualifications: "B.E. (ECE), M.Tech. (WMC, JNTUH), Ph.D. (JNTUH on FPGA based Robotics)",
+                    linkedin: "https://www.linkedin.com/in/sanjay-dubey?utm_source=share_via&utm_content=profile&utm_medium=member_android"
                   },
                   {
                     name: "Mr. T P Kausalya Nandan",
@@ -2962,8 +2837,82 @@ export default function App() {
             </div>
           </section>
 
+          {/* VISION & MISSION BLOCKS */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              
+              {/* Vision block */}
+              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+                <div className="absolute top-0 left-0 w-2 h-full bg-[#00629B]"></div>
+                <div>
+                  <div className="inline-flex p-3 bg-sky-50 text-[#00629B] rounded-xl mb-6">
+                    <Globe className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-4 font-display">Chapter Vision</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    {ABOUT_CONTENT.aboutIntro.chapterVision}
+                  </p>
+                </div>
+                <div className="text-xs text-[#00629B] font-bold font-mono tracking-wider uppercase mt-8 block">IEEE EPS BVRIT - VISION 2026-2030</div>
+              </div>
 
+              {/* Mission block */}
+              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+                <div className="absolute top-0 left-0 w-2 h-full bg-[#004B75]"></div>
+                <div>
+                  <div className="inline-flex p-3 bg-slate-100 text-[#004B75] rounded-xl mb-6">
+                    <Award className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-4 font-display">Chapter Mission</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    {ABOUT_CONTENT.aboutIntro.chapterMission}
+                  </p>
+                </div>
+                <div className="text-xs text-[#004B75] font-bold font-mono tracking-wider uppercase mt-8 block">IEEE EPS BVRIT - CORE OBJECTIVE</div>
+              </div>
 
+            </div>
+          </section>
+
+          {/* EDUCATIONAL METRICS EXPLANATION - WHAT IS PACKAGING */}
+          <section className="py-16 bg-slate-900 text-white rounded-3xl max-w-7xl mx-auto px-6 sm:px-12 relative overflow-hidden">
+            <div className="absolute left-0 bottom-0 opacity-5 pointer-events-none">
+              <Cpu className="w-96 h-96" />
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-12 relative z-10 items-center">
+              <div className="space-y-6">
+                <span className="text-xs font-bold text-sky-400 uppercase tracking-widest font-display">The Next Computing Frontier</span>
+                <h3 className="text-2xl sm:text-3.5xl font-extrabold tracking-tight font-display text-white">
+                  {ABOUT_CONTENT.whatIsPackaging.title}
+                </h3>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  {ABOUT_CONTENT.whatIsPackaging.explanation}
+                </p>
+                
+                <div className="pt-4 border-t border-slate-800">
+                  <p className="text-xs italic text-slate-400">
+                    "Packaging is where chemistry, physical mechanics, heat dissipation algorithms & VLSI join forces."
+                  </p>
+                </div>
+              </div>
+
+              {/* Visual Metrics list */}
+              <div className="grid sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-1 gap-6">
+                {ABOUT_CONTENT.whatIsPackaging.highlights.map((hlt, hIdx) => (
+                  <div key={hIdx} className="bg-white/5 border border-white/10 p-5 rounded-2xl flex items-start gap-4">
+                    <div className="text-2xl sm:text-3xl font-black text-amber-400 font-display shrink-0 mt-0.5 leading-none">
+                      {hlt.metric}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white mb-1 font-display">{hlt.label}</h4>
+                      <p className="text-slate-400 text-xs leading-relaxed">{hlt.detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         </motion.div>
       )}
 
@@ -3175,10 +3124,10 @@ export default function App() {
               </div>
 
               {/* Tab selectors for Admin Panel */}
-              <div className="flex border-b border-slate-200 mt-2 mb-6">
+              <div className="flex overflow-x-auto whitespace-nowrap border-b border-slate-200 mt-2 mb-6 no-scrollbar">
                 <button
                   onClick={() => setAdminTab("enquiries")}
-                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer shrink-0 ${
                     adminTab === "enquiries"
                       ? "border-[#00629B] text-[#00629B]"
                       : "border-transparent text-slate-500 hover:text-slate-700"
@@ -3188,7 +3137,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setAdminTab("announcements")}
-                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer shrink-0 ${
                     adminTab === "announcements"
                       ? "border-[#00629B] text-[#00629B]"
                       : "border-transparent text-slate-500 hover:text-slate-700"
@@ -3198,7 +3147,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setAdminTab("ticker")}
-                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer shrink-0 ${
                     adminTab === "ticker"
                       ? "border-[#00629B] text-[#00629B]"
                       : "border-transparent text-slate-500 hover:text-slate-700"
@@ -3208,7 +3157,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setAdminTab("carousel")}
-                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer shrink-0 ${
                     adminTab === "carousel"
                       ? "border-[#00629B] text-[#00629B]"
                       : "border-transparent text-slate-500 hover:text-slate-700"
@@ -3218,7 +3167,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setAdminTab("gallery")}
-                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                  className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer shrink-0 ${
                     adminTab === "gallery"
                       ? "border-[#00629B] text-[#00629B]"
                       : "border-transparent text-slate-500 hover:text-slate-700"
@@ -3240,7 +3189,7 @@ export default function App() {
                 {isAdminEmail(loggedInAdminEmail) && (
                   <button
                     onClick={() => setAdminTab("pending-requests")}
-                    className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer ${
+                    className={`px-6 py-3 font-bold text-sm border-b-2 transition cursor-pointer shrink-0 ${
                       adminTab === "pending-requests"
                         ? "border-[#00629B] text-[#00629B]"
                         : "border-transparent text-slate-500 hover:text-slate-700"
