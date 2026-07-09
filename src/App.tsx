@@ -337,7 +337,7 @@ export default function App() {
     category: string;
   }>>(() => {
     const saved = localStorage.getItem("ieee_gallery_images");
-    if (saved) {
+    if (saved && !saved.includes("unsplash.com")) {
       try {
         return JSON.parse(saved);
       } catch (e) {
@@ -347,30 +347,30 @@ export default function App() {
     return [
       {
         id: "gal-1",
-        title: "Hands-on Modeling Session",
-        caption: "Students analyzing thermodynamic plots of 3D package stacks.",
-        url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80",
+        title: "DIP Package Structure",
+        caption: "Detailed cross-section view of a Dual In-line Package (DIP) showing wirebonding, die, and leadframe layout.",
+        url: "/gallery-dip.png?v=1.1",
         category: "Workshops"
       },
       {
         id: "gal-2",
-        title: "Chapter Orientation 2026",
-        caption: "A huge turnout of engineering enthusiasts for our initial EPS roadmap briefing.",
-        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=600&q=80",
-        category: "Inauguration"
+        title: "Flip Chip Assembly Layout",
+        caption: "Cross-section showing flip-chip die attach with underfill, micro-bumps, and BGA solder ball configuration.",
+        url: "/gallery-flipchip.png?v=1.1",
+        category: "Workshops"
       },
       {
         id: "gal-3",
-        title: "Micro-PCB Solder Workshop",
-        caption: "Getting hands-on precision soldering with standard lead-free substrates.",
-        url: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80",
+        title: "Paper Packaging Design Layout",
+        caption: "Full design outline template for custom 3D packaging boxes.",
+        url: "/gallery-pkgdesign.png?v=1.1",
         category: "Workshops"
       },
       {
         id: "gal-4",
-        title: "Industry Expert Virtual Meet",
-        caption: "Virtual roundtable discussing Advanced Packaging innovations with Silicon Valley mentors.",
-        url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
+        title: "2.5D Packaging Schematic",
+        caption: "Modern multi-die package stack architecture featuring Silicon Interposer, TSVs, and RDL routing layer.",
+        url: "/gallery-2.5d.png?v=1.1",
         category: "Seminars"
       }
     ];
@@ -1944,7 +1944,7 @@ export default function App() {
             </div>
 
             {/* Row 2 on Mobile, Center on Desktop: Navigation Links (Scrollable on mobile) */}
-            <div className="flex items-center justify-start sm:justify-center w-full sm:h-full gap-0 overflow-x-auto no-scrollbar scroll-smooth px-4 sm:px-2 border-t border-slate-100 sm:border-none pt-1 sm:pt-0">
+            <div className="flex items-center justify-start sm:justify-center w-full sm:h-full gap-0 overflow-x-auto whitespace-nowrap no-scrollbar scroll-smooth px-4 sm:px-2 border-t border-slate-100 sm:border-none pt-1 sm:pt-0">
               {[
                 {
                   id: "home",

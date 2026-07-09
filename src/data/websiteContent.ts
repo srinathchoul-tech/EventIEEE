@@ -247,7 +247,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A04R1@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/charansaitej-voorugonda",
-        image: "/student-charansaitej.png"
+        image: "/student-charansaitej.png?v=1.1"
       },
       {
         name: "Sai Aashrita Vasagiri",
@@ -255,7 +255,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A04Q3@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/vasagiri-sai-aashrita-b41bb6327?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-aashrita.jpg"
+        image: "/student-aashrita.jpg?v=1.1"
       },
       {
         name: "Vaishnavi Cherukuri",
@@ -263,7 +263,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A0452@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/vaishnavi-cherukuri-b6aa5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-vaishnavi.jpg"
+        image: "/student-vaishnavi.jpg?v=1.1"
       },
       {
         name: "SREEJAN GOUD ROUTHU",
@@ -271,7 +271,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A04M8@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/sreejan-goud-routhu-15ba4033b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-sreejan.jpg"
+        image: "/student-sreejan.jpg?v=1.1"
       },
       {
         name: "P V Lalith Surya",
@@ -279,7 +279,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A04G9@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/pv-lalith-surya-577ab733b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-lalith.jpg"
+        image: "/student-lalith.jpg?v=1.1"
       },
       {
         name: "BANDI REDDAPPA VENKATESH",
@@ -287,7 +287,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A0423@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/bandireddappa-venkatesh-889a3533b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-venkatesh.jpg"
+        image: "/student-venkatesh.jpg?v=1.1"
       },
       {
         name: "HASINI PRIYA AVULA",
@@ -295,7 +295,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A0418@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/avula-hasini-priya-7aa98433b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-hasini.jpg"
+        image: "/student-hasini.jpg?v=1.1"
       },
       {
         name: "Patlolla Rushitha",
@@ -303,7 +303,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A04H9@bvritr.ac.in",
         linkedin: "https://www.linkedin.com/in/rushitha-p-6a8a5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-rushitha.png"
+        image: "/student-rushitha.png?v=1.1"
       },
       {
         name: "AISHWARYA BATINI",
@@ -311,7 +311,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A0429@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/aishwarya-batini-ab40a5340?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-aishwarya.jpg"
+        image: "/student-aishwarya.jpg?v=1.1"
       },
       {
         name: "Bhaskar Akshaya",
@@ -319,7 +319,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211a0437@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/bhaskar-akshaya-42098933b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-akshaya.jpg"
+        image: "/student-akshaya.jpg?v=1.1"
       },
       {
         name: "YOGESH BALINENI",
@@ -327,7 +327,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A0421@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/yogesh-chandra-5b5682331?utm_source=share_via&utm_content=profile&utm_medium=member_ios",
-        image: "/student-yogesh.jpg"
+        image: "/student-yogesh.jpg?v=1.1"
       },
       {
         name: "Niharika Rathod",
@@ -335,7 +335,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A04K3@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/niharika-rathod-14a681223?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-niharika.jpg"
+        image: "/student-niharika.jpg?v=1.1"
       },
       {
         name: "Choul Srinath",
@@ -343,7 +343,7 @@ export const ABOUT_CONTENT = {
         department: "CSE, 3rd year",
         email: "24211a05b5@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/srinathchoul/",
-        image: "/student-srinath.jpg"
+        image: "/student-srinath.jpg?v=1.1"
       }
     ]
   },
@@ -354,24 +354,24 @@ export const ABOUT_CONTENT = {
     subtitle: "Visual highlights from our lab sessions, guest lectures, student campaigns, and group photos.",
     images: [
       {
-        title: "Hands-on Modeling Session",
-        caption: "Students analyzing thermodynamic plots of 3D package stacks.",
-        url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80"
+        title: "DIP Package Structure",
+        caption: "Detailed cross-section view of a Dual In-line Package (DIP) showing wirebonding, die, and leadframe layout.",
+        url: "/gallery-dip.png"
       },
       {
-        title: "Chapter Orientation 2026",
-        caption: "A huge turnout of engineering enthusiasts for our initial EPS roadmap briefing.",
-        url: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=600&q=80"
+        title: "Flip Chip Assembly Layout",
+        caption: "Cross-section showing flip-chip die attach with underfill, micro-bumps, and BGA solder ball configuration.",
+        url: "/gallery-flipchip.png"
       },
       {
-        title: "Micro-PCB Solder Workshop",
-        caption: "Getting hands-on precision soldering with standard lead-free substrates.",
-        url: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80"
+        title: "Paper Packaging Design Layout",
+        caption: "Full design outline template for custom 3D packaging boxes.",
+        url: "/gallery-pkgdesign.png"
       },
       {
-        title: "Industry Expert Virtual Meet",
-        caption: "Virtual roundtable discussing Advanced Packaging innovations with Silicon Valley mentors.",
-        url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80"
+        title: "2.5D Packaging Schematic",
+        caption: "Modern multi-die package stack architecture featuring Silicon Interposer, TSVs, and RDL routing layer.",
+        url: "/gallery-2.5d.png"
       }
     ]
   }
