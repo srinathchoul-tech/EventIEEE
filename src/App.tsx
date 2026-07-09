@@ -4733,7 +4733,7 @@ export default function App() {
                             <img
                               src={img.url}
                               alt={img.title}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              className="w-full h-full object-contain p-4 bg-white transition-transform duration-700 group-hover:scale-105"
                               loading="lazy"
                             />
                           ) : (
