@@ -74,7 +74,7 @@ import facultyPrasannaImg from "../assets/faculty-prasanna.jpg";
 import aboutBvritImg from "../assets/about-bvrit.jpg";
 import aboutHyderabadImg from "../assets/about-hyderabad.png";
 import { db, auth, isFirebaseEnabled } from "./firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, updateDoc, setDoc, getDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 // Import all local dataset for ease of modification
@@ -675,8 +675,79 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Synchronize website config parameters with Firebase Firestore Cloud Database
+  const fetchCloudConfig = async () => {
+    if (!isFirebaseEnabled || !db) return;
+    try {
+      // 1. Ticker text
+      const tickerDoc = await getDoc(doc(db, "settings", "ticker"));
+      if (tickerDoc.exists()) {
+        const text = tickerDoc.data().text;
+        setTickerText(text);
+        localStorage.setItem("ieee_ticker_text", text);
+      } else {
+        await setDoc(doc(db, "settings", "ticker"), { text: "🎓 Chief Guest: Dr. Srinivas Prasad, Lead Packaging Architect at Intel/AMD Hyderabad visiting campus! | 🔥 IEEE EPS BVRIT Student Chapter Launch on June 15, 2026! | 🚀 Register as an organizer at the Chapter Enrollment Desk below! | 💡 Sub-group signups for Advanced Packaging & Thermal Systems Co-Design are now open!" });
+      }
+
+      // 2. Announcements
+      const annSnapshot = await getDocs(collection(db, "announcements"));
+      if (!annSnapshot.empty) {
+        const annList = annSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setAnnouncements(annList as any);
+        localStorage.setItem("ieee_announcements", JSON.stringify(annList));
+      } else {
+        for (const ann of announcements) {
+          const { id, ...data } = ann;
+          await setDoc(doc(db, "announcements", id), data);
+        }
+      }
+
+      // 3. Carousel
+      const carSnapshot = await getDocs(collection(db, "carousel"));
+      if (!carSnapshot.empty) {
+        const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setCarouselImages(carList as any);
+        localStorage.setItem("ieee_carousel_images", JSON.stringify(carList));
+      } else {
+        for (const slide of carouselImages) {
+          const { id, ...data } = slide;
+          await setDoc(doc(db, "carousel", id), data);
+        }
+      }
+
+      // 4. Competitions
+      const compSnapshot = await getDocs(collection(db, "competitions"));
+      if (!compSnapshot.empty) {
+        const compList = compSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setCompetitions(compList as any);
+        localStorage.setItem("ieee_competitions", JSON.stringify(compList));
+      } else {
+        for (const comp of competitions) {
+          const { id, ...data } = comp;
+          await setDoc(doc(db, "competitions", id), data);
+        }
+      }
+
+      // 5. Gallery
+      const galSnapshot = await getDocs(collection(db, "gallery"));
+      if (!galSnapshot.empty) {
+        const galList = galSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setGalleryImages(galList as any);
+        localStorage.setItem("ieee_gallery_images", JSON.stringify(galList));
+      } else {
+        for (const img of galleryImages) {
+          const { id, ...data } = img;
+          await setDoc(doc(db, "gallery", id), data);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to sync website config from Firestore:", err);
+    }
+  };
+
   // Load Student Portal data from local storage on mount
   useEffect(() => {
+    fetchCloudConfig();
     const savedUsers = localStorage.getItem("ieee_student_users");
     if (savedUsers) {
       try {
@@ -985,7 +1056,7 @@ export default function App() {
     setShowGalleryAddEditModal("edit");
   };
 
-  const handleSaveGalleryImage = (e: any) => {
+  const handleSaveGalleryImage = async (e: any) => {
     e.preventDefault();
     if (!galleryFormTitle.trim() || !galleryFormCaption.trim() || !galleryFormUrl.trim()) {
       setGalleryFormError("Please fill in all fields and upload/provide an image.");
@@ -993,14 +1064,27 @@ export default function App() {
     }
 
     if (showGalleryAddEditModal === "add") {
+      const imgId = "gal-" + Date.now();
       const newImg = {
-        id: "gal-" + Date.now(),
+        id: imgId,
         title: galleryFormTitle.trim(),
         caption: galleryFormCaption.trim(),
         category: galleryFormCategory,
         url: galleryFormUrl
       };
       setGalleryImages([newImg, ...galleryImages]);
+      if (isFirebaseEnabled && db) {
+        try {
+          await setDoc(doc(db, "gallery", imgId), {
+            title: newImg.title,
+            caption: newImg.caption,
+            category: newImg.category,
+            url: newImg.url
+          });
+        } catch (err) {
+          console.error("Failed to save gallery image to Firestore:", err);
+        }
+      }
       setGalleryNotification({ type: "success", message: "Photo added successfully to the gallery!" });
     } else if (showGalleryAddEditModal === "edit" && editingGalleryImage) {
       const updated = galleryImages.map((img) => 
@@ -1015,6 +1099,18 @@ export default function App() {
           : img
       );
       setGalleryImages(updated);
+      if (isFirebaseEnabled && db && editingGalleryImage.id) {
+        try {
+          await setDoc(doc(db, "gallery", editingGalleryImage.id), {
+            title: galleryFormTitle.trim(),
+            caption: galleryFormCaption.trim(),
+            category: galleryFormCategory,
+            url: galleryFormUrl
+          });
+        } catch (err) {
+          console.error("Failed to update gallery image in Firestore:", err);
+        }
+      }
       setGalleryNotification({ type: "success", message: "Photo details updated successfully!" });
     }
 
@@ -1022,10 +1118,17 @@ export default function App() {
     setEditingGalleryImage(null);
   };
 
-  const handleDeleteGalleryImage = (id: string) => {
+  const handleDeleteGalleryImage = async (id: string) => {
     if (confirm("Are you sure you want to delete this photo from the gallery?")) {
       const updated = galleryImages.filter((img) => img.id !== id);
       setGalleryImages(updated);
+      if (isFirebaseEnabled && db) {
+        try {
+          await deleteDoc(doc(db, "gallery", id));
+        } catch (err) {
+          console.error("Failed to delete gallery image from Firestore:", err);
+        }
+      }
       setGalleryNotification({ type: "success", message: "Photo deleted successfully from the gallery!" });
     }
   };
@@ -1494,15 +1597,16 @@ export default function App() {
   };
 
   // Create Competition / Opportunity
-  const handleCreateCompetition = (e: FormEvent) => {
+  const handleCreateCompetition = async (e: FormEvent) => {
     e.preventDefault();
     if (!competitionFormData.title || !competitionFormData.googleFormUrl) {
       showToast("Please fill in all required fields.", "warning");
       return;
     }
 
+    const compId = "comp-" + Date.now();
     const newComp = {
-      id: "comp-" + Date.now(),
+      id: compId,
       title: competitionFormData.title,
       category: competitionFormData.category,
       desc: competitionFormData.desc,
@@ -1516,6 +1620,23 @@ export default function App() {
     const updatedComps = [...competitions, newComp];
     setCompetitions(updatedComps);
     localStorage.setItem("ieee_competitions", JSON.stringify(updatedComps));
+
+    if (isFirebaseEnabled && db) {
+      try {
+        await setDoc(doc(db, "competitions", compId), {
+          title: newComp.title,
+          category: newComp.category,
+          desc: newComp.desc,
+          date: newComp.date,
+          cost: newComp.cost,
+          googleFormUrl: newComp.googleFormUrl,
+          results: "",
+          status: "Upcoming"
+        });
+      } catch (err) {
+        console.error("Failed to save opportunity to Firestore:", err);
+      }
+    }
 
     // Reset Form
     setCompetitionFormData({
@@ -1531,10 +1652,17 @@ export default function App() {
   };
 
   // Delete Competition
-  const handleDeleteCompetition = (compId: string) => {
+  const handleDeleteCompetition = async (compId: string) => {
     const updatedComps = competitions.filter(c => c.id !== compId);
     setCompetitions(updatedComps);
     localStorage.setItem("ieee_competitions", JSON.stringify(updatedComps));
+    if (isFirebaseEnabled && db) {
+      try {
+        await deleteDoc(doc(db, "competitions", compId));
+      } catch (err) {
+        console.error("Failed to delete opportunity from Firestore:", err);
+      }
+    }
     showToast("Opportunity deleted successfully.", "info");
   };
 
@@ -1630,7 +1758,7 @@ export default function App() {
   };
 
   // Save Competition Results / Prizes
-  const handleSaveResults = (compId: string) => {
+  const handleSaveResults = async (compId: string) => {
     const updatedComps = competitions.map(c => {
       if (c.id === compId) {
         return { ...c, results: resultsInput };
@@ -1639,6 +1767,14 @@ export default function App() {
     });
     setCompetitions(updatedComps);
     localStorage.setItem("ieee_competitions", JSON.stringify(updatedComps));
+
+    if (isFirebaseEnabled && db) {
+      try {
+        await updateDoc(doc(db, "competitions", compId), { results: resultsInput });
+      } catch (err) {
+        console.error("Failed to update results in Firestore:", err);
+      }
+    }
     showToast(`Results updated for this opportunity.`, "success");
     setSelectedCompForResults(null);
     setResultsInput("");
@@ -3508,19 +3644,27 @@ export default function App() {
                     </h3>
 
                     <form 
-                      onSubmit={(e) => {
+                      onSubmit={async (e) => {
                         e.preventDefault();
                         if (!announcementFormData.title || !announcementFormData.date || !announcementFormData.speaker || !announcementFormData.location || !announcementFormData.description) {
                           setAdminNotification({ type: "error", message: "Please fill in all required announcement fields!" });
                           return;
                         }
+                        const annId = "evt-" + Date.now();
                         const newAnn = {
-                          id: "evt-" + Date.now(),
+                          id: annId,
                           ...announcementFormData
                         };
                         const updated = [newAnn, ...announcements];
                         setAnnouncements(updated);
                         localStorage.setItem("ieee_announcements", JSON.stringify(updated));
+                        if (isFirebaseEnabled && db) {
+                          try {
+                            await setDoc(doc(db, "announcements", annId), announcementFormData);
+                          } catch (err) {
+                            console.error("Failed to save announcement to Firestore:", err);
+                          }
+                        }
                         // reset form
                         setAnnouncementFormData({
                           title: "",
@@ -3692,11 +3836,18 @@ export default function App() {
                                   {ann.status}
                                 </span>
                                 <button
-                                  onClick={() => {
+                                  onClick={async () => {
                                     if (confirm(`Remove announcement "${ann.title}"?`)) {
                                       const updated = announcements.filter(a => a.id !== ann.id);
                                       setAnnouncements(updated);
                                       localStorage.setItem("ieee_announcements", JSON.stringify(updated));
+                                      if (isFirebaseEnabled && db && ann.id) {
+                                        try {
+                                          await deleteDoc(doc(db, "announcements", ann.id));
+                                        } catch (err) {
+                                          console.error("Failed to delete announcement from Firestore:", err);
+                                        }
+                                      }
                                     }
                                   }}
                                   className="text-slate-400 hover:text-red-600 transition p-1.5 rounded hover:bg-red-50 cursor-pointer"
@@ -3732,9 +3883,16 @@ export default function App() {
                   </p>
 
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
                       localStorage.setItem("ieee_ticker_text", tickerText);
+                      if (isFirebaseEnabled && db) {
+                        try {
+                          await setDoc(doc(db, "settings", "ticker"), { text: tickerText });
+                        } catch (err) {
+                          console.error("Failed to save ticker text to Firestore:", err);
+                        }
+                      }
                       setAdminNotification({ type: "success", message: "News ticker updated successfully! The new text is now live on the homepage." });
                     }}
                     className="space-y-4"
@@ -3772,17 +3930,28 @@ export default function App() {
                   </p>
 
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
                       if (!newCarouselUrl.trim()) return;
+                      const slideId = "slide-" + Date.now();
                       const newSlide = {
-                        id: "slide-" + Date.now(),
+                        id: slideId,
                         url: newCarouselUrl.trim(),
                         caption: newCarouselCaption.trim() || "Event Poster / Banner"
                       };
                       const updatedSlides = [...carouselImages, newSlide];
                       setCarouselImages(updatedSlides);
                       localStorage.setItem("ieee_carousel_images", JSON.stringify(updatedSlides));
+                      if (isFirebaseEnabled && db) {
+                        try {
+                          await setDoc(doc(db, "carousel", slideId), {
+                            url: newSlide.url,
+                            caption: newSlide.caption
+                          });
+                        } catch (err) {
+                          console.error("Failed to save slide to Firestore:", err);
+                        }
+                      }
                       setNewCarouselUrl("");
                       setNewCarouselCaption("");
                       showToast("New picture added to the carousel successfully!", "success");
@@ -3866,11 +4035,18 @@ export default function App() {
                               <div className="absolute top-2 right-2">
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={async () => {
                                     if (confirm("Are you sure you want to remove this slide?")) {
                                       const updated = carouselImages.filter(item => item.id !== slide.id);
                                       setCarouselImages(updated);
                                       localStorage.setItem("ieee_carousel_images", JSON.stringify(updated));
+                                      if (isFirebaseEnabled && db && slide.id) {
+                                        try {
+                                          await deleteDoc(doc(db, "carousel", slide.id));
+                                        } catch (err) {
+                                          console.error("Failed to delete slide from Firestore:", err);
+                                        }
+                                      }
                                       setCurrentCarouselIndex(0);
                                     }
                                   }}
