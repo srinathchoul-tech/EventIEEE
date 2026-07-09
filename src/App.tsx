@@ -1989,7 +1989,7 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[60px] sm:w-[85px]">
+                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[140px] sm:w-[220px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="Logo"
