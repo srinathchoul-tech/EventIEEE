@@ -1896,6 +1896,36 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  // Helper to extract uppercase initials from logged-in user names
+  const getUserInitials = () => {
+    if (isAdminLoggedIn) {
+      if (loggedInAdminEmail) {
+        const organizer = receivedEnquiries.find(
+          enq => enq.email?.toLowerCase() === loggedInAdminEmail.toLowerCase()
+        );
+        if (organizer && organizer.fullName) {
+          const names = organizer.fullName.trim().split(/\s+/);
+          if (names.length >= 2) {
+            return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+          }
+          return organizer.fullName.substr(0, 2).toUpperCase();
+        }
+      }
+      return "AD";
+    }
+    if (currentStudentUser) {
+      if (currentStudentUser.name) {
+        const names = currentStudentUser.name.trim().split(/\s+/);
+        if (names.length >= 2) {
+          return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+        }
+        return currentStudentUser.name.substr(0, 2).toUpperCase();
+      }
+      return "ST";
+    }
+    return "US";
+  };
+
   // Icon Converter helper for visual pillars
   const renderPillarIcon = (iconName: string) => {
     switch (iconName) {
@@ -2021,7 +2051,7 @@ export default function App() {
                       onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                       className="w-10 h-10 rounded-full bg-[#00629B]/10 hover:bg-[#00629B]/20 text-[#00629B] border-2 border-[#00629B]/30 flex items-center justify-center cursor-pointer transition-all relative"
                     >
-                      <span className="font-extrabold text-xs">{isAdminLoggedIn ? "AD" : (currentStudentUser?.name?.substr(0, 2).toUpperCase() || "ST")}</span>
+                      <span className="font-extrabold text-xs">{getUserInitials()}</span>
                       <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span>
                     </button>
                     <AnimatePresence>
@@ -2226,7 +2256,7 @@ export default function App() {
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                     className="w-10 h-10 rounded-full bg-[#00629B]/10 hover:bg-[#00629B]/20 text-[#00629B] border-2 border-[#00629B]/30 flex items-center justify-center cursor-pointer transition-all relative"
                   >
-                    <span className="font-extrabold text-xs">{isAdminLoggedIn ? "AD" : (currentStudentUser?.name?.substr(0, 2).toUpperCase() || "ST")}</span>
+                    <span className="font-extrabold text-xs">{getUserInitials()}</span>
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span>
                   </button>
                   <AnimatePresence>
@@ -3387,7 +3417,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 self-end md:self-auto shrink-0">
+                    <div className="flex flex-wrap gap-2 w-full justify-end md:w-auto md:justify-start shrink-0">
                       <button
                         onClick={fetchEnquiries}
                         className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition text-slate-600 flex items-center justify-center cursor-pointer"
@@ -4281,7 +4311,7 @@ export default function App() {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex gap-2 mt-4 pt-3 border-t border-slate-100">
+                              <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100">
                                 <button
                                   onClick={() => {
                                     setSelectedCompForRegs(comp);
