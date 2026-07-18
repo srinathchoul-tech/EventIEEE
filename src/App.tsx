@@ -1979,7 +1979,7 @@ export default function App() {
       <nav className={`fixed left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-md transition-all duration-300 ${
         currentPage === "home" ? "top-11" : "top-0"
       }`}>
-        <div className="max-w-full mx-auto px-4 sm:px-10 h-auto sm:h-[80px]">
+        <div className="max-w-full mx-auto pl-4 sm:pl-6 pr-4 sm:pr-10 h-auto sm:h-[80px]">
           <div className="flex flex-col sm:flex-row items-center justify-between h-full gap-2 sm:gap-4 py-2 sm:py-0">
 
             {/* Top Row on Mobile: Logo and Register Actions */}
@@ -1989,7 +1989,7 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[140px] sm:w-[220px]">
+                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[50px] sm:w-[70px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="Logo"
@@ -2335,85 +2335,19 @@ export default function App() {
           transition={{ duration: 0.4 }}
         >
 
-          {/* PICTURE PROFILE SECTION (DYNAMIC CAROUSEL SLIDESHOW) */}
-          {carouselImages.length > 0 && (
-            <section className="relative overflow-hidden bg-slate-950 h-[350px] sm:h-[450px] border-b border-slate-800">
-              {/* Picture/Slides container */}
-              <div className="relative w-full h-full">
-                {carouselImages.map((slide, idx) => (
-                  <div
-                    key={slide.id || idx}
-                    className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                      idx === currentCarouselIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-                    }`}
-                  >
-                    {isImageUrl(slide.url) ? (
-                      <img
-                        src={slide.url}
-                        alt={slide.caption}
-                        className="w-full h-full object-contain object-center"
-                      />
-                    ) : (
-                      <div 
-                        onClick={() => handleViewOrDownloadFile(slide.url, slide.caption)}
-                        className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-white p-6 gap-4 cursor-pointer"
-                      >
-                        <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 hover:scale-105 transition-transform duration-300">
-                          {getFileIcon(slide.url, "w-10 h-10")}
-                        </div>
-                        <div className="text-center space-y-1">
-                          <span className="text-[10px] uppercase font-black tracking-widest px-2 py-0.5 rounded bg-amber-500 text-slate-950">
-                            {getFileExtensionLabel(slide.url)} Document
-                          </span>
-                          <p className="text-xs text-slate-300 mt-1">Click anywhere on the slide to open / download the file</p>
-                        </div>
-                      </div>
-                    )}
-                    {/* Shadow overlay at bottom of photo for text legibility */}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent pt-24 pb-8 px-6 sm:px-12 text-left z-20">
-                      <p className="text-white text-base sm:text-2xl font-bold tracking-tight drop-shadow-md font-display leading-tight max-w-3xl">
-                        {slide.caption}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+          {/* PICTURE PROFILE SECTION (FALLBACK BANNER INSTEAD OF SLIDESHOW) */}
+          <section className="relative overflow-hidden bg-slate-950 h-[200px] sm:h-[260px] border-b border-slate-800 flex flex-col items-center justify-center text-center p-6 select-none">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,98,155,0.08),transparent)] pointer-events-none"></div>
+            <div className="space-y-2 z-10 animate-fade-in">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00629B]/10 text-[#00629B] text-[10px] font-black tracking-widest uppercase mb-1 border border-[#00629B]/20">
+                <span>IEEE EPS BVRIT Announcements</span>
               </div>
-
-              {/* Slider Left Arrow */}
-              <button
-                onClick={() => setCurrentCarouselIndex((prev) => (prev - 1 + carouselImages.length) % carouselImages.length)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/45 hover:bg-[#00629B]/80 text-white rounded-full transition-colors cursor-pointer border border-white/10 backdrop-blur-xs shadow-md"
-                aria-label="Previous Slide"
-              >
-                <ChevronRight className="w-5 h-5 rotate-180" />
-              </button>
-
-              {/* Slider Right Arrow */}
-              <button
-                onClick={() => setCurrentCarouselIndex((prev) => (prev + 1) % carouselImages.length)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-black/45 hover:bg-[#00629B]/80 text-white rounded-full transition-colors cursor-pointer border border-white/10 backdrop-blur-xs shadow-md"
-                aria-label="Next Slide"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-
-              {/* Dot Indicators */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-                {carouselImages.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentCarouselIndex(idx)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      idx === currentCarouselIndex 
-                        ? "bg-[#00629B] w-6" 
-                        : "bg-white/50 hover:bg-white"
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display uppercase tracking-wider">No Announcements</h3>
+              <p className="text-slate-400 text-xs sm:text-sm max-w-md mx-auto leading-relaxed font-medium">
+                There are no active posters or announcements published on the main banner at this moment. Stay tuned for future electronics packaging updates!
+              </p>
+            </div>
+          </section>
 
           {/* HOME HERO SECTION */}
           <section className="relative overflow-hidden bg-white border-b border-slate-100">
