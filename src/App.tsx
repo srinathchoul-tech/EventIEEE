@@ -4956,7 +4956,7 @@ export default function App() {
                               src={img.url}
                               alt={img.title}
                               className={`w-full h-full transition-transform duration-700 group-hover:scale-105 ${
-                                cat === "Inauguration" ? "object-contain p-2.5 bg-slate-50/60" : "object-contain p-4 bg-white"
+                                cat === "Inauguration" ? "object-cover" : "object-contain p-4 bg-white"
                               }`}
                               loading="lazy"
                             />
