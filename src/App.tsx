@@ -1979,34 +1979,47 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Helper to extract uppercase initials from logged-in user names
+  // Helper to extract uppercase first letter from logged-in user names
   const getUserInitials = () => {
     if (isAdminLoggedIn) {
       if (loggedInAdminEmail) {
+        // 1. Check static student committee
+        const committeeMember = ABOUT_CONTENT.committee.students.find(
+          s => s.email?.toLowerCase() === loggedInAdminEmail.toLowerCase()
+        );
+        if (committeeMember && committeeMember.name) {
+          return committeeMember.name.trim().charAt(0).toUpperCase();
+        }
+        
+        // 2. Check dynamic enquiries/organizers collection
         const organizer = receivedEnquiries.find(
           enq => enq.email?.toLowerCase() === loggedInAdminEmail.toLowerCase()
         );
         if (organizer && organizer.fullName) {
-          const names = organizer.fullName.trim().split(/\s+/);
-          if (names.length >= 2) {
-            return (names[0][0] + names[names.length - 1][0]).toUpperCase();
-          }
-          return organizer.fullName.substr(0, 2).toUpperCase();
+          return organizer.fullName.trim().charAt(0).toUpperCase();
+        }
+
+        // 3. Fallback to first letter of email username
+        const username = loggedInAdminEmail.split("@")[0];
+        if (username) {
+          return username.charAt(0).toUpperCase();
         }
       }
-      return "AD";
+      return "A";
     }
     if (currentStudentUser) {
       if (currentStudentUser.name) {
-        const names = currentStudentUser.name.trim().split(/\s+/);
-        if (names.length >= 2) {
-          return (names[0][0] + names[names.length - 1][0]).toUpperCase();
-        }
-        return currentStudentUser.name.substr(0, 2).toUpperCase();
+        return currentStudentUser.name.trim().charAt(0).toUpperCase();
       }
-      return "ST";
+      if (currentStudentUser.email) {
+        const username = currentStudentUser.email.split("@")[0];
+        if (username) {
+          return username.charAt(0).toUpperCase();
+        }
+      }
+      return "S";
     }
-    return "US";
+    return "U";
   };
 
   // Icon Converter helper for visual pillars
