@@ -2407,7 +2407,8 @@ export default function App() {
                       <marquee
                         direction="up"
                         scrollamount="2"
-                        className="h-full w-full"
+                        className="w-full"
+                        style={{ height: "320px" }}
                         onMouseOver={(e) => e.currentTarget.stop()}
                         onMouseOut={(e) => e.currentTarget.start()}
                       >
