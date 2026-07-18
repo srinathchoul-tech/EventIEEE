@@ -1989,11 +1989,11 @@ export default function App() {
                 className="flex items-center cursor-pointer select-none group" 
                 onClick={() => navigateTo("home")}
               >
-                <div className="relative shrink-0 flex items-center h-[50px] sm:h-[70px] w-[50px] sm:w-[70px]">
+                <div className="relative shrink-0 flex items-center h-[56px] sm:h-[76px] w-[90px] sm:w-[130px]">
                   <img 
                     src={combinedLogoImg} 
                     alt="Logo"
-                    className="h-full w-full object-contain hover:scale-105 transition-transform duration-300"
+                    className="h-full w-full object-contain object-left hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               </div>
@@ -2344,7 +2344,7 @@ export default function App() {
               </div>
               <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display uppercase tracking-wider">No Announcements</h3>
               <p className="text-slate-400 text-xs sm:text-sm max-w-md mx-auto leading-relaxed font-medium">
-                There are no active posters or announcements published on the main banner at this moment. Stay tuned for future electronics packaging updates!
+                Stay tuned for further updates
               </p>
             </div>
           </section>
