@@ -693,13 +693,12 @@ export default function App() {
       const annSnapshot = await getDocs(collection(db, "announcements"));
       if (!annSnapshot.empty) {
         const annList = annSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setAnnouncements(annList as any);
-        localStorage.setItem("ieee_announcements", JSON.stringify(annList));
+        const filteredAnnList = annList.filter(ann => ann.id !== "evt-initial");
+        setAnnouncements(filteredAnnList as any);
+        localStorage.setItem("ieee_announcements", JSON.stringify(filteredAnnList));
       } else {
-        for (const ann of announcements) {
-          const { id, ...data } = ann;
-          await setDoc(doc(db, "announcements", id), data);
-        }
+        setAnnouncements([]);
+        localStorage.setItem("ieee_announcements", JSON.stringify([]));
       }
 
       // 3. Carousel
@@ -787,26 +786,14 @@ export default function App() {
 
     // Load dynamic announcements
     const savedAnnouncements = localStorage.getItem("ieee_announcements");
-    if (savedAnnouncements) {
+    if (savedAnnouncements && !savedAnnouncements.includes("evt-initial")) {
       try {
         setAnnouncements(JSON.parse(savedAnnouncements));
       } catch (e) {
         console.error(e);
       }
     } else {
-      const defaultAnnouncements = [
-        {
-          id: "evt-initial",
-          status: "Upcoming",
-          date: "June 15, 2026",
-          title: "IEEE EPS BVRIT Student Chapter Launch & Orientation",
-          type: "Chapter Milestone",
-          speaker: "IEEE EPS BVRIT Core Committee",
-          location: "Seminar Hall 1, ECE Block, BVRIT",
-          description: "Join us for the grand launch of the IEEE Electronics Packaging Society Student Chapter at BVRIT Narsapur. Discover the exciting domain of semiconductor packaging, thermal co-design, chiplets, and dynamic student opportunities.",
-          image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80"
-        }
-      ];
+      const defaultAnnouncements: any[] = [];
       setAnnouncements(defaultAnnouncements);
       localStorage.setItem("ieee_announcements", JSON.stringify(defaultAnnouncements));
     }
