@@ -337,7 +337,7 @@ export default function App() {
     category: string;
   }>>(() => {
     const saved = localStorage.getItem("ieee_gallery_images");
-    if (saved && !saved.includes("unsplash.com")) {
+    if (saved && !saved.includes("unsplash.com") && saved.includes("Inauguration")) {
       try {
         return JSON.parse(saved);
       } catch (e) {
@@ -345,6 +345,90 @@ export default function App() {
       }
     }
     return [
+      {
+        id: "inaug-1",
+        title: "Inauguration Ceremony - Ribbon Cutting",
+        caption: "Official launch of the IEEE EPS Student Branch Chapter at BVRIT Narsapur.",
+        url: "/inauguration/1.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-2",
+        title: "Lighting the Lamp",
+        caption: "Auspicious lighting ceremony by our distinguished faculty and student coordinators.",
+        url: "/inauguration/2.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-3",
+        title: "Dignitaries Address",
+        caption: "Keynote speakers and advisory members sharing their vision for advanced packaging.",
+        url: "/inauguration/3.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-4",
+        title: "Core Committee Briefing",
+        caption: "Student leaders presenting the initial roadmap and focus areas of the society.",
+        url: "/inauguration/4.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-5",
+        title: "Audience & Chapter Members",
+        caption: "BVRIT ECE students and faculty attending the inaugural session.",
+        url: "/inauguration/5.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-6",
+        title: "Unveiling the Chapter Plaque",
+        caption: "Commemoration plaque unveiling by our distinguished advisors.",
+        url: "/inauguration/6.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-7",
+        title: "Keynote Presentation",
+        caption: "Expert lecture on semiconductor trends, microelectronics, and systems packaging.",
+        url: "/inauguration/7.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-8",
+        title: "Interactive Q&A Session",
+        caption: "Students engaging with faculty mentors and guest experts.",
+        url: "/inauguration/8.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-9",
+        title: "Advisory Panel Board",
+        caption: "Faculty advisors discussing the chapter schedule and planned workshops.",
+        url: "/inauguration/9.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-10",
+        title: "Student Committee Installation",
+        caption: "Induction ceremony for the newly installed student board members.",
+        url: "/inauguration/10.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-11",
+        title: "Faculty Mentors Felicitation",
+        caption: "Felicitation of the advisory board members for their guidance.",
+        url: "/inauguration/11.jpeg",
+        category: "Inauguration"
+      },
+      {
+        id: "inaug-12",
+        title: "Group Photo",
+        caption: "All delegates, faculty advisors, and student members at the inaugural ceremony.",
+        url: "/inauguration/12.jpeg",
+        category: "Inauguration"
+      },
       {
         id: "gal-1",
         title: "DIP Package Structure",
@@ -731,8 +815,20 @@ export default function App() {
       const galSnapshot = await getDocs(collection(db, "gallery"));
       if (!galSnapshot.empty) {
         const galList = galSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setGalleryImages(galList as any);
-        localStorage.setItem("ieee_gallery_images", JSON.stringify(galList));
+        if (galList.some(img => img.category === "Inauguration")) {
+          setGalleryImages(galList as any);
+          localStorage.setItem("ieee_gallery_images", JSON.stringify(galList));
+        } else {
+          // Merge local inauguration images into state and upload to Firestore
+          const localInauguration = galleryImages.filter(img => img.category === "Inauguration");
+          const merged = [...localInauguration, ...galList];
+          setGalleryImages(merged);
+          localStorage.setItem("ieee_gallery_images", JSON.stringify(merged));
+          for (const img of localInauguration) {
+            const { id, ...data } = img;
+            await setDoc(doc(db, "gallery", id), data);
+          }
+        }
       } else {
         for (const img of galleryImages) {
           const { id, ...data } = img;
@@ -4828,7 +4924,7 @@ export default function App() {
 
           {/* Salon-Style Organized Gallery: Grouped by Category */}
           <div className="space-y-16">
-            {["Seminars", "Workshops", "Inauguration", "Activities", "Other"].map((cat) => {
+            {["Inauguration", "Seminars", "Workshops", "Activities", "Other"].map((cat) => {
               const catImages = galleryImages.filter(img => img.category === cat);
               if (catImages.length === 0) return null;
 
@@ -4840,7 +4936,7 @@ export default function App() {
                     <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-full">{catImages.length} Photos</span>
                   </div>
 
-                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {catImages.map((img, idx) => (
                       <motion.div
                         key={img.id}
@@ -4852,16 +4948,16 @@ export default function App() {
                           if (isImageUrl(img.url)) setLightboxImage(img);
                           else handleViewOrDownloadFile(img.url, img.title);
                         }}
-                        className={`break-inside-avoid relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer group ${
-                          idx % 3 === 0 ? "aspect-[4/5]" : idx % 2 === 0 ? "aspect-square" : "aspect-[4/3]"
-                        }`}
+                        className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer group aspect-[4/3]"
                       >
                         <div className="h-full w-full">
                           {isImageUrl(img.url) ? (
                             <img
                               src={img.url}
                               alt={img.title}
-                              className="w-full h-full object-contain p-4 bg-white transition-transform duration-700 group-hover:scale-105"
+                              className={`w-full h-full transition-transform duration-700 group-hover:scale-105 ${
+                                cat === "Inauguration" ? "object-cover" : "object-contain p-4 bg-white"
+                              }`}
                               loading="lazy"
                             />
                           ) : (
