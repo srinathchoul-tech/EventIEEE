@@ -731,7 +731,7 @@ export default function App() {
   useEffect(() => {
     if (isFirebaseEnabled && auth) {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
+        if (user && user.email && isUserAuthorizedForAdmin(user.email)) {
           setIsAdminLoggedIn(true);
           setLoggedInAdminEmail(user.email || "");
           localStorage.setItem("ieee_is_admin_logged_in", "true");
@@ -1279,11 +1279,18 @@ export default function App() {
 
     if (isFirebaseEnabled && auth) {
       try {
-        await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-        setIsAdminLoggedIn(true);
-        setAdminEmail("");
-        setAdminPassword("");
-        fetchEnquiries();
+        const userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+        const email = userCredential.user.email || "";
+        if (isUserAuthorizedForAdmin(email)) {
+          setIsAdminLoggedIn(true);
+          setAdminEmail("");
+          setAdminPassword("");
+          fetchEnquiries();
+        } else {
+          await signOut(auth);
+          setIsAdminLoggedIn(false);
+          setAuthError("Access denied. Your account is not authorized to access the Admin Console.");
+        }
       } catch (err: any) {
         console.error(err);
         let readableMsg = "Authentication failed. Check your details and try again.";
@@ -1597,12 +1604,7 @@ export default function App() {
         if (user && user.email) {
           const emailLower = user.email.toLowerCase();
           
-          // Verify if they are in the database/approvals or is the default admin
-          const matchesEnrolled = receivedEnquiries.find(
-            enq => enq.email?.toLowerCase() === emailLower
-          );
-          
-          if (emailLower === "admin@ieee.org" || (matchesEnrolled && matchesEnrolled.status !== "pending" && matchesEnrolled.status !== "rejected") || emailLower.endsWith("@bvrit.ac.in") || emailLower.endsWith("@ieee.org")) {
+          if (isUserAuthorizedForAdmin(emailLower)) {
             setIsAdminLoggedIn(true);
             setLoggedInAdminEmail(emailLower);
             localStorage.setItem("ieee_is_admin_logged_in", "true");
@@ -1610,7 +1612,8 @@ export default function App() {
             fetchEnquiries();
             showToast(`Welcome! Successfully logged in as organizer via Google.`, "success");
           } else {
-            // Default authorization message
+            await signOut(auth);
+            setIsAdminLoggedIn(false);
             setAuthError(`Email ${emailLower} is not registered or approved as an organizer. Please complete the Chapter Enrollment Desk request first.`);
           }
         }
@@ -1977,6 +1980,34 @@ export default function App() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  // Helper to verify if an email is authorized to access the Admin Console
+  const isUserAuthorizedForAdmin = (email: string) => {
+    if (!email) return false;
+    const emailLower = email.toLowerCase().trim();
+    
+    // 1. Check if email is in the static 13 Student Committee list
+    const isCommitteeMember = ABOUT_CONTENT.committee.students.some(
+      student => student.email?.toLowerCase().trim() === emailLower
+    );
+    if (isCommitteeMember) return true;
+
+    // 2. Check if email is admin@ieee.org or the other hardcoded chair/admin emails
+    const isHardcodedAdmin = 
+      emailLower === "admin@ieee.org" ||
+      emailLower === "24211a04r1@bvrit.ac.in" ||
+      emailLower === "24211a05r1@bvrit.ac.in" ||
+      emailLower === "24211a05b5@bvrit.ac.in";
+    if (isHardcodedAdmin) return true;
+
+    // 3. Check if email is an approved organizer in receivedEnquiries
+    const isApprovedOrganizer = receivedEnquiries.some(
+      enq => enq.email?.toLowerCase().trim() === emailLower && enq.status === "approved"
+    );
+    if (isApprovedOrganizer) return true;
+
+    return false;
   };
 
   // Helper to extract uppercase first letter from logged-in user names

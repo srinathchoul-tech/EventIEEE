@@ -295,7 +295,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A0418@bvrit.ac.in",
         linkedin: "https://www.linkedin.com/in/avula-hasini-priya-7aa98433b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-hasini.jpg?v=1.1"
+        image: "/student-rushitha.png?v=1.1"
       },
       {
         name: "Patlolla Rushitha",
@@ -303,7 +303,7 @@ export const ABOUT_CONTENT = {
         department: "ECE, 3rd year",
         email: "24211A04H9@bvritr.ac.in",
         linkedin: "https://www.linkedin.com/in/rushitha-p-6a8a5933b?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-        image: "/student-rushitha.png?v=1.1"
+        image: "/student-hasini.jpg?v=1.1"
       },
       {
         name: "AISHWARYA BATINI",
